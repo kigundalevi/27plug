@@ -66,6 +66,7 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
   Future<String?> _registerUser(
       String _registerFirstName,
       String _registerLastName,
+      bool isMale,
       int minAge,
       int maxAge,
       String _registerPhoneNo,
@@ -73,8 +74,16 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
       String _registerpassword,
       Loc location) {
     RegisterController ctrl = new RegisterController();
-    return ctrl.authRegisterUser(_registerFirstName, _registerLastName, minAge,
-        maxAge, _registerPhoneNo, _registerEmail, _registerpassword, location);
+    return ctrl.authRegisterUser(
+        _registerFirstName,
+        _registerLastName,
+        isMale,
+        minAge,
+        maxAge,
+        _registerPhoneNo,
+        _registerEmail,
+        _registerpassword,
+        location);
   }
 
   bool _loading = false;
@@ -167,7 +176,7 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
               width: MediaQuery.of(context).size.width - 40,
               margin: EdgeInsets.symmetric(horizontal: 20),
               decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: kActiveColor.withOpacity(0.9),
                   borderRadius: BorderRadius.circular(15),
                   boxShadow: [
                     BoxShadow(
@@ -246,6 +255,7 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                           child: Column(
                             children: [
                               TextInputField(
+                                  lightlayout: true,
                                   placeholder: txtFirstName,
                                   icondata: Icons.person,
                                   keyboardtype: TextInputType.text,
@@ -260,6 +270,7 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                                 height: 15.0,
                               ),
                               TextInputField(
+                                  lightlayout: true,
                                   placeholder: txtLastName,
                                   icondata: Icons.person,
                                   keyboardtype: TextInputType.text,
@@ -274,6 +285,7 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                                 height: 15.0,
                               ),
                               TextInputField(
+                                  lightlayout: true,
                                   placeholder: txtYourEmail,
                                   icondata: Icons.mail,
                                   keyboardtype: TextInputType.text,
@@ -298,7 +310,8 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                                         children: [
                                           Icon(
                                             Icons.phone_android_outlined,
-                                            color: Palette.iconColor,
+                                            color: kPrimaryColor,
+                                            size: 30,
                                           ),
                                           SizedBox(
                                             width: 10.0,
@@ -306,19 +319,21 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                                           Text("Phone number",
                                               style: TextStyle(
                                                   fontSize: 16,
-                                                  color: Palette.textColor1)),
+                                                  color: kPrimaryColor)),
                                         ],
                                       ),
                                       Container(
                                         margin: EdgeInsets.only(
                                             bottom: 8.0, right: 8.0),
                                         child: IntlPhoneField(
+                                          countryCodeTextColor: kPrimaryColor,
+                                          dropDownArrowColor: kPrimaryColor,
                                           autoValidate: false,
                                           validator: validateRegisterPhone,
                                           style: TextStyle(
-                                              fontSize: 18,
+                                              fontSize: 20,
                                               fontWeight: FontWeight.bold,
-                                              color: Palette.textColor1),
+                                              color: kPrimaryColor),
                                           decoration: InputDecoration(
                                             // labelText: 'Phone Number',
                                             // border: OutlineInputBorder(
@@ -339,8 +354,8 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                                             // contentPadding: EdgeInsets.all(10),
                                             hintText: '7 - - - - - - - -',
                                             hintStyle: TextStyle(
-                                                fontSize: 18,
-                                                color: Palette.textColor1),
+                                                fontSize: 20,
+                                                color: kPrimaryColor),
                                           ),
                                           initialCountryCode: 'KE',
                                           onChanged: (phone) {
@@ -688,6 +703,7 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                               Padding(
                                 padding: const EdgeInsets.only(bottom: 8.0),
                                 child: TextInputField(
+                                    lightlayout: true,
                                     placeholder: txtYourEmail,
                                     icondata: Icons.mail_outline,
                                     keyboardtype: TextInputType.emailAddress,
@@ -700,6 +716,7 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                                     }),
                               ),
                               TextInputField(
+                                  lightlayout: true,
                                   obsuretext: true,
                                   placeholder: txtPassword,
                                   icondata: MaterialCommunityIcons.lock_outline,
@@ -814,7 +831,7 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                                     offset: Offset(0, 1))
                               ]),
                           child: Icon(
-                            Icons.arrow_forward,
+                            FlutterIcons.plug_faw5s,
                             color: Colors.white,
                           ),
                         ),
@@ -899,10 +916,10 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                                   });
                                 } else {
                                   Loc location = await currentLocation();
-                                  print(location);
                                   String? response = await _registerUser(
                                       _registerFirstName.toString(),
                                       _registerLastName.toString(),
+                                      isMale,
                                       minAge,
                                       maxAge,
                                       _registerPhoneNo.toString(),

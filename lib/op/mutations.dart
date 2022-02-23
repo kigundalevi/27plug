@@ -2,6 +2,7 @@ class Mutations {
   String registerUser(
       String firstName, //
       String lastName, //
+      bool isMale,
       String minYob, //
       String maxYob, //
       String phoneNo, //
@@ -14,7 +15,7 @@ class Mutations {
       bool location_live) {
     return """
       mutation{
-      createUser(firstName:"$firstName",lastName:"$lastName",email:"$email",password:"$password",phoneNo:"$phoneNo",minYob:"$minYob",maxYob:"$maxYob",ip:"$ip",locationName:"$location_name",lat:"$lat",lng:"$lng",locationLive:$location_live,){
+      createUser(firstName:"$firstName",lastName:"$lastName",isMale:$isMale,email:"$email",password:"$password",phoneNo:"$phoneNo",minYob:"$minYob",maxYob:"$maxYob",ip:"$ip",locationName:"$location_name",lat:"$lat",lng:"$lng",locationLive:$location_live,){
         user{
           id,
           email,

@@ -51,6 +51,7 @@ class RegisterController {
   Future<String?> authRegisterUser(
       String _registerFirstName,
       String _registerLastName,
+      bool isMale,
       int minAge,
       int maxAge,
       String _registerPhoneNo,
@@ -71,6 +72,7 @@ class RegisterController {
       queryMutation.registerUser(
           _registerFirstName,
           _registerLastName,
+          isMale,
           minYob.toString(),
           maxYob.toString(),
           _registerPhoneNo,

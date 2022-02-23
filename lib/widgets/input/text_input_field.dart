@@ -1,10 +1,12 @@
 import 'package:africanplug/config/config.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_icons/flutter_icons.dart';
 
-class TextInputField extends StatelessWidget {
+class TextInputField extends StatefulWidget {
   final String placeholder;
   final IconData icondata;
   final double? iconsize;
+  final bool lightlayout;
   final Color? iconcolor;
   final bool enabled;
   final bool obsuretext;
@@ -21,6 +23,7 @@ class TextInputField extends StatelessWidget {
     this.iconsize = 30,
     this.iconcolor = Palette.iconColor,
     this.obsuretext = false,
+    this.lightlayout = false,
     this.inputController,
     this.inputValidator,
     this.onChanged,
@@ -31,25 +34,51 @@ class TextInputField extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  State<TextInputField> createState() => _TextInputFieldState();
+}
+
+class _TextInputFieldState extends State<TextInputField> {
+  bool _inputObscured = true;
+  @override
   Widget build(BuildContext context) {
     return TextFormField(
-      enabled: enabled,
-      obscureText: obsuretext,
-      keyboardType: keyboardtype,
+      style: TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.w700,
+          color: !widget.lightlayout ? Palette.textColor1 : kPrimaryColor),
+      enabled: widget.enabled,
+      obscureText: widget.obsuretext ? _inputObscured : false,
+      keyboardType: widget.keyboardtype,
       minLines: 1,
-      maxLines: 5,
+      maxLines: widget.obsuretext ? 1 : 5,
       autofocus: false,
-      controller: inputController,
-      validator: inputValidator,
-      onChanged: onChanged,
-      onSaved: onSaved,
+      controller: widget.inputController,
+      validator: widget.inputValidator,
+      onChanged: widget.onChanged,
+      onSaved: widget.onSaved,
       cursorColor: kPrimaryColor,
       decoration: InputDecoration(
         prefixIcon: Icon(
-          icondata,
-          color: iconcolor,
-          size: iconsize,
+          widget.icondata,
+          color: !widget.lightlayout ? widget.iconcolor : kPrimaryColor,
+          size: widget.iconsize,
         ),
+        suffixIcon: widget.obsuretext
+            ? InkWell(
+                child: Icon(
+                  _inputObscured
+                      ? FlutterIcons.eye_faw5s
+                      : FlutterIcons.eye_slash_faw5s,
+                  color: !widget.lightlayout ? widget.iconcolor : kPrimaryColor,
+                  size: 20,
+                ),
+                onTap: () {
+                  setState(() {
+                    _inputObscured = !_inputObscured;
+                  });
+                },
+              )
+            : SizedBox(),
         // enabledBorder: OutlineInputBorder(
         //   borderSide: BorderSide(color: borderColor),
         //   borderRadius: BorderRadius.all(Radius.circular(10.0)),
@@ -59,8 +88,10 @@ class TextInputField extends StatelessWidget {
         //   borderRadius: BorderRadius.all(Radius.circular(10.0)),
         // ),
         // contentPadding: EdgeInsets.all(0.0),
-        hintText: placeholder,
-        hintStyle: TextStyle(fontSize: 14, color: Palette.textColor1),
+        hintText: widget.placeholder,
+        hintStyle: TextStyle(
+            fontSize: 18,
+            color: !widget.lightlayout ? Palette.textColor1 : kPrimaryColor),
       ),
     );
   }
