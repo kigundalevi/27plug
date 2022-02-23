@@ -14,12 +14,14 @@ class Mutations {
       bool location_live) {
     return """
       mutation{
-      createUser(firstName:"$firstName",lastName:"$lastName",email:"$email",password:"$password",phoneNo:"$phoneNo",minYob:"$minYob",maxYob:"$maxYob",ip:"$ip",location_name:"$location_name",lat:"$lat",lng:"$lng",location_live:"$location_live",){
+      createUser(firstName:"$firstName",lastName:"$lastName",email:"$email",password:"$password",phoneNo:"$phoneNo",minYob:"$minYob",maxYob:"$maxYob",ip:"$ip",locationName:"$location_name",lat:"$lat",lng:"$lng",locationLive:$location_live,){
         user{
+          id,
           email,
           password
         }
       }   
+      }
     """;
   }
 
@@ -40,3 +42,10 @@ class Mutations {
     """;
   }
 }
+// mutation{
+// createUser(firstName:"Main",lastName:"Plug",email:"plug@27plug.com",password:"MainPlug27",phoneNo:"+254753874632",minYob:"1990",maxYob:"2000",ip:"unknown",location_name:"n,k",lat:"1.3",lng:"4.5",location_live:false){
+//         user{
+//           email,
+//           password
+//         }
+// }}  

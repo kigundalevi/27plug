@@ -83,15 +83,22 @@ class RegisterController {
           location.live),
     )));
     if (result.hasException) {
-      print(result.exception);
-      return 'Error registering user';
+      print(result);
+      try {
+        OperationException? registerexception = result.exception;
+        List<GraphQLError>? errors = registerexception?.graphqlErrors;
+        String main_error = errors![0].message;
+        return main_error;
+      } catch (error) {
+        return 'Invalid parameters';
+      }
     } else {
-      String token = result.data?['register']['accessToken'];
+      String user_email = result.data?['createUser']['user']['email'];
       //login user
-      GraphQLConfiguration.setToken(token);
-      print('register' + token);
+      //GraphQLConfiguration.setToken(token);
+      print('registered succesfully');
 
-      return null;
+      return 'success';
     }
   }
 }

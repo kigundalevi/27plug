@@ -3,6 +3,7 @@ import 'package:africanplug/config/base_functions.dart';
 import 'package:africanplug/controller/login_controller.dart';
 import 'package:africanplug/controller/register_controller.dart';
 import 'package:africanplug/models/location.dart';
+import 'package:africanplug/widgets/input/text_input_field.dart';
 import 'package:another_flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
@@ -105,11 +106,11 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
               height: 300,
               decoration: BoxDecoration(
                   image: DecorationImage(
-                      image: AssetImage("assets/images/27_background.jpg"),
+                      image: AssetImage("assets/images/rev.gif"),
                       fit: BoxFit.fill)),
               child: Container(
                 padding: EdgeInsets.only(top: 90, left: 20),
-                color: kPrimaryColor.withOpacity(.85),
+                color: kPrimaryColor.withOpacity(0.9),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -200,9 +201,9 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                               if (!isSignupScreen)
                                 Container(
                                   margin: EdgeInsets.only(top: 3),
-                                  height: 2,
+                                  height: 3,
                                   width: 55,
-                                  color: Colors.orange,
+                                  color: kActiveColor,
                                 )
                             ],
                           ),
@@ -227,9 +228,9 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                               if (isSignupScreen)
                                 Container(
                                   margin: EdgeInsets.only(top: 3),
-                                  height: 2,
+                                  height: 3,
                                   width: 55,
-                                  color: Colors.orange,
+                                  color: kActiveColor,
                                 )
                             ],
                           ),
@@ -278,10 +279,10 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                                   keyboardtype: TextInputType.text,
                                   inputValidator: validateRegisterEmail,
                                   onChanged: (value) {
-                                    _registerLastName = value;
+                                    _registerEmail = value;
                                   },
                                   onSaved: (value) {
-                                    _registerLastName = value;
+                                    _registerEmail = value;
                                   }),
                               SizedBox(
                                 height: 15.0,
@@ -314,6 +315,10 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                                         child: IntlPhoneField(
                                           autoValidate: false,
                                           validator: validateRegisterPhone,
+                                          style: TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold,
+                                              color: Palette.textColor1),
                                           decoration: InputDecoration(
                                             // labelText: 'Phone Number',
                                             // border: OutlineInputBorder(
@@ -334,7 +339,7 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                                             // contentPadding: EdgeInsets.all(10),
                                             hintText: '7 - - - - - - - -',
                                             hintStyle: TextStyle(
-                                                fontSize: 14,
+                                                fontSize: 18,
                                                 color: Palette.textColor1),
                                           ),
                                           initialCountryCode: 'KE',
@@ -349,10 +354,10 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                                     ],
                                   ),
                                 ),
-                                decoration: BoxDecoration(
-                                    border:
-                                        Border.all(color: Palette.textColor1),
-                                    borderRadius: BorderRadius.circular(10)),
+                                // decoration: BoxDecoration(
+                                //     border:
+                                //         Border.all(color: Palette.textColor1),
+                                //     borderRadius: BorderRadius.circular(10)),
                               ),
                               SizedBox(
                                 height: 15.0,
@@ -366,7 +371,7 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                                       Row(
                                         mainAxisSize: MainAxisSize.max,
                                         children: [
-                                          Text("Age :",
+                                          Text("Age Range: ",
                                               style: TextStyle(
                                                   fontSize: 16,
                                                   color: Palette.textColor1)),
@@ -374,12 +379,11 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                                               style: TextStyle(
                                                   fontSize: 16,
                                                   fontWeight: FontWeight.bold,
-                                                  color:
-                                                      Colors.orange.shade600))
+                                                  color: kActiveColor))
                                         ],
                                       ),
                                       RangeSlider(
-                                        activeColor: Colors.orange.shade600,
+                                        activeColor: kActiveColor,
                                         inactiveColor: kPrimaryColor,
                                         values: _ageRangeValues,
                                         max: 75,
@@ -408,12 +412,19 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                                 decoration: BoxDecoration(
                                     border: _showAgeError
                                         ? Border.all(color: Colors.redAccent)
-                                        : Border.all(color: Palette.textColor1),
+                                        : Border.all(color: kWhite),
                                     borderRadius: BorderRadius.circular(10)),
                               ),
+                              _showAgeError
+                                  ? SizedBox()
+                                  : Divider(
+                                      thickness: 1.0,
+                                      color: Palette.textColor1,
+                                    ),
                               SizedBox(
                                 height: 15.0,
                               ),
+
                               Container(
                                 child: Padding(
                                   padding: const EdgeInsets.only(
@@ -541,10 +552,14 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                                     ],
                                   ),
                                 ),
-                                decoration: BoxDecoration(
-                                    border:
-                                        Border.all(color: Palette.textColor1),
-                                    borderRadius: BorderRadius.circular(10)),
+                                // decoration: BoxDecoration(
+                                //     border:
+                                //         Border.all(color: Palette.textColor1),
+                                //     borderRadius: BorderRadius.circular(10)),
+                              ),
+                              Divider(
+                                thickness: 1.0,
+                                color: Palette.textColor1,
                               ),
                               SizedBox(
                                 height: 15.0,
@@ -626,7 +641,7 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                               //             //recognizer: ,
                               //             text: "term & conditions",
                               //             style:
-                              //                 TextStyle(color: Colors.orange),
+                              //                 TextStyle(color: kActiveColor),
                               //           ),
                               //         ]),
                               //   ),
@@ -667,6 +682,9 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                               //   hintText: txtYourEmail,
                               //   hintStyle: TextStyle(fontSize: 14, color: Palette.textColor1),
                               // ),
+                              SizedBox(
+                                height: 10.0,
+                              ),
                               Padding(
                                 padding: const EdgeInsets.only(bottom: 8.0),
                                 child: TextInputField(
@@ -692,36 +710,36 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                                   onSaved: (value) {
                                     _password = value;
                                   }),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Checkbox(
-                                        value: isRememberMe,
-                                        activeColor: Palette.textColor2,
-                                        onChanged: (value) {
-                                          setState(() {
-                                            isRememberMe = !isRememberMe;
-                                          });
-                                        },
-                                      ),
-                                      Text("Remember me",
-                                          style: TextStyle(
-                                              fontSize: 12,
-                                              color: Palette.textColor1))
-                                    ],
-                                  ),
-                                  TextButton(
-                                    onPressed: () {},
-                                    child: Text("Forgot Password?",
-                                        style: TextStyle(
-                                            fontSize: 12,
-                                            color: Palette.textColor1)),
-                                  )
-                                ],
-                              )
+                              // Row(
+                              //   mainAxisAlignment:
+                              //       MainAxisAlignment.spaceBetween,
+                              //   children: [
+                              //     Row(
+                              //       children: [
+                              //         Checkbox(
+                              //           value: isRememberMe,
+                              //           activeColor: Palette.textColor2,
+                              //           onChanged: (value) {
+                              //             setState(() {
+                              //               isRememberMe = !isRememberMe;
+                              //             });
+                              //           },
+                              //         ),
+                              //         Text("Remember me",
+                              //             style: TextStyle(
+                              //                 fontSize: 12,
+                              //                 color: Palette.textColor1))
+                              //       ],
+                              //     ),
+                              //     TextButton(
+                              //       onPressed: () {},
+                              //       child: Text("Forgot Password?",
+                              //           style: TextStyle(
+                              //               fontSize: 12,
+                              //               color: Palette.textColor1)),
+                              //     )
+                              //   ],
+                              // )
                             ],
                           ),
                         ),
@@ -758,7 +776,7 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                       ),
                       child: CircularProgressIndicator(
                         strokeWidth: 5.0,
-                        color: Colors.orange,
+                        color: kActiveColor,
                       ),
                     )
                   : InkWell(
@@ -779,13 +797,14 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                         ),
                         child: Container(
                           decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                  colors: [
-                                    Colors.orange.shade200,
-                                    Colors.red.shade400
-                                  ],
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight),
+                              color: kActiveColor,
+                              // gradient: LinearGradient(
+                              //     colors: [
+                              //       kActiveColor.shade200,
+                              //       Colors.red.shade400
+                              //     ],
+                              //     begin: Alignment.topLeft,
+                              //     end: Alignment.bottomRight),
                               borderRadius: BorderRadius.circular(30),
                               boxShadow: [
                                 BoxShadow(
@@ -896,17 +915,51 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                                     //   _loading = false;
                                     // });
                                     Flushbar(
+                                      isDismissible: false,
                                       icon: Icon(
                                         Icons.check_circle_rounded,
                                         color: kPrimaryColor,
                                       ),
                                       backgroundColor: kPrimaryLightColor,
-                                      title: "Success",
-                                      message: "Registered successfully",
+                                      title: "Registered successfully",
+                                      message: "logging in..",
                                       duration: Duration(seconds: 3),
                                     )..show(context);
-                                    Navigator.pop(context);
-                                    Navigator.pushNamed(context, "/home");
+                                    String? _loginResponse = await _loginUser(
+                                        _registerEmail, _registerpassword);
+
+                                    if (_loginResponse.toString() ==
+                                        'success') {
+                                      // setState(() {
+                                      //   _loading = false;
+                                      // });
+                                      Flushbar(
+                                        icon: Icon(
+                                          Icons.check_circle_rounded,
+                                          color: kPrimaryColor,
+                                        ),
+                                        backgroundColor: kPrimaryLightColor,
+                                        title: "Success",
+                                        message: "Logged in successfully",
+                                        duration: Duration(seconds: 3),
+                                      )..show(context);
+                                      Navigator.pop(context);
+                                      Navigator.pushNamed(context, "/home");
+                                    } else {
+                                      setState(() {
+                                        _loading = false;
+                                      });
+                                      Flushbar(
+                                        icon: Icon(
+                                          Icons.info_outline,
+                                          color: Colors.white,
+                                        ),
+                                        backgroundColor: Colors.redAccent,
+                                        title: "Error",
+                                        message: response.toString(),
+                                        duration: Duration(seconds: 3),
+                                      )..show(context);
+                                    }
                                   } else {
                                     setState(() {
                                       _loading = false;
@@ -942,7 +995,8 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
             left: 0,
             child: Column(
               children: [
-                isSignupScreen ? SizedBox() : Text("Or Signin with"),
+                // isSignupScreen ? SizedBox() : Text("Or Signin with"),
+                SizedBox(height: 30.0),
                 isSignupScreen
                     ? Container(
                         width: 200,
@@ -956,22 +1010,64 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                                 TextSpan(
                                   //recognizer: ,
                                   text: "term & conditions",
-                                  style: TextStyle(color: Colors.orange),
+                                  style: TextStyle(color: kActiveColor),
                                 ),
                               ]),
                         ),
                       )
-                    : Container(
-                        margin: EdgeInsets.only(right: 20, left: 20, top: 15),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            buildTextButton(MaterialCommunityIcons.facebook,
-                                "Facebook", Palette.facebookColor),
-                            buildTextButton(MaterialCommunityIcons.google_plus,
-                                "Google", Palette.googleColor),
-                          ],
-                        ),
+                    : Column(
+                        children: [
+                          SizedBox(height: 22.0),
+                          Container(
+                            // margin: EdgeInsets.only(right: 20, left: 20, top: 15),
+                            color: kScaffoldColor,
+                            child: Row(
+                              mainAxisSize: MainAxisSize.max,
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                // buildTextButton(MaterialCommunityIcons.facebook,
+                                //     "Facebook", Palette.facebookColor),
+                                Row(
+                                  children: [
+                                    Checkbox(
+                                      value: isRememberMe,
+                                      activeColor: kPrimaryColor,
+                                      onChanged: (value) {
+                                        setState(() {
+                                          isRememberMe = !isRememberMe;
+                                        });
+                                      },
+                                    ),
+                                    Text("Remember me",
+                                        style:
+                                            TextStyle(color: kLightTextColor))
+                                  ],
+                                ),
+                                InkWell(
+                                  onTap: () {},
+                                  child: Row(
+                                    children: [
+                                      Text("Forgot password ?",
+                                          style:
+                                              TextStyle(color: kLightTextColor))
+                                    ],
+                                  ),
+                                ),
+                                // Column(
+                                //   children: [
+                                //     Text("Forgot password ?",
+                                //         style:
+                                //             TextStyle(color: Palette.textColor2)),
+                                //     Text("Reset",
+                                //         style: TextStyle(color: kActiveColor)),
+                                //   ],
+                                // )
+                                // buildTextButton(MaterialCommunityIcons.google_plus,
+                                //     "Google", Palette.googleColor),
+                              ],
+                            ),
+                          ),
+                        ],
                       )
               ],
             ),
@@ -1120,7 +1216,7 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
           //           TextSpan(
           //             //recognizer: ,
           //             text: "term & conditions",
-          //             style: TextStyle(color: Colors.orange),
+          //             style: TextStyle(color: kActiveColor),
           //           ),
           //         ]),
           //   ),
@@ -1161,7 +1257,7 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
     return AnimatedPositioned(
       duration: Duration(milliseconds: 700),
       curve: Curves.bounceInOut,
-      top: isSignupScreen ? 535 : 430,
+      top: isSignupScreen ? 565 : 430,
       right: 0,
       left: 0,
       child: Center(
@@ -1184,7 +1280,7 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
               ? Container(
                   decoration: BoxDecoration(
                       gradient: LinearGradient(
-                          colors: [Colors.orange.shade200, Colors.red.shade400],
+                          colors: [kActiveColor, Colors.red.shade400],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight),
                       borderRadius: BorderRadius.circular(30),
@@ -1230,63 +1326,6 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
           hintText: hintText,
           hintStyle: TextStyle(fontSize: 14, color: Palette.textColor1),
         ),
-      ),
-    );
-  }
-}
-
-class TextInputField extends StatelessWidget {
-  final String placeholder;
-  final IconData icondata;
-  final bool enabled;
-  final bool obsuretext;
-  final TextEditingController? inputController;
-  final String? Function(String?)? inputValidator;
-  final Function(String?)? onChanged;
-  final Function(String?)? onSaved;
-  final TextInputType keyboardtype;
-  final Color borderColor;
-  const TextInputField({
-    Key? key,
-    required this.placeholder,
-    required this.icondata,
-    this.obsuretext = false,
-    this.inputController,
-    this.inputValidator,
-    this.onChanged,
-    this.onSaved,
-    this.keyboardtype = TextInputType.text,
-    this.enabled = true,
-    this.borderColor = Palette.textColor1,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return TextFormField(
-      enabled: enabled,
-      obscureText: obsuretext,
-      keyboardType: keyboardtype,
-      autofocus: false,
-      controller: inputController,
-      validator: inputValidator,
-      onChanged: onChanged,
-      onSaved: onSaved,
-      decoration: InputDecoration(
-        prefixIcon: Icon(
-          icondata,
-          color: Palette.iconColor,
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: borderColor),
-          borderRadius: BorderRadius.all(Radius.circular(10.0)),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: Palette.textColor1),
-          borderRadius: BorderRadius.all(Radius.circular(10.0)),
-        ),
-        contentPadding: EdgeInsets.all(10),
-        hintText: placeholder,
-        hintStyle: TextStyle(fontSize: 14, color: Palette.textColor1),
       ),
     );
   }

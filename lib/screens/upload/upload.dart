@@ -1,21 +1,27 @@
 import 'dart:io';
 import 'dart:ui';
+import 'package:africanplug/config/base_functions.dart';
 import 'package:africanplug/config/config.dart';
 import 'package:africanplug/config/graphql_config.dart';
 import 'package:africanplug/models/tag.dart';
 import 'package:africanplug/player/upload_player.dart';
 import 'package:africanplug/screens/login/login.dart';
+import 'package:africanplug/screens/upload/validation.dart';
 import 'package:africanplug/widgets/app/appbar.dart';
 import 'package:africanplug/widgets/button/main_upload_button.dart';
 import 'package:africanplug/widgets/button/rounded_button.dart';
 import 'package:africanplug/widgets/button/thumbnail_icon_button.dart';
+import 'package:africanplug/widgets/input/image_input.dart';
 import 'package:africanplug/widgets/input/text_field_container.dart';
+import 'package:africanplug/widgets/input/text_input_field.dart';
 import 'package:africanplug/widgets/menu/main_menu.dart';
 import 'package:africanplug/widgets/video/thumbnail_display.dart';
 import 'package:africanplug/widgets/video/video_info_chip.dart';
 import 'package:africanplug/widgets/video/video_tile.dart';
+import 'package:another_flushbar/flushbar.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_icons/flutter_icons.dart';
 import 'package:flutter_tagging/flutter_tagging.dart';
 import 'package:video_player/video_player.dart';
 
@@ -71,6 +77,11 @@ class _UploadVideoPageState extends State<UploadVideoPage>
   late bool selectingVideo;
 
   late VideoPlayerController _controller;
+  PlatformFile? _selectedThumbnail;
+  String? _selectedThumbnailPath;
+
+  bool _selectedVideoError = false;
+  bool _selectedThumbnailError = false;
   @override
   void initState() {
     super.initState();
@@ -102,6 +113,7 @@ class _UploadVideoPageState extends State<UploadVideoPage>
 
   bool _loading = false;
   bool _autoValidate = false;
+  bool _thumnailSelected = false;
 
   refreshState(VoidCallback fn) {
     if (mounted) setState(fn);
@@ -142,8 +154,17 @@ class _UploadVideoPageState extends State<UploadVideoPage>
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
+    final key = GlobalKey();
     String? current_page = ModalRoute.of(context)?.settings.name;
+    final height = MediaQuery.of(context).size.height;
+    var inputBorder = OutlineInputBorder(
+      borderSide: BorderSide(color: Colors.white),
+      borderRadius: BorderRadius.all(
+        Radius.circular(30.0),
+      ),
+    );
     return Scaffold(
+        backgroundColor: kBackgroundColor,
         floatingActionButton:
             current_page != "/upload" ? MainUploadButton() : SizedBox(),
         body: Stack(children: [
@@ -164,43 +185,93 @@ class _UploadVideoPageState extends State<UploadVideoPage>
               child: Material(
                 animationDuration: duration,
                 borderRadius: BorderRadius.all(Radius.circular(20)),
-                // elevation: 8.0,
-                color: kPrimaryLightColor,
-                child: SafeArea(
-                  child: Container(
-                    color: kWhite,
+                elevation: 8.0,
+                color: kScaffoldColor,
+                child: Padding(
+                  padding: isCollapsed
+                      ? const EdgeInsets.only(bottom: 0.0)
+                      : const EdgeInsets.only(bottom: 15.0),
+                  child: SafeArea(
                     child: Stack(children: [
-                      SingleChildScrollView(
-                        child: Form(
-                          key: _uploadFormKey,
-                          autovalidateMode: AutovalidateMode.disabled,
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 30.0),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                SizedBox(
-                                  height: size.height / 12,
-                                ),
-                                selectedVideo != null
-                                    ? Stack(
+                      Scaffold(
+                        backgroundColor: kScaffoldColor,
+                        // appBar: appBar(size, () {
+                        //   setState(() {
+                        //     collapseFromLeft = true;
+                        //     if (isCollapsed)
+                        //       _aController.forward();
+                        //     else
+                        //       _aController.reverse();
+
+                        //     isCollapsed = !isCollapsed;
+                        //   });
+                        // }, () {}, () {}),
+                        body: Column(
+                          children: [
+                            appBar(size, () {
+                              setState(() {
+                                collapseFromLeft = true;
+                                if (isCollapsed)
+                                  _aController.forward();
+                                else
+                                  _aController.reverse();
+
+                                isCollapsed = !isCollapsed;
+                              });
+                            }, () {}, () {}),
+                            selectedVideo != null
+                                ? Column(
+                                    children: [
+                                      // SizedBox(
+                                      //   height: 10,
+                                      // ),
+                                      Stack(
                                         alignment: AlignmentDirectional.topEnd,
                                         children: [
                                           Column(
                                             children: [
-                                              ClipRRect(
-                                                borderRadius:
-                                                    BorderRadius.circular(10.0),
-                                                child:
-                                                    new NetworkPlayerLifeCycle(
-                                                        '$selectedVideoPath', // with the String dirPath I have error but if I use the same path but write like this  /data/user/0/com.XXXXX.flutter_video_test/app_flutter/Movies/2019-11-08.mp4 it's ok ... why ?
-                                                        (BuildContext context,
-                                                                VideoPlayerController
-                                                                    controller) =>
-                                                            AspectRatioVideo(
-                                                                controller)),
-                                              ),
-                                              Text(selectedVideo!.name)
+                                              new NetworkPlayerLifeCycle(
+                                                  '$selectedVideoPath',
+                                                  selectedVideo!, // with the String dirPath I have error but if I use the same path but write like this  /data/user/0/com.XXXXX.flutter_video_test/app_flutter/Movies/2019-11-08.mp4 it's ok ... why ?
+                                                  (BuildContext context,
+                                                          VideoPlayerController
+                                                              controller) =>
+                                                      AspectRatioVideo(
+                                                          controller,
+                                                          selectedVideo!,
+                                                          size)),
+                                              Container(
+                                                  alignment: Alignment.topLeft,
+                                                  padding:
+                                                      const EdgeInsets.all(8.0),
+                                                  decoration: BoxDecoration(
+                                                      color: kScaffoldColor,
+                                                      // borderRadius:
+                                                      //     BorderRadius
+                                                      //         .circular(15),
+                                                      boxShadow: [
+                                                        BoxShadow(
+                                                            color: Colors.black
+                                                                .withOpacity(
+                                                                    0.3),
+                                                            blurRadius: 15,
+                                                            spreadRadius: 6),
+                                                      ]),
+                                                  child: Text(
+                                                      selectedVideo!
+                                                                  .name.length >
+                                                              100
+                                                          ? selectedVideo!.name
+                                                              .replaceRange(
+                                                                  100,
+                                                                  selectedVideo!
+                                                                      .name
+                                                                      .length,
+                                                                  '...')
+                                                          : selectedVideo!.name,
+                                                      style: TextStyle(
+                                                          color: kActiveColor,
+                                                          fontSize: 15)))
                                             ],
                                           ),
                                           InkWell(
@@ -228,12 +299,12 @@ class _UploadVideoPageState extends State<UploadVideoPage>
                                                   selectedVideo =
                                                       videoPicked.files.first;
                                                 });
-// String out = firstInput.replaceAll(".", "");
-                                                print(file.name);
-                                                print(file.bytes);
-                                                print(file.size);
-                                                print(file.extension);
-                                                print(file.path);
+                                                // String out = firstInput.replaceAll(".", "");
+                                                // print(file.name);
+                                                // print(file.bytes);
+                                                // print(file.size);
+                                                // print(file.extension);
+                                                // print(file.path);
                                                 setState(() {
                                                   selectingVideo = false;
                                                 });
@@ -273,213 +344,416 @@ class _UploadVideoPageState extends State<UploadVideoPage>
                                             ),
                                           )
                                         ],
-                                      )
-                                    : Stack(
-                                        alignment: Alignment.center,
+                                      ),
+                                    ],
+                                  )
+                                : Stack(
+                                    alignment: Alignment.center,
+                                    children: [
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           new Container(
                                             width: size.width,
-                                            height: size.height / 5,
-                                            decoration: new BoxDecoration(
-                                              color: Colors.grey.shade100,
-                                              // image: new DecorationImage(
-                                              //   image: new AssetImage(
-                                              //       "assets/images/image_placeholder.png"),
-                                              //   fit: BoxFit.cover,
-                                              // ),
-                                              borderRadius: new BorderRadius
-                                                      .all(
-                                                  new Radius.circular(10.0)),
-                                            ),
+                                            height: size.height / 3.5,
+                                            decoration: BoxDecoration(
+                                                color: kScaffoldColor,
+                                                border: _selectedVideoError
+                                                    ? Border.all(color: kRed)
+                                                    : Border.all(width: 0.0)
+                                                // image: new DecorationImage(
+                                                //   image: new AssetImage(
+                                                //       "assets/images/image_placeholder.png"),
+                                                //   fit: BoxFit.cover,
+                                                // ),
+                                                // borderRadius: new BorderRadius.all(
+                                                //     new Radius.circular(10.0)),
+                                                ),
                                           ),
-                                          Center(
-                                            child: selectingVideo
-                                                ? CircularProgressIndicator(
-                                                    color: kPrimaryColor,
-                                                  )
-                                                : InkWell(
-                                                    onTap: () async {
-                                                      setState(() {
-                                                        selectingVideo = true;
-                                                      });
-                                                      FilePickerResult?
-                                                          videoPicked =
-                                                          await FilePicker
-                                                              .platform
-                                                              .pickFiles(
-                                                                  type: FileType
-                                                                      .video);
-                                                      if (videoPicked != null) {
-                                                        PlatformFile file =
-                                                            videoPicked
-                                                                .files.first;
-
-                                                        setState(() {
-                                                          selectedVideoPath =
-                                                              file.path;
-                                                          selectedVideo =
-                                                              videoPicked
-                                                                  .files.first;
-                                                        });
-
-                                                        print(file.name);
-                                                        print(file.bytes);
-                                                        print(file.size);
-                                                        print(file.extension);
-                                                        print(file.path);
-                                                        setState(() {
-                                                          selectingVideo =
-                                                              false;
-                                                        });
-                                                      } else {
-                                                        setState(() {
-                                                          selectingVideo =
-                                                              false;
-                                                        });
-                                                        //TODO:Snackbarshoww error
-                                                      }
-                                                    },
-                                                    child: Material(
-                                                      elevation: 8.0,
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              10.0),
-                                                      child: Padding(
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .all(8.0),
-                                                        child: Column(
-                                                          children: [
-                                                            Icon(Icons
-                                                                .video_call_outlined),
-                                                            Text("Select Video")
-                                                          ],
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ),
-                                          ),
+                                          _selectedVideoError
+                                              ? Container(
+                                                  color: kWhite,
+                                                  width: size.width,
+                                                  padding:
+                                                      const EdgeInsets.all(8.0),
+                                                  child: Text(
+                                                      "Select a video to upload",
+                                                      style: TextStyle(
+                                                          color: kRed)),
+                                                )
+                                              : SizedBox()
                                         ],
                                       ),
-                                SizedBox(height: size.height * 0.05),
-                                TextFieldContainer(
-                                  color: kPrimaryLightColor,
-                                  child: TextFormField(
-                                    keyboardType: TextInputType.emailAddress,
-                                    autofocus: false,
-                                    controller: titleController,
-                                    // validator: validateEmail,
-                                    onChanged: (value) => _title = value,
-                                    onSaved: (value) => _title = value,
-                                    // style: _inputStyle,
-                                    decoration: InputDecoration(
-                                        fillColor: kPrimaryLightColor,
-                                        // contentPadding:
-                                        //     EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 15.0),
-                                        hintText: "Video Title",
-                                        border: InputBorder.none),
+                                      Center(
+                                        child: selectingVideo
+                                            ? CircularProgressIndicator(
+                                                color: kActiveColor,
+                                              )
+                                            : TextButton.icon(
+                                                style: TextButton.styleFrom(
+                                                  textStyle: TextStyle(
+                                                      color: Colors.blue),
+                                                  backgroundColor: kActiveColor,
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            24.0),
+                                                  ),
+                                                ),
+                                                icon: Icon(
+                                                  FlutterIcons.attach_file_mdi,
+                                                  color: kWhite,
+                                                ),
+                                                label: Text(
+                                                  'Select video',
+                                                  style:
+                                                      TextStyle(color: kBlack),
+                                                ),
+                                                onPressed: () async {
+                                                  setState(() {
+                                                    selectingVideo = true;
+                                                  });
+                                                  FilePickerResult?
+                                                      videoPicked =
+                                                      await FilePicker.platform
+                                                          .pickFiles(
+                                                              type: FileType
+                                                                  .video);
+                                                  if (videoPicked != null) {
+                                                    PlatformFile file =
+                                                        videoPicked.files.first;
+
+                                                    setState(() {
+                                                      selectedVideoPath =
+                                                          file.path;
+                                                      selectedVideo =
+                                                          videoPicked
+                                                              .files.first;
+                                                    });
+                                                    _selectedVideoError = false;
+                                                    // print(file.name);
+                                                    // print(file.bytes);
+                                                    // print(file.size);
+                                                    // print(file.extension);
+                                                    // print(file.path);
+                                                    setState(() {
+                                                      selectingVideo = false;
+                                                    });
+                                                  } else {
+                                                    setState(() {
+                                                      _selectedVideoError =
+                                                          true;
+                                                      selectingVideo = false;
+                                                    });
+                                                    //TODO:Snackbarshoww error
+                                                  }
+                                                }),
+                                      ),
+                                    ],
                                   ),
-                                ),
-                                TextFieldContainer(
-                                  color: kPrimaryLightColor,
-                                  child: TextFormField(
-                                    keyboardType: TextInputType.text,
-                                    obscureText: true,
-                                    autofocus: false,
-                                    controller: descriptionController,
-                                    // validator: validatePassword,
-                                    onChanged: (value) => _description = value,
-                                    onSaved: (value) => _description = value,
-                                    decoration: InputDecoration(
-                                        hintText: 'Video Description',
-                                        // icon: Icon(
-                                        //   Icons.lock,
-                                        //   color: kPrimaryColor,
-                                        // ),
-                                        // suffixIcon: Icon(
-                                        //   Icons.visibility,
-                                        //   color: kPrimaryColor,
-                                        // ),
-                                        border: InputBorder.none),
+                            Container(
+                              // height: height - (height / 7),
+                              child: Flexible(
+                                child: AnimatedContainer(
+                                  duration: Duration(milliseconds: 700),
+                                  curve: Curves.bounceInOut,
+                                  height: size.height,
+                                  padding: EdgeInsets.all(10),
+                                  // width: MediaQuery.of(context).size.width - 40,
+                                  // margin: EdgeInsets.only(10),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.only(
+                                        bottomLeft:
+                                            Radius.circular(numCurveRadius),
+                                        bottomRight:
+                                            Radius.circular(numCurveRadius)),
+                                    // boxShadow: [
+                                    //   BoxShadow(
+                                    //       color:
+                                    //           Colors.black.withOpacity(0.3),
+                                    //       blurRadius: 15,
+                                    //       spreadRadius: 5),
+                                    // ]
                                   ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: FlutterTagging<VideoTag>(
-                                    initialItems: _tagsToSelect,
-                                    textFieldConfiguration:
-                                        TextFieldConfiguration(
-                                      decoration: InputDecoration(
-                                        // border: InputBorder.none,
-                                        border: OutlineInputBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(10.0),
-                                        ),
-                                        filled: true,
-                                        fillColor: kPrimaryLightColor,
-                                        hintText: 'search tag',
-                                        labelText: 'Video tags',
+                                  child: Form(
+                                    key: _uploadFormKey,
+                                    autovalidateMode: AutovalidateMode.disabled,
+                                    child: SingleChildScrollView(
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          // SizedBox(
+                                          //   height: size.height / 12,
+                                          // ),
+                                          TextInputField(
+                                              placeholder: "Video Title",
+                                              icondata: FlutterIcons.play_faw5s,
+                                              iconcolor: kPrimaryLightColor,
+                                              iconsize: 20,
+                                              keyboardtype: TextInputType.text,
+                                              inputValidator:
+                                                  validateVideoTitle,
+                                              inputController: titleController,
+                                              onChanged: (value) {
+                                                _title = value;
+                                              },
+                                              onSaved: (value) {
+                                                _title = value;
+                                              }),
+                                          TextInputField(
+                                              placeholder: "Video Description",
+                                              icondata: FlutterIcons.play_faw5s,
+                                              iconcolor: kPrimaryLightColor,
+                                              iconsize: 20,
+                                              keyboardtype:
+                                                  TextInputType.multiline,
+                                              inputValidator:
+                                                  validateVideoDescription,
+                                              inputController:
+                                                  descriptionController,
+                                              onChanged: (value) {
+                                                _description = value;
+                                              },
+                                              onSaved: (value) {
+                                                _description = value;
+                                              }),
+                                          Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              InkWell(
+                                                  child: TextInputField(
+                                                    placeholder:
+                                                        _selectedThumbnail ==
+                                                                null
+                                                            ? "Select thumbnail"
+                                                            : _selectedThumbnail!
+                                                                .name,
+                                                    icondata: FlutterIcons
+                                                        .file_picture_o_faw,
+                                                    iconcolor:
+                                                        kPrimaryLightColor,
+                                                    iconsize: 20,
+                                                    enabled: false,
+                                                  ),
+                                                  onTap: () async {
+                                                    setState(() {
+                                                      _thumnailSelected = true;
+                                                    });
+                                                    FilePickerResult?
+                                                        _thumbnailSelection =
+                                                        await FilePicker
+                                                            .platform
+                                                            .pickFiles(
+                                                                type: FileType
+                                                                    .image);
+                                                    if (_thumbnailSelection !=
+                                                        null) {
+                                                      PlatformFile file =
+                                                          _thumbnailSelection
+                                                              .files.first;
+
+                                                      setState(() {
+                                                        _selectedThumbnailPath =
+                                                            file.path;
+                                                        _selectedThumbnail =
+                                                            _thumbnailSelection
+                                                                .files.first;
+                                                      });
+                                                      _selectedThumbnailError =
+                                                          false;
+                                                    } else {
+                                                      setState(() {
+                                                        _selectedThumbnailError =
+                                                            true;
+                                                      });
+                                                      //TODO:Snackbarshoww error
+                                                    }
+                                                  }),
+                                              _selectedThumbnailError
+                                                  ? Container(
+                                                      color: kWhite,
+                                                      width: size.width,
+                                                      padding:
+                                                          const EdgeInsets.all(
+                                                              8.0),
+                                                      child: Text(
+                                                          "Select video thumbnail",
+                                                          style: TextStyle(
+                                                              color: kRed)))
+                                                  : SizedBox()
+                                            ],
+                                          ),
+                                          Container(
+                                            margin: EdgeInsets.symmetric(
+                                                vertical: 12.0),
+                                            padding: EdgeInsets.all(6.0),
+                                            decoration: BoxDecoration(
+                                                border: Border.all(
+                                                    color: kPrimaryColor
+                                                        .withOpacity(0.4)),
+                                                borderRadius:
+                                                    BorderRadius.circular(
+                                                        10.0)),
+                                            child: FlutterTagging<VideoTag>(
+                                              initialItems: _tagsToSelect,
+                                              textFieldConfiguration:
+                                                  TextFieldConfiguration(
+                                                cursorColor: kPrimaryColor,
+                                                decoration: InputDecoration(
+                                                  // border: InputBorder.none,
+                                                  labelStyle: TextStyle(
+                                                      color: kPrimaryColor),
+
+                                                  filled: true,
+                                                  // fillColor: kPrimaryLightColor,
+                                                  hintText: 'search tag',
+                                                  labelText: 'Video tags',
+                                                ),
+                                              ),
+                                              findSuggestions: TagSearchService
+                                                  .findVideoTags,
+                                              additionCallback: (value) {
+                                                return VideoTag(
+                                                    id: 0,
+                                                    name: value,
+                                                    description: "");
+                                              },
+                                              onAdded: (videoTag) {
+                                                // api calls here, triggered when add to tag button is pressed
+                                                return videoTag;
+                                              },
+                                              configureChip: configureChip,
+                                              configureSuggestion: (tag) {
+                                                return SuggestionConfiguration(
+                                                  splashColor: kActiveColor,
+                                                  title: Text(tag.name),
+                                                  // subtitle: Text(tag.id.toString()),
+                                                  additionWidget: Chip(
+                                                    avatar: Icon(
+                                                      Icons.add_circle,
+                                                      color: Colors.white,
+                                                    ),
+                                                    label: Text(
+                                                      'Add New Tag',
+                                                      style: TextStyle(
+                                                          color: kBlack),
+                                                    ),
+                                                    labelStyle: TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 14.0,
+                                                      fontWeight:
+                                                          FontWeight.w300,
+                                                    ),
+                                                    backgroundColor:
+                                                        kActiveColor,
+                                                  ),
+                                                );
+                                              },
+                                            ),
+                                          ),
+                                          SizedBox(height: size.height * 0.03),
+                                          !_loading
+                                              ? TextButton.icon(
+                                                  style: TextButton.styleFrom(
+                                                    elevation: 8.0,
+                                                    padding:
+                                                        EdgeInsets.symmetric(
+                                                            horizontal: 14.0,
+                                                            vertical: 8.0),
+                                                    textStyle: TextStyle(
+                                                        color: Colors.blue),
+                                                    backgroundColor:
+                                                        kActiveColor,
+                                                    shape:
+                                                        RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              24.0),
+                                                    ),
+                                                  ),
+                                                  icon: Icon(
+                                                    FlutterIcons.plug_faw5s,
+                                                    color: kWhite,
+                                                  ),
+                                                  label: Text(
+                                                    'Upload',
+                                                    style: TextStyle(
+                                                        color: kBlack,
+                                                        fontSize: 17,
+                                                        fontWeight:
+                                                            FontWeight.bold),
+                                                  ),
+                                                  onPressed: () async {
+                                                    if (selectedVideo == null) {
+                                                      setState(() {
+                                                        _selectedVideoError =
+                                                            true;
+                                                      });
+                                                      return;
+                                                    }
+                                                    if (_selectedThumbnail ==
+                                                        null) {
+                                                      setState(() {
+                                                        _selectedThumbnailError =
+                                                            true;
+                                                      });
+                                                      return;
+                                                    }
+                                                    bool isOnline =
+                                                        await checkOnline();
+                                                    if (!isOnline) {
+                                                      Flushbar(
+                                                        icon: Icon(
+                                                          Icons.info_outline,
+                                                          color: Colors.white,
+                                                        ),
+                                                        backgroundColor:
+                                                            Colors.redAccent,
+                                                        title: "Error",
+                                                        message: "No Internet",
+                                                        duration: Duration(
+                                                            seconds: 3),
+                                                      )..show(context);
+                                                    } else {
+                                                      /// POST FUNCTIONALITY
+                                                      if (_uploadFormKey
+                                                          .currentState!
+                                                          .validate()) {
+                                                        setState(() {
+                                                          _loading = true;
+                                                        });
+                                                      }
+                                                    }
+                                                  })
+                                              : CircularProgressIndicator(
+                                                  color: kActiveColor,
+                                                ),
+                                          SizedBox(height: size.height * 0.05)
+                                        ],
                                       ),
                                     ),
-                                    findSuggestions:
-                                        TagSearchService.findVideoTags,
-                                    additionCallback: (value) {
-                                      return VideoTag(
-                                          id: 0, name: value, description: "");
-                                    },
-                                    onAdded: (videoTag) {
-                                      // api calls here, triggered when add to tag button is pressed
-                                      return videoTag;
-                                    },
-                                    configureChip: configureChip,
-                                    configureSuggestion: (tag) {
-                                      return SuggestionConfiguration(
-                                        title: Text(tag.name),
-                                        // subtitle: Text(tag.id.toString()),
-                                        additionWidget: Chip(
-                                          avatar: Icon(
-                                            Icons.add_circle,
-                                            color: Colors.white,
-                                          ),
-                                          label: Text('Add New Tag'),
-                                          labelStyle: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 14.0,
-                                            fontWeight: FontWeight.w300,
-                                          ),
-                                          backgroundColor: Colors.green,
-                                        ),
-                                      );
-                                    },
                                   ),
                                 ),
-                                SizedBox(height: size.height * 0.03),
-                                !_loading
-                                    ? Material(
-                                        elevation: 8.0,
-                                        child: RoundedButton(
-                                            text: "Upload", press: () async {}),
-                                      )
-                                    : CircularProgressIndicator(
-                                        color: kPrimaryColor,
-                                      ),
-                                SizedBox(height: size.height * 0.05)
-                              ],
+                              ),
                             ),
-                          ),
+                          ],
                         ),
                       ),
-                      appBar(size, () {
-                        setState(() {
-                          collapseFromLeft = true;
-                          if (isCollapsed)
-                            _aController.forward();
-                          else
-                            _aController.reverse();
+                      // appBar(size, () {
+                      //   setState(() {
+                      //     collapseFromLeft = true;
+                      //     if (isCollapsed)
+                      //       _aController.forward();
+                      //     else
+                      //       _aController.reverse();
 
-                          isCollapsed = !isCollapsed;
-                        });
-                      })
+                      //     isCollapsed = !isCollapsed;
+                      //   });
+                      // })
                     ]),
                   ),
                 ),

@@ -75,12 +75,12 @@ Future<Loc> currentLocation() async {
 }
 
 Future<Loc> _locFromIp() async {
-  Loc location = Loc(lat: "0", lng: "0", ip: "0.0.0.0", name: "unknown");
+  Loc location;
   try {
     http.Response res = await http.get(Uri.parse('http://ip-api.com/json'));
     location = Loc(
-        lat: json.decode(res.body)['lat'],
-        lng: json.decode(res.body)['lng'],
+        lat: json.decode(res.body)['lat'].toString(),
+        lng: json.decode(res.body)['lon'].toString(),
         ip: json.decode(res.body)['query'],
         name: json.decode(res.body)['regionName'] +
             ',' +
@@ -88,13 +88,11 @@ Future<Loc> _locFromIp() async {
 
     return location;
   } catch (err) {
+    print(err);
     print("Error getting Loc from IP");
 
     location = Loc(lat: "0", lng: "0", ip: "0.0.0.0", name: "unknown");
     return location;
     //handleError
   }
-  Future.delayed(Duration(milliseconds: 10), () {
-    return location;
-  });
 }

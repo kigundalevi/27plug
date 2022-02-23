@@ -9,10 +9,15 @@ const LOGIN_URL = "https://plug27.herokuapp.com/login";
 // const kPrimaryColor = Color(0xFF11823B);
 // const kPrimaryLightColor = Color(0xFFD0FAE4);
 const kPrimaryColor = Color(0xFF040848);
-const kPrimaryLightColor = Color(0xFFbf69b1);
+const kPrimaryLightColor = Color(0xFFBB86FC);
+const kBackgroundColor = Color(0xFFBB86FC);
 const kLightTextColor = Color(0xFFD0FAE4);
 const kNeutralColor = Color(0xFF215268);
+const kBlack = Colors.black;
 const kWhite = Colors.white;
+const kRed = Colors.red;
+const kActiveColor = Color(0xFF03DAC5);
+const kScaffoldColor = Color(0xFF1b1e58);
 
 // TEXT
 const txtAppName = "27PLUG";

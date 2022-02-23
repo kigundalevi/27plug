@@ -1,32 +1,54 @@
 import 'package:africanplug/config/config.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_icons/flutter_icons.dart';
 
-Container appBar(Size size, menu_pressed) {
+Container appBar(Size size, left_pressed, center_pressed, right_pressed) {
   return Container(
-    color: kPrimaryColor.withOpacity(0.979),
+    color: Colors.transparent,
     height: size.height / 14,
-    child: Container(
-      alignment: Alignment.bottomCenter,
-      decoration: BoxDecoration(color: kPrimaryLightColor),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          IconButton(
-            onPressed: menu_pressed,
-            icon: Icon(Icons.menu),
-            color: kPrimaryColor,
+    width: size.width,
+    child: Row(
+      mainAxisSize: MainAxisSize.max,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        IconButton(
+          icon: Icon(
+            Icons.menu,
+            color: kWhite,
           ),
-          Text(
-            txtAppName,
-            style: TextStyle(fontWeight: FontWeight.bold, color: kPrimaryColor),
+          onPressed: left_pressed,
+        ),
+        Center(
+          child: InkWell(
+            onTap: center_pressed,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  FlutterIcons.plug_faw5s,
+                  color: kActiveColor,
+                  size: 25.0,
+                ),
+                Text("27Plug",
+                    style: TextStyle(
+                        color: kActiveColor,
+                        fontSize: 19.0,
+                        fontWeight: FontWeight.bold))
+              ],
+            ),
           ),
-          IconButton(
-            onPressed: () {},
-            icon: Icon(Icons.search),
-            color: kPrimaryColor,
-          )
-        ],
-      ),
+        ),
+        IconButton(
+          icon: CircleAvatar(
+            backgroundImage: AssetImage(
+              'assets/images/brian.jpg',
+            ),
+            backgroundColor: Colors.black26,
+            foregroundColor: Colors.black26,
+          ),
+          onPressed: right_pressed,
+        )
+      ],
     ),
   );
 }

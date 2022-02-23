@@ -37,7 +37,7 @@ class ImageChip extends StatelessWidget {
             ),
             Text(
               text,
-              style: TextStyle(color: kPrimaryColor),
+              style: TextStyle(color: kLightTextColor),
             ),
           ],
         ),

@@ -16,14 +16,14 @@ class VideoInfoChip extends StatelessWidget {
       // width: size.width * 0.25,
       padding: EdgeInsets.all(2),
       decoration: BoxDecoration(
-        color: kPrimaryLightColor,
+        color: Colors.grey.shade900,
         borderRadius: BorderRadius.all(Radius.circular(numCurveRadius)),
       ),
       child: Row(
         children: [
           Icon(
             icon_data,
-            color: kPrimaryColor,
+            color: kActiveColor,
             size: size.height * 0.025,
           ),
           SizedBox(

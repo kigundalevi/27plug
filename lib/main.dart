@@ -53,10 +53,13 @@ class _MyAppState extends State<MyApp> {
           debugShowCheckedModeBanner: false,
           title: txtAppName,
           theme: ThemeData(
-            // This is the theme of your application.
-            primaryColor: kPrimaryColor,
-            scaffoldBackgroundColor: Colors.white,
-          ),
+              // This is the theme of your application.
+              primaryColor: kPrimaryColor,
+              scaffoldBackgroundColor: Colors.white,
+              inputDecorationTheme: InputDecorationTheme(
+                focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: kPrimaryColor)),
+              )),
           home: GraphQLConfiguration.sessionToken == ''
               ? LoginSignupScreen()
               : VideosScreen(),
