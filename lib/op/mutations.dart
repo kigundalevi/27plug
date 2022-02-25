@@ -1,3 +1,7 @@
+import 'dart:io';
+import 'package:flutter/services.dart' show rootBundle;
+import 'package:http/http.dart';
+
 class Mutations {
   String registerUser(
       String firstName, //
@@ -15,7 +19,7 @@ class Mutations {
       bool location_live) {
     return """
       mutation{
-      createUser(firstName:"$firstName",lastName:"$lastName",isMale:$isMale,email:"$email",password:"$password",phoneNo:"$phoneNo",minYob:"$minYob",maxYob:"$maxYob",ip:"$ip",locationName:"$location_name",lat:"$lat",lng:"$lng",locationLive:$location_live,){
+      createUser(firstName:"$firstName",lastName:"$lastName",isMale:$isMale,email:"$email",password:"$password",phoneNo:"$phoneNo",minYob:"$minYob",maxYob:"$maxYob",ip:"$ip",locationName:"$location_name",lat:"$lat",lng:"$lng",locationLive:$location_live){
         user{
           id,
           email,
@@ -37,9 +41,39 @@ class Mutations {
     """;
   }
 
-  String addVideo(String name, String startDateTime, String finishDateTime,
-      String place, String leaderName) {
+  String uploadVideo(
+      File selectedVideo,
+      // String selectedVideoName,
+      File selectedThumbnail,
+      // String selectedThumbnailName,
+      String title,
+      String description,
+      String ip,
+      String lat,
+      String lng,
+      String location_name,
+      bool location_live) {
+    var videoByteData = selectedVideo.readAsBytesSync();
+    var thumbnailByteData = selectedThumbnail.readAsBytesSync();
+
+    var multipartVideo = MultipartFile.fromBytes(
+      'video_file',
+      videoByteData,
+      // filename: selectedVideoName,
+      // contentType: MediaType("image", "jpg"),
+    );
+    var multipartThumbnail = MultipartFile.fromBytes(
+      'thumbanail_file',
+      thumbnailByteData,
+      // filename: selectedThumbnailName,
+      // contentType: MediaType("image", "jpg"),
+    );
+
     return """ 
+      mutation{
+        addVideo(title:"$title",description:"$description",ip:"$ip",locationName:"$location_name",lat:"$lat",lng:"$lng",locationLive:$location_live)
+        {title}
+        }
     """;
   }
 }

@@ -2,7 +2,8 @@ import 'package:africanplug/config/config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 
-Container appBar(Size size, left_pressed, center_pressed, right_pressed) {
+Container appBar(
+    Size size, left_pressed, center_pressed, right_pressed, user_id) {
   return Container(
     color: Colors.transparent,
     height: size.height / 14,
@@ -38,16 +39,25 @@ Container appBar(Size size, left_pressed, center_pressed, right_pressed) {
             ),
           ),
         ),
-        IconButton(
-          icon: CircleAvatar(
-            backgroundImage: AssetImage(
-              'assets/images/brian.jpg',
-            ),
-            backgroundColor: Colors.black26,
-            foregroundColor: Colors.black26,
-          ),
-          onPressed: right_pressed,
-        )
+        user_id == null
+            ? IconButton(
+                icon: CircleAvatar(
+                  backgroundImage: AssetImage(
+                    'assets/images/brian.jpg',
+                  ),
+                  backgroundColor: Colors.black26,
+                  foregroundColor: Colors.black26,
+                ),
+                onPressed: right_pressed,
+              )
+            : IconButton(
+                icon: Icon(
+                  FlutterIcons.guest_zoc,
+                  color: Colors.white70,
+                  size: 23,
+                ),
+                onPressed: right_pressed,
+              )
       ],
     ),
   );

@@ -27,13 +27,15 @@ class GraphQLConfiguration {
 
   static getLink({bool register = false}) {
     if (register == null || register == false) {
-      return GraphQLConfiguration.link != null
-          ? GraphQLConfiguration.link
-          : GraphQLConfiguration.httpLink;
+      return GraphQLConfiguration.link;
+      // return GraphQLConfiguration.link != null
+      //     ? GraphQLConfiguration.link
+      //     : GraphQLConfiguration.httpLink;
     } else {
-      return GraphQLConfiguration.link != null
-          ? GraphQLConfiguration.link
-          : GraphQLConfiguration.registerLink;
+      return GraphQLConfiguration.registerLink;
+      // return GraphQLConfiguration.link != null
+      //     ? GraphQLConfiguration.link
+      //     : GraphQLConfiguration.registerLink;
     }
   }
 

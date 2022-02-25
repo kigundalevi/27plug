@@ -55,6 +55,9 @@ dependencies:
     intl_phone_field: ^1.2.0
     connectivity_plus: ^2.2.1
     geolocator: ^8.2.0
+    dio: ^4.0.4
+    device_info_plus: ^3.2.2
+    # d
     # chewie: ^1.3.0
 
 dev_dependencies:

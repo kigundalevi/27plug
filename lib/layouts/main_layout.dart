@@ -104,7 +104,7 @@ class _MainLayoutState extends State<MainLayout> with TickerProviderStateMixin {
 
                         isCollapsed = !isCollapsed;
                       });
-                    }, () {}, () {})
+                    }, () {}, () {}, 1)
                   ]),
                 ),
               ),

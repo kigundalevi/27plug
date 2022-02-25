@@ -44,7 +44,7 @@ class _TextInputFieldState extends State<TextInputField> {
     return TextFormField(
       style: TextStyle(
           fontSize: 18,
-          fontWeight: FontWeight.w700,
+          fontWeight: widget.lightlayout ? FontWeight.w500 : FontWeight.normal,
           color: !widget.lightlayout ? Palette.textColor1 : kPrimaryColor),
       enabled: widget.enabled,
       obscureText: widget.obsuretext ? _inputObscured : false,

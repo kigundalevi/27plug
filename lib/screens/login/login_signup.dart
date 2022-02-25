@@ -58,9 +58,9 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
   bool _autoValidate = false;
   bool _registerAutoValidate = false;
 
-  Future<String?> _loginUser(email, password) {
+  Future<String?> _loginUser(email, password, Loc location) {
     LoginController ctrl = new LoginController();
-    return ctrl.authLoginUser(email, password);
+    return ctrl.authLoginUser(email, password, location);
   }
 
   Future<String?> _registerUser(
@@ -103,6 +103,7 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
 
   @override
   Widget build(BuildContext context) {
+    Size size = MediaQuery.of(context).size;
     return Scaffold(
       backgroundColor: Palette.backgroundColor,
       body: Stack(
@@ -316,9 +317,9 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                                           SizedBox(
                                             width: 10.0,
                                           ),
-                                          Text("Phone number",
+                                          Text("Phone Number",
                                               style: TextStyle(
-                                                  fontSize: 16,
+                                                  fontSize: 19,
                                                   color: kPrimaryColor)),
                                         ],
                                       ),
@@ -354,7 +355,7 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                                             // contentPadding: EdgeInsets.all(10),
                                             hintText: '7 - - - - - - - -',
                                             hintStyle: TextStyle(
-                                                fontSize: 20,
+                                                fontSize: 18,
                                                 color: kPrimaryColor),
                                           ),
                                           initialCountryCode: 'KE',
@@ -377,65 +378,79 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                               SizedBox(
                                 height: 15.0,
                               ),
-                              Container(
-                                child: Padding(
-                                  padding: const EdgeInsets.only(
-                                      left: 8.0, top: 10.0),
-                                  child: Column(
-                                    children: [
-                                      Row(
-                                        mainAxisSize: MainAxisSize.max,
+                              Column(
+                                children: [
+                                  Container(
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(
+                                          left: 8.0, top: 10.0),
+                                      child: Column(
                                         children: [
-                                          Text("Age Range: ",
-                                              style: TextStyle(
-                                                  fontSize: 16,
-                                                  color: Palette.textColor1)),
-                                          Text("${minAge} to ${maxAge}",
-                                              style: TextStyle(
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: kActiveColor))
+                                          Row(
+                                            mainAxisSize: MainAxisSize.max,
+                                            children: [
+                                              Text("Age Range: ",
+                                                  style: TextStyle(
+                                                      fontSize: 18,
+                                                      color: kPrimaryColor)),
+                                              Text("${minAge} to ${maxAge}",
+                                                  style: TextStyle(
+                                                      fontSize: 18,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      color: kPrimaryColor))
+                                            ],
+                                          ),
+                                          RangeSlider(
+                                            activeColor: kPrimaryColor,
+                                            inactiveColor: kPrimaryLightColor,
+                                            values: _ageRangeValues,
+                                            max: 75,
+                                            divisions: 75,
+                                            labels: RangeLabels(
+                                              _ageRangeValues.start
+                                                  .round()
+                                                  .toString(),
+                                              _ageRangeValues.end
+                                                  .round()
+                                                  .toString(),
+                                            ),
+                                            onChanged: (RangeValues values) {
+                                              setState(() {
+                                                _ageChanged = true;
+                                                _showAgeError = false;
+                                                _ageRangeValues = values;
+                                                minAge = values.start.toInt();
+                                                maxAge = values.end.toInt();
+                                              });
+                                            },
+                                          ),
                                         ],
                                       ),
-                                      RangeSlider(
-                                        activeColor: kActiveColor,
-                                        inactiveColor: kPrimaryColor,
-                                        values: _ageRangeValues,
-                                        max: 75,
-                                        divisions: 75,
-                                        labels: RangeLabels(
-                                          _ageRangeValues.start
-                                              .round()
-                                              .toString(),
-                                          _ageRangeValues.end
-                                              .round()
-                                              .toString(),
-                                        ),
-                                        onChanged: (RangeValues values) {
-                                          setState(() {
-                                            _ageChanged = true;
-                                            _showAgeError = false;
-                                            _ageRangeValues = values;
-                                            minAge = values.start.toInt();
-                                            maxAge = values.end.toInt();
-                                          });
-                                        },
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                decoration: BoxDecoration(
-                                    border: _showAgeError
-                                        ? Border.all(color: Colors.redAccent)
-                                        : Border.all(color: kWhite),
-                                    borderRadius: BorderRadius.circular(10)),
-                              ),
-                              _showAgeError
-                                  ? SizedBox()
-                                  : Divider(
-                                      thickness: 1.0,
-                                      color: Palette.textColor1,
                                     ),
+                                    decoration: BoxDecoration(
+                                        border: _showAgeError
+                                            ? Border.all(
+                                                color: Colors.redAccent)
+                                            : Border.all(color: kWhite),
+                                        borderRadius:
+                                            BorderRadius.circular(10)),
+                                  ),
+                                  _showAgeError
+                                      ? Container(
+                                          width: size.width,
+                                          child: Text("Set your age range",
+                                              style:
+                                                  TextStyle(color: Colors.red)))
+                                      : SizedBox()
+                                ],
+                              ),
+                              // _showAgeError
+                              //     ? SizedBox()
+                              //     : Divider(
+                              //         thickness: 1.0,
+                              //         color: Palette.textColor1,
+                              //       ),
                               SizedBox(
                                 height: 15.0,
                               ),
@@ -452,15 +467,26 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                                           Icon(
                                             MaterialCommunityIcons
                                                 .gender_male_female,
-                                            color: Palette.iconColor,
+                                            color: kPrimaryColor,
                                           ),
                                           SizedBox(
                                             width: 10.0,
                                           ),
-                                          Text("Gender",
-                                              style: TextStyle(
-                                                  fontSize: 16,
-                                                  color: Palette.textColor1)),
+                                          Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Text("Gender : ",
+                                                  style: TextStyle(
+                                                      fontSize: 18,
+                                                      color: kPrimaryColor)),
+                                              Text(isMale ? "Male" : "Female",
+                                                  style: TextStyle(
+                                                      fontSize: 18,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      color: kPrimaryColor)),
+                                            ],
+                                          )
                                         ],
                                       ),
                                       Padding(
@@ -483,16 +509,14 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                                                         right: 8),
                                                     decoration: BoxDecoration(
                                                         color: isMale
-                                                            ? Palette.textColor2
-                                                            : Colors
-                                                                .transparent,
-                                                        border: Border.all(
-                                                            width: 1,
-                                                            color: isMale
-                                                                ? Colors
-                                                                    .transparent
-                                                                : Palette
-                                                                    .textColor1),
+                                                            ? kPrimaryColor
+                                                            : kPrimaryLightColor,
+                                                        // border: Border.all(
+                                                        //     width: 1,
+                                                        //     color: isMale
+                                                        //         ? Colors
+                                                        //             .transparent
+                                                        //         : kPrimaryColor),
                                                         borderRadius:
                                                             BorderRadius
                                                                 .circular(15)),
@@ -507,8 +531,7 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                                                   Text(
                                                     "Male",
                                                     style: TextStyle(
-                                                        color:
-                                                            Palette.textColor1),
+                                                        color: kPrimaryColor),
                                                   )
                                                 ],
                                               ),
@@ -530,17 +553,15 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                                                     margin: EdgeInsets.only(
                                                         right: 8),
                                                     decoration: BoxDecoration(
-                                                        color: isMale
-                                                            ? Colors.transparent
-                                                            : Palette
-                                                                .textColor2,
-                                                        border: Border.all(
-                                                            width: 1,
-                                                            color: isMale
-                                                                ? Palette
-                                                                    .textColor1
-                                                                : Colors
-                                                                    .transparent),
+                                                        color: !isMale
+                                                            ? kPrimaryColor
+                                                            : kPrimaryLightColor,
+                                                        // border: Border.all(
+                                                        //     width: 1,
+                                                        //     color: !isMale
+                                                        //         ? Colors
+                                                        //             .transparent
+                                                        //         : kPrimaryColor),
                                                         borderRadius:
                                                             BorderRadius
                                                                 .circular(15)),
@@ -555,8 +576,7 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                                                   Text(
                                                     "Female",
                                                     style: TextStyle(
-                                                        color:
-                                                            Palette.textColor1),
+                                                        color: kPrimaryColor),
                                                   )
                                                 ],
                                               ),
@@ -572,14 +592,15 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                                 //         Border.all(color: Palette.textColor1),
                                 //     borderRadius: BorderRadius.circular(10)),
                               ),
-                              Divider(
-                                thickness: 1.0,
-                                color: Palette.textColor1,
-                              ),
+                              // Divider(
+                              //   thickness: 1.0,
+                              //   color: Palette.textColor1,
+                              // ),
                               SizedBox(
                                 height: 15.0,
                               ),
                               TextInputField(
+                                  lightlayout: true,
                                   obsuretext: true,
                                   placeholder: txtPassword,
                                   icondata: MaterialCommunityIcons.lock_outline,
@@ -605,6 +626,7 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                                                   _registerpassword!.isEmpty)
                                               ? false
                                               : true,
+                                          lightlayout: true,
                                           obsuretext: true,
                                           placeholder: txtConfirmPassword,
                                           icondata: MaterialCommunityIcons
@@ -856,8 +878,9 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                           if (!isSignupScreen) {
                             /// LOGIN FUNCTIONALITY
                             if (_formKey.currentState!.validate()) {
+                              Loc location = await currentLocation();
                               String? response =
-                                  await _loginUser(_email, _password);
+                                  await _loginUser(_email, _password, location);
 
                               if (response.toString() == 'success') {
                                 // setState(() {
@@ -943,7 +966,9 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                                       duration: Duration(seconds: 3),
                                     )..show(context);
                                     String? _loginResponse = await _loginUser(
-                                        _registerEmail, _registerpassword);
+                                        _registerEmail,
+                                        _registerpassword,
+                                        location);
 
                                     if (_loginResponse.toString() ==
                                         'success') {

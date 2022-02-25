@@ -170,7 +170,7 @@ class _VideosScreenState extends State<VideosScreen>
 
                                         isCollapsed = !isCollapsed;
                                       });
-                                    }, () {}, () {}),
+                                    }, () {}, () {}, 1),
                                     Container(
                                       height: 290,
                                       // color: Colors.red,
@@ -327,8 +327,6 @@ class _VideosScreenState extends State<VideosScreen>
                                               ),
                                             ),
                                           ),
-
-                                          
                                         ],
                                       )
                                     : SizedBox(),

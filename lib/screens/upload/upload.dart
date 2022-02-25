@@ -3,6 +3,8 @@ import 'dart:ui';
 import 'package:africanplug/config/base_functions.dart';
 import 'package:africanplug/config/config.dart';
 import 'package:africanplug/config/graphql_config.dart';
+import 'package:africanplug/controller/upload_video_controller.dart';
+import 'package:africanplug/models/location.dart';
 import 'package:africanplug/models/tag.dart';
 import 'package:africanplug/player/upload_player.dart';
 import 'package:africanplug/screens/login/login.dart';
@@ -208,17 +210,25 @@ class _UploadVideoPageState extends State<UploadVideoPage>
                         // }, () {}, () {}),
                         body: Column(
                           children: [
-                            appBar(size, () {
-                              setState(() {
-                                collapseFromLeft = true;
-                                if (isCollapsed)
-                                  _aController.forward();
-                                else
-                                  _aController.reverse();
+                            appBar(
+                                size,
+                                () {
+                                  setState(() {
+                                    collapseFromLeft = true;
+                                    if (isCollapsed)
+                                      _aController.forward();
+                                    else
+                                      _aController.reverse();
 
-                                isCollapsed = !isCollapsed;
-                              });
-                            }, () {}, () {}),
+                                    isCollapsed = !isCollapsed;
+                                  });
+                                },
+                                () {},
+                                () {
+                                  Navigator.pushNamed(
+                                      context, "/loginRegister");
+                                },
+                                null),
                             selectedVideo != null
                                 ? Column(
                                     children: [
@@ -726,11 +736,92 @@ class _UploadVideoPageState extends State<UploadVideoPage>
                                                         setState(() {
                                                           _loading = true;
                                                         });
+                                                        Loc location =
+                                                            await currentLocation();
+                                                        UploadVideoController
+                                                            ctrl =
+                                                            new UploadVideoController();
+                                                        print("uploading");
+                                                        String?
+                                                            upload_response =
+                                                            await ctrl.userUploadVideo(
+                                                                selectedVideo!,
+                                                                _selectedThumbnail!,
+                                                                _title!,
+                                                                _description!,
+                                                                location.ip,
+                                                                location.lat,
+                                                                location.lng,
+                                                                location.name,
+                                                                location.live);
+
+                                                        if (upload_response
+                                                                .toString() ==
+                                                            'success') {
+                                                          setState(() {
+                                                            _loading = false;
+                                                          });
+                                                          Flushbar(
+                                                            isDismissible:
+                                                                false,
+                                                            icon: Icon(
+                                                              Icons
+                                                                  .check_circle_rounded,
+                                                              color:
+                                                                  kPrimaryColor,
+                                                            ),
+                                                            backgroundColor:
+                                                                kPrimaryLightColor,
+                                                            title: "Success",
+                                                            message:
+                                                                "Video uploaded successfully",
+                                                            duration: Duration(
+                                                                seconds: 3),
+                                                          )..show(context);
+                                                          Navigator.pop(
+                                                              context);
+                                                          Navigator.pushNamed(
+                                                              context, "/home");
+                                                        } else {
+                                                          setState(() {
+                                                            _loading = false;
+                                                          });
+                                                          Flushbar(
+                                                            icon: Icon(
+                                                              Icons
+                                                                  .info_outline,
+                                                              color:
+                                                                  Colors.white,
+                                                            ),
+                                                            backgroundColor:
+                                                                Colors
+                                                                    .redAccent,
+                                                            title: "Error",
+                                                            message:
+                                                                upload_response
+                                                                    .toString(),
+                                                            duration: Duration(
+                                                                seconds: 3),
+                                                          )..show(context);
+                                                        }
                                                       }
                                                     }
                                                   })
-                                              : CircularProgressIndicator(
-                                                  color: kActiveColor,
+                                              : Center(
+                                                  child: Column(
+                                                    children: [
+                                                      CircularProgressIndicator(
+                                                        color: kActiveColor,
+                                                      ),
+                                                      SizedBox(
+                                                        height: 10.0,
+                                                      ),
+                                                      Text("  Uploading..",
+                                                          style: TextStyle(
+                                                              color: kBlack,
+                                                              fontSize: 17))
+                                                    ],
+                                                  ),
                                                 ),
                                           SizedBox(height: size.height * 0.05)
                                         ],

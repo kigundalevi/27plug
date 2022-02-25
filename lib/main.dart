@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:africanplug/config/config.dart';
 import 'package:africanplug/config/graphql_config.dart';
 import 'package:africanplug/config/route_names.dart';
+import 'package:africanplug/landing.dart';
 import 'package:africanplug/screens/login/login.dart';
 import 'package:africanplug/screens/login/login_signup.dart';
 import 'package:africanplug/screens/upload/upload.dart';
@@ -61,9 +62,10 @@ class _MyAppState extends State<MyApp> {
                     borderSide: BorderSide(color: kPrimaryColor)),
               )),
           home: GraphQLConfiguration.sessionToken == ''
-              ? LoginSignupScreen()
+              ? LandingScreen()
               : VideosScreen(),
           routes: <String, WidgetBuilder>{
+            landingRoute: (BuildContext context) => LandingScreen(),
             loginRegisterRoute: (BuildContext context) => LoginSignupScreen(),
             homeRoute: (BuildContext context) => VideosScreen(),
             uploadRoute: (BuildContext context) => UploadVideoPage()

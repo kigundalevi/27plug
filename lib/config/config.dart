@@ -2,9 +2,15 @@ import 'package:flutter/material.dart';
 
 // BACKEND
 // const BACKEND_URL = "https://plug-apis.herokuapp.com/graphql";
-const REGISTER_URL = "https://plug27.herokuapp.com/graphq";
-const BACKEND_URL = "https://plug27.herokuapp.com/graphql";
-const LOGIN_URL = "https://plug27.herokuapp.com/login";
+// const REGISTER_URL = "https://plug27.herokuapp.com/graphq";
+// const BACKEND_URL = "https://plug27.herokuapp.com/graphql";
+// const LOGIN_URL = "https://plug27.herokuapp.com/login";
+
+const REGISTER_URL = "https://brianmutugi.pythonanywhere.com/graphq";
+const BACKEND_URL = "https://brianmutugi.pythonanywhere.com/graphql";
+const LOGIN_URL = "https://brianmutugi.pythonanywhere.com/login";
+
+// https://brianmutugi.pythonanywhere.com/graphql
 // COLORS
 // const kPrimaryColor = Color(0xFF11823B);
 // const kPrimaryLightColor = Color(0xFFD0FAE4);
@@ -21,6 +27,7 @@ const kScaffoldColor = Color(0xFF1b1e58);
 
 // TEXT
 const txtAppName = "27PLUG";
+const txtVersion = "1";
 const txtIntro = "WELCOME TO 27 PLUG";
 const txtLogin = "LOGIN";
 const txtYourEmail = "Your Email";

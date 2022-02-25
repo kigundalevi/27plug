@@ -4,6 +4,7 @@ import 'package:africanplug/screens/login/login_signup.dart';
 import 'package:africanplug/screens/upload/upload.dart';
 import 'package:africanplug/screens/videos/videos_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_icons/flutter_icons.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 
 Widget MainMenu(
@@ -17,303 +18,306 @@ Widget MainMenu(
         padding: const EdgeInsets.only(left: 16.0, top: 50.0),
         child: Align(
           alignment: Alignment.centerLeft,
-          child: Column(
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Stack(
-                children: <Widget>[
-                  Row(
-                    children: [
-                      Container(
-                          // margin: EdgeInsets.only(top: size.height / 11),
-                          height: size.height / 12,
-                          width: size.width / 6,
-                          child: FittedBox(
-                            child: new FloatingActionButton(
-                              heroTag: "btn2",
-                              elevation: 5.0,
-                              backgroundColor: kWhite,
-                              onPressed: () {},
-                              child: Padding(
-                                padding: const EdgeInsets.all(3.0),
-                                child: new Container(
-                                  width: size.height / 12,
-                                  height: size.height / 12,
-                                  decoration: new BoxDecoration(
-                                    color: kPrimaryColor,
-                                    image: new DecorationImage(
-                                      //  https://pixinvent.com/materialize-material-design-admin-template/app-assets/images/user/12.jpg
-                                      // https://media-exp1.licdn.com/dms/image/C5603AQGs80XgVG-nxg/profile-displayphoto-shrink_200_200/0?e=1586995200&v=beta&t=XQSVmNAVycY5cSWSkIWELb9NJ-Cwjx2smaH0nclMmpU
-                                      image: new AssetImage(
-                                          "assets/images/brian.jpg"),
-                                      fit: BoxFit.cover,
-                                    ),
-                                    borderRadius: new BorderRadius.all(
-                                        new Radius.circular(size.height / 3)),
-                                    //  border: new Border.all(
-                                    //        color: mainColor,
-                                    //        width: 4.0,
-                                    //  ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          )),
-                      Container(
-                        // color: kPrimaryColor,
-                        margin: EdgeInsets.only(top: 12, left: 10),
-                        height: size.height / 12,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
+          child: userid != null
+              ? Column(
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Stack(
+                      children: <Widget>[
+                        Row(
                           children: [
-                            Text(
-                              "Brian Mutugi",
-                              style: TextStyle(
-                                  fontSize: 18, fontWeight: FontWeight.bold),
-                            ),
-                            SizedBox(
-                              height: 5,
-                            ),
-                            Text(
-                              "116 Subscribers",
-                              style: TextStyle(fontSize: 14),
+                            Container(
+                                // margin: EdgeInsets.only(top: size.height / 11),
+                                height: size.height / 12,
+                                width: size.width / 6,
+                                child: FittedBox(
+                                  child: new FloatingActionButton(
+                                    heroTag: "btn2",
+                                    elevation: 5.0,
+                                    backgroundColor: kWhite,
+                                    onPressed: () {},
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(3.0),
+                                      child: new Container(
+                                        width: size.height / 12,
+                                        height: size.height / 12,
+                                        decoration: new BoxDecoration(
+                                          color: kPrimaryColor,
+                                          image: new DecorationImage(
+                                            //  https://pixinvent.com/materialize-material-design-admin-template/app-assets/images/user/12.jpg
+                                            // https://media-exp1.licdn.com/dms/image/C5603AQGs80XgVG-nxg/profile-displayphoto-shrink_200_200/0?e=1586995200&v=beta&t=XQSVmNAVycY5cSWSkIWELb9NJ-Cwjx2smaH0nclMmpU
+                                            image: new AssetImage(
+                                                "assets/images/brian.jpg"),
+                                            fit: BoxFit.cover,
+                                          ),
+                                          borderRadius: new BorderRadius.all(
+                                              new Radius.circular(
+                                                  size.height / 3)),
+                                          //  border: new Border.all(
+                                          //        color: mainColor,
+                                          //        width: 4.0,
+                                          //  ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                )),
+                            Container(
+                              // color: kPrimaryColor,
+                              margin: EdgeInsets.only(top: 12, left: 10),
+                              height: size.height / 12,
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "Brian Mutugi",
+                                    style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  SizedBox(
+                                    height: 5,
+                                  ),
+                                  Text(
+                                    "116 Subscribers",
+                                    style: TextStyle(fontSize: 14),
+                                  ),
+                                ],
+                              ),
                             ),
                           ],
                         ),
+                      ],
+                    ),
+                    SizedBox(
+                      height: 10.0,
+                    ),
+                    Container(
+                      width: size.width / 1.8,
+                      child: Divider(
+                        color: Colors.black38,
                       ),
-                    ],
-                  ),
-
-                  // Container(
-                  //     margin: EdgeInsets.only(top: size.height / 6),
-                  //     width: size.width / 1.8,
-                  //     child: Material(
-                  //       color: Colors.white,
-                  //       elevation: 20.0,
-                  //       shadowColor: Color(0x802196F3),
-                  //       borderRadius: BorderRadius.circular(5.0),
-                  //       child: Padding(
-                  //         padding: const EdgeInsets.all(4.0),
-                  //         child: Column(
-                  //           children: <Widget>[
-                  //             Row(
-                  //               mainAxisAlignment: MainAxisAlignment.center,
-                  //               children: <Widget>[
-                  //                 Align(
-                  //                   alignment: Alignment.center,
-                  //                   child: Text(
-                  //                     "Jane Doe",
-                  //                     style: TextStyle(
-                  //                         fontSize: 18,
-                  //                         fontWeight: FontWeight.bold),
-                  //                   ),
-                  //                 ),
-                  //               ],
-                  //             ),
-                  //             Row(
-                  //               mainAxisAlignment: MainAxisAlignment.center,
-                  //               children: <Widget>[
-                  //                 Icon(
-                  //                   Icons.star,
-                  //                   color: Colors.purpleAccent,
-                  //                   size: 18.0,
-                  //                 ),
-                  //                 Icon(
-                  //                   Icons.star,
-                  //                   color: Colors.purpleAccent,
-                  //                   size: 18.0,
-                  //                 ),
-                  //                 Icon(
-                  //                   Icons.star,
-                  //                   color: Colors.purpleAccent,
-                  //                   size: 18.0,
-                  //                 ),
-                  //                 Icon(
-                  //                   Icons.star,
-                  //                   color: Colors.purpleAccent,
-                  //                   size: 18.0,
-                  //                 ),
-                  //                 Icon(
-                  //                   Icons.star,
-                  //                   color: Colors.purpleAccent,
-                  //                   size: 18.0,
-                  //                 ),
-                  //                 Text(
-                  //                   "5.0",
-                  //                   style: TextStyle(color: Colors.black),
-                  //                 ),
-                  //               ],
-                  //             ),
-                  //             Row(
-                  //               mainAxisSize: MainAxisSize.max,
-                  //               mainAxisAlignment:
-                  //                   MainAxisAlignment.spaceAround,
-                  //               children: <Widget>[
-                  //                 Icon(
-                  //                   Icons.location_on,
-                  //                   color: kPrimaryColor,
-                  //                 ),
-                  //                 Text("London, England"),
-                  //               ],
-                  //             ),
-                  //           ],
-                  //         ),
-                  //       ),
-                  //     )),
-                ],
-              ),
-              SizedBox(
-                height: 10.0,
-              ),
-              Container(
-                width: size.width / 1.8,
-                child: Divider(
-                  color: Colors.black38,
-                ),
-              ),
-              MenuOption(
-                  context, size, Icons.dashboard, "Home", "home", current_page),
-              Container(
-                width: size.width / 1.8,
-                child: Divider(
-                  color: Colors.black38,
-                ),
-              ),
-              MenuOption(context, size, Icons.video_call_outlined, "Upload",
-                  "upload", current_page),
-              Container(
-                width: size.width / 1.8,
-                child: Divider(
-                  color: Colors.black38,
-                ),
-              ),
-              Container(
-                height: size.height / 20,
-                child: FlatButton.icon(
-                    onPressed: () {},
-                    icon: Icon(
-                      Icons.video_library,
-                      color: kPrimaryLightColor,
-                      size: 22.0,
                     ),
-                    label: Text(
-                      "My Videos",
-                      style: TextStyle(color: kPrimaryColor, fontSize: 15.0),
-                    )),
-              ),
-              Container(
-                width: size.width / 1.8,
-                child: Divider(
-                  color: Colors.black38,
-                ),
-              ),
-              Container(
-                height: size.height / 20,
-                child: FlatButton.icon(
-                    onPressed: () {},
-                    icon: Icon(
-                      Icons.watch_later,
-                      color: kPrimaryLightColor,
-                      size: 22.0,
+                    MenuOption(context, size, Icons.dashboard, "Home", "home",
+                        current_page),
+                    Container(
+                      width: size.width / 1.8,
+                      child: Divider(
+                        color: Colors.black38,
+                      ),
                     ),
-                    label: Text(
-                      "Watch Later",
-                      style: TextStyle(color: kPrimaryColor, fontSize: 15.0),
-                    )),
-              ),
-              Container(
-                width: size.width / 1.8,
-                child: Divider(
-                  color: Colors.black38,
-                ),
-              ),
-              Container(
-                height: size.height / 20,
-                child: FlatButton.icon(
-                    onPressed: () {},
-                    icon: Icon(
-                      Icons.favorite,
-                      color: kPrimaryLightColor,
-                      size: 22.0,
+                    MenuOption(context, size, Icons.video_call_outlined,
+                        "Upload", "upload", current_page),
+                    Container(
+                      width: size.width / 1.8,
+                      child: Divider(
+                        color: Colors.black38,
+                      ),
                     ),
-                    label: Text(
-                      "Favourites",
-                      style: TextStyle(color: kPrimaryColor, fontSize: 15.0),
-                    )),
-              ),
-              Container(
-                width: size.width / 1.8,
-                child: Divider(
-                  color: Colors.black38,
-                ),
-              ),
-              Container(
-                height: size.height / 20,
-                child: FlatButton.icon(
-                    onPressed: () {},
-                    icon: Icon(
-                      Icons.history,
-                      color: kPrimaryLightColor,
-                      size: 22.0,
+                    MenuOption(context, size, Icons.video_library, "My Videos",
+                        "myvideos", current_page),
+                    Container(
+                      width: size.width / 1.8,
+                      child: Divider(
+                        color: Colors.black38,
+                      ),
                     ),
-                    label: Text(
-                      "History",
-                      style: TextStyle(color: kPrimaryColor, fontSize: 15.0),
-                    )),
-              ),
-              Container(
-                width: size.width / 1.8,
-                child: Divider(
-                  color: Colors.black38,
-                ),
-              ),
-              SizedBox(
-                height: size.height / 5.1,
-              ),
-              Container(
-                height: size.height / 20,
-                child: FlatButton.icon(
-                    onPressed: () {},
-                    icon: Icon(
-                      Icons.settings,
-                      color: kPrimaryLightColor,
-                      size: 22.0,
+                    MenuOption(context, size, Icons.watch_later, "Watch Later",
+                        "watchlater", current_page),
+                    Container(
+                      width: size.width / 1.8,
+                      child: Divider(
+                        color: Colors.black38,
+                      ),
                     ),
-                    label: Text(
-                      "Account Settings",
-                      style: TextStyle(color: kPrimaryColor, fontSize: 15.0),
-                    )),
-              ),
-              Container(
-                width: size.width / 1.8,
-                child: Divider(
-                  color: Colors.black38,
-                ),
-              ),
-              Container(
-                height: size.height / 22,
-                child: FlatButton.icon(
-                    onPressed: () {
+                    MenuOption(context, size, Icons.favorite, "Favourites",
+                        "favourites", current_page),
+                    Container(
+                      width: size.width / 1.8,
+                      child: Divider(
+                        color: Colors.black38,
+                      ),
+                    ),
+                    MenuOption(context, size, Icons.history, "History",
+                        "history", current_page),
+                    Container(
+                      width: size.width / 1.8,
+                      child: Divider(
+                        color: Colors.black38,
+                      ),
+                    ),
+                    SizedBox(
+                      height: size.height / 5.1,
+                    ),
+                    MenuOption(context, size, Icons.help, "Contact Support",
+                        "support", current_page),
+                    Container(
+                      width: size.width / 1.8,
+                      child: Divider(
+                        color: Colors.black38,
+                      ),
+                    ),
+                    MenuButton(
+                        context, size, Icons.logout, "Log Out", "support", () {
                       logout(context);
-                    },
-                    icon: Icon(
-                      Icons.logout,
-                      color: kPrimaryLightColor,
-                      size: 26.0,
+                    }),
+                    Container(
+                      width: size.width / 1.8,
+                      child: Divider(
+                        color: Colors.black38,
+                      ),
                     ),
-                    label: Text(
-                      "Log Out",
-                      style: TextStyle(color: kPrimaryColor, fontSize: 15.0),
-                    )),
-              ),
-              SizedBox(
-                height: 10.0,
-              ),
-            ],
-          ),
+                    // MenuButton(
+                    //     context,
+                    //     size,
+                    //     Icons.copyright,
+                    //     DateTime.now().year.toString() + " 27Plug v1",
+                    //     "copyright",
+                    //     () {}),
+                  ],
+                )
+              : Column(
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Stack(
+                      children: <Widget>[
+                        Row(
+                          children: [
+                            Container(
+                                // margin: EdgeInsets.only(top: size.height / 11),
+                                height: size.height / 12,
+                                width: size.width / 6,
+                                child: FittedBox(
+                                  child: new FloatingActionButton(
+                                    heroTag: "btn2",
+                                    elevation: 5.0,
+                                    backgroundColor: kWhite,
+                                    onPressed: () {},
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(3.0),
+                                      child: new Container(
+                                        width: size.height / 12,
+                                        height: size.height / 12,
+                                        decoration: new BoxDecoration(
+                                          color: kPrimaryColor,
+                                          image: new DecorationImage(
+                                            //  https://pixinvent.com/materialize-material-design-admin-template/app-assets/images/user/12.jpg
+                                            // https://media-exp1.licdn.com/dms/image/C5603AQGs80XgVG-nxg/profile-displayphoto-shrink_200_200/0?e=1586995200&v=beta&t=XQSVmNAVycY5cSWSkIWELb9NJ-Cwjx2smaH0nclMmpU
+                                            image: new AssetImage(
+                                                "assets/images/user.png"),
+                                            fit: BoxFit.cover,
+                                          ),
+                                          borderRadius: new BorderRadius.all(
+                                              new Radius.circular(
+                                                  size.height / 3)),
+                                          //  border: new Border.all(
+                                          //        color: mainColor,
+                                          //        width: 4.0,
+                                          //  ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                )),
+                            Container(
+                              // color: kPrimaryColor,
+                              margin: EdgeInsets.only(top: 12, left: 10),
+                              height: size.height / 12,
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "Guest",
+                                    style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  SizedBox(
+                                    height: 5,
+                                  ),
+                                  Text(
+                                    "@" + txtAppName.toLowerCase(),
+                                    style: TextStyle(fontSize: 14),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    SizedBox(
+                      height: 10.0,
+                    ),
+                    Container(
+                      width: size.width / 1.8,
+                      child: Divider(
+                        color: Colors.black38,
+                      ),
+                    ),
+                    MenuOption(context, size, FlutterIcons.account_edit_mco,
+                        "Register", "loginRegister", current_page),
+                    Container(
+                      width: size.width / 1.8,
+                      child: Divider(
+                        color: Colors.black38,
+                      ),
+                    ),
+                    MenuOption(context, size, Icons.login, "Login",
+                        "loginRegister", current_page),
+                    Container(
+                      width: size.width / 1.8,
+                      child: Divider(
+                        color: Colors.black38,
+                      ),
+                    ),
+                    SizedBox(
+                      height: size.height / 2.09,
+                    ),
+                    // MenuOption(context, size, Icons.help, "Contact Support",
+                    //     "support", current_page),
+                    // Container(
+                    //   width: size.width / 1.8,
+                    //   child: Divider(
+                    //     color: Colors.black38,
+                    //   ),
+                    // ),
+                    MenuOption(context, size, Icons.info_outline, "About",
+                        "about", current_page),
+                    Container(
+                      width: size.width / 1.8,
+                      child: Divider(
+                        color: Colors.black38,
+                      ),
+                    ),
+                    MenuButton(
+                        context,
+                        size,
+                        Icons.copyright,
+                        txtAppName +
+                            " v" +
+                            txtVersion +
+                            " " +
+                            DateTime.now().year.toString(),
+                        "App", () {
+                      logout(context);
+                    })
+
+                    // MenuButton(
+                    //     context,
+                    //     size,
+                    //     Icons.copyright,
+                    //     DateTime.now().year.toString() + " 27Plug v1",
+                    //     "copyright",
+                    //     () {}),
+                  ],
+                ),
         ),
       ),
     ),
@@ -324,16 +328,16 @@ Container MenuOption(context, size, IconData icon, String text, String page,
     String currentPage) {
   return Container(
     decoration: BoxDecoration(
-        color: currentPage == "/${page}" ? kPrimaryLightColor : Colors.white,
+        color: currentPage == "/${page}" ? kPrimaryColor : kBackgroundColor,
         borderRadius: BorderRadius.all(Radius.circular(8))),
     height: size.height / 20,
     width: size.width / 1.8,
     alignment: Alignment.topLeft,
     // width: size.width / 1.8,
     child: FlatButton.icon(
-        // minWidth: size.width / 1.8,
+        // minWidth: size.width,
         onPressed: () {
-          Navigator.pop(context);
+          // Navigator.pop(context);
           Navigator.pushNamed(context, "/${page}");
           // Navigator.push(context,
           //     MaterialPageRoute(builder: (context) {
@@ -342,7 +346,34 @@ Container MenuOption(context, size, IconData icon, String text, String page,
         },
         icon: Icon(
           icon,
-          color: currentPage == "/${page}" ? kPrimaryColor : kPrimaryLightColor,
+          color: currentPage == "/${page}" ? kActiveColor : kPrimaryColor,
+          size: 22.0,
+        ),
+        label: Text(
+          text,
+          style: TextStyle(
+              color: currentPage == "/${page}" ? kActiveColor : kPrimaryColor,
+              fontSize: 15.0),
+        )),
+  );
+}
+
+Container MenuButton(
+    context, size, IconData icon, String text, String currentPage, onClick) {
+  return Container(
+    decoration: BoxDecoration(
+        color: kBackgroundColor,
+        borderRadius: BorderRadius.all(Radius.circular(8))),
+    height: size.height / 20,
+    width: size.width / 1.8,
+    alignment: Alignment.topLeft,
+    // width: size.width / 1.8,
+    child: FlatButton.icon(
+        // minWidth: size.width / 1.8,
+        onPressed: onClick,
+        icon: Icon(
+          icon,
+          color: kPrimaryColor,
           size: 22.0,
         ),
         label: Text(

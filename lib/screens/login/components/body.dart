@@ -1,5 +1,7 @@
+import 'package:africanplug/config/base_functions.dart';
 import 'package:africanplug/config/config.dart';
 import 'package:africanplug/controller/login_controller.dart';
+import 'package:africanplug/models/location.dart';
 import 'package:africanplug/screens/home/home.dart';
 import 'package:africanplug/screens/login/components/background.dart';
 import 'package:africanplug/screens/login/components/validation.dart';
@@ -35,9 +37,9 @@ class _LoginBodyState extends State<LoginBody> {
   TextStyle _inputStyle = TextStyle(fontFamily: 'Montserrat', fontSize: 20.0);
   bool _autoValidate = false;
 
-  Future<String?> _loginUser(email, password) {
+  Future<String?> _loginUser(email, password, location) {
     LoginController ctrl = new LoginController();
-    return ctrl.authLoginUser(email, password);
+    return ctrl.authLoginUser(email, password, location);
   }
 
   bool _loading = false;
@@ -113,8 +115,9 @@ class _LoginBodyState extends State<LoginBody> {
                           _loading = true;
                         });
                         if (_formKey.currentState!.validate()) {
+                          Loc location = await currentLocation();
                           String? response =
-                              await _loginUser(_email, _password);
+                              await _loginUser(_email, _password, location);
 
                           if (response.toString() == 'success') {
                             // setState(() {

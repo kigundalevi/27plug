@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:africanplug/config/config.dart';
+import 'package:africanplug/models/location.dart';
 import 'package:africanplug/op/mutations.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:africanplug/config/graphql_config.dart';
@@ -28,8 +29,19 @@ class LoginController {
     return null;
   }
 
-  Future<String?> authLoginUser(String email, String password) async {
-    var data = {'email': email, 'password': password};
+  Future<String?> authLoginUser(
+      String email, String password, Loc location) async {
+    var data = {
+      'email': email,
+      'password': password,
+      'location': {
+        'ip': location.ip,
+        'lat': location.lat,
+        'lng': location.lng,
+        'name': location.name,
+        'live': location.live
+      }
+    };
 
     http.Response response = await http.post(
       Uri.parse('https://plug27.herokuapp.com/login'),

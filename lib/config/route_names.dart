@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
+const String landingRoute = '/landing';
 const String loginRegisterRoute = '/loginRegister';
 const String homeRoute = '/home';
 const String uploadRoute = '/upload';
