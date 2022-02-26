@@ -1,5 +1,7 @@
+import 'package:africanplug/config/base_functions.dart';
 import 'package:africanplug/config/config.dart';
 import 'package:africanplug/config/graphql_config.dart';
+import 'package:africanplug/models/user.dart';
 import 'package:africanplug/screens/login/login_signup.dart';
 import 'package:africanplug/screens/upload/upload.dart';
 import 'package:africanplug/screens/videos/videos_screen.dart';
@@ -8,8 +10,8 @@ import 'package:flutter_icons/flutter_icons.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 
 Widget MainMenu(
-    context, current_page, slideAnimation, menuScaleAnimation, size, userid) {
-  print(current_page);
+    context, current_page, slideAnimation, menuScaleAnimation, size) {
+  User user = currentUser();
   return SlideTransition(
     position: slideAnimation,
     child: ScaleTransition(
@@ -18,7 +20,7 @@ Widget MainMenu(
         padding: const EdgeInsets.only(left: 16.0, top: 50.0),
         child: Align(
           alignment: Alignment.centerLeft,
-          child: userid != null
+          child: user.id != 1
               ? Column(
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.start,
@@ -48,8 +50,8 @@ Widget MainMenu(
                                           image: new DecorationImage(
                                             //  https://pixinvent.com/materialize-material-design-admin-template/app-assets/images/user/12.jpg
                                             // https://media-exp1.licdn.com/dms/image/C5603AQGs80XgVG-nxg/profile-displayphoto-shrink_200_200/0?e=1586995200&v=beta&t=XQSVmNAVycY5cSWSkIWELb9NJ-Cwjx2smaH0nclMmpU
-                                            image: new AssetImage(
-                                                "assets/images/brian.jpg"),
+                                            image:
+                                                new NetworkImage(user.dp_url),
                                             fit: BoxFit.cover,
                                           ),
                                           borderRadius: new BorderRadius.all(
@@ -73,7 +75,7 @@ Widget MainMenu(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    "Brian Mutugi",
+                                    user.first_name + " " + user.last_name,
                                     style: TextStyle(
                                         fontSize: 18,
                                         fontWeight: FontWeight.bold),
@@ -82,7 +84,7 @@ Widget MainMenu(
                                     height: 5,
                                   ),
                                   Text(
-                                    "116 Subscribers",
+                                    user.user_type, //TODO:Put subscribers here
                                     style: TextStyle(fontSize: 14),
                                   ),
                                 ],

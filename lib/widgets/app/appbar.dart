@@ -1,9 +1,11 @@
+import 'package:africanplug/config/base_functions.dart';
 import 'package:africanplug/config/config.dart';
+import 'package:africanplug/models/user.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 
-Container appBar(
-    Size size, left_pressed, center_pressed, right_pressed, user_id) {
+Container appBar(Size size, left_pressed, center_pressed, right_pressed) {
+  User user = currentUser();
   return Container(
     color: Colors.transparent,
     height: size.height / 14,
@@ -30,7 +32,7 @@ Container appBar(
                   color: kActiveColor,
                   size: 25.0,
                 ),
-                Text("27Plug",
+                Text(txtAppName,
                     style: TextStyle(
                         color: kActiveColor,
                         fontSize: 19.0,
@@ -39,7 +41,7 @@ Container appBar(
             ),
           ),
         ),
-        user_id == null
+        user.id != 1
             ? IconButton(
                 icon: CircleAvatar(
                   backgroundImage: AssetImage(

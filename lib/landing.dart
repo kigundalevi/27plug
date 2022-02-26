@@ -1,5 +1,7 @@
+import 'package:africanplug/config/base_functions.dart';
 import 'package:africanplug/config/config.dart';
 import 'package:africanplug/config/graphql_config.dart';
+import 'package:africanplug/models/user.dart';
 import 'package:africanplug/screens/login/login.dart';
 import 'package:africanplug/widgets/app/appbar.dart';
 import 'package:africanplug/widgets/button/main_upload_button.dart';
@@ -71,7 +73,7 @@ class _LandingScreenState extends State<LandingScreen>
         //     current_page != "/upload" ? MainUploadButton() : SizedBox(),
         body: Stack(children: [
           MainMenu(context, current_page, _slideAnimation, _menuScaleAnimation,
-              size, null),
+              size),
           AnimatedPositioned(
             duration: duration,
             top: 0,
@@ -182,8 +184,7 @@ class _LandingScreenState extends State<LandingScreen>
                                         () {
                                           Navigator.pushNamed(
                                               context, "/loginRegister");
-                                        },
-                                        current_page),
+                                        }),
                                     videoSelected
                                         ? Container(
                                             height: 290,

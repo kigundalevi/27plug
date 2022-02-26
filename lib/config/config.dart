@@ -6,9 +6,9 @@ import 'package:flutter/material.dart';
 // const BACKEND_URL = "https://plug27.herokuapp.com/graphql";
 // const LOGIN_URL = "https://plug27.herokuapp.com/login";
 
-const REGISTER_URL = "https://brianmutugi.pythonanywhere.com/graphq";
-const BACKEND_URL = "https://brianmutugi.pythonanywhere.com/graphql";
-const LOGIN_URL = "https://brianmutugi.pythonanywhere.com/login";
+const REGISTER_URL = "https://plug27.herokuapp.com/graphq";
+const BACKEND_URL = "https://plug27.herokuapp.com/graphql";
+const LOGIN_URL = "https://plug27.herokuapp.com/login";
 
 // https://brianmutugi.pythonanywhere.com/graphql
 // COLORS
@@ -26,7 +26,7 @@ const kActiveColor = Color(0xFF03DAC5);
 const kScaffoldColor = Color(0xFF1b1e58);
 
 // TEXT
-const txtAppName = "27PLUG";
+const txtAppName = "27Plug";
 const txtVersion = "1";
 const txtIntro = "WELCOME TO 27 PLUG";
 const txtLogin = "LOGIN";
@@ -58,3 +58,5 @@ class Palette {
   static const Color googleColor = Color(0xFFDE4B39);
   static const Color backgroundColor = Color(0xFFECF3F9);
 }
+/// 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 ///
+/// git clone https://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@github.com/MutugiBrian/27Plug-Apis.git

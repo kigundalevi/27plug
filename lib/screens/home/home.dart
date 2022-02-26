@@ -58,7 +58,7 @@ class _AppHomeState extends State<AppHome> with TickerProviderStateMixin {
         floatingActionButton: MainUploadButton(),
         body: Stack(children: [
           MainMenu(context, current_page, _slideAnimation, _menuScaleAnimation,
-              size, 1),
+              size),
           AnimatedPositioned(
             duration: duration,
             top: 0,

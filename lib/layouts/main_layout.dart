@@ -62,7 +62,7 @@ class _MainLayoutState extends State<MainLayout> with TickerProviderStateMixin {
         height: size.height,
         child: Stack(children: [
           MainMenu(context, current_page, _slideAnimation, _menuScaleAnimation,
-              size, 1),
+              size),
           AnimatedPositioned(
             duration: duration,
             top: 0,
@@ -104,7 +104,7 @@ class _MainLayoutState extends State<MainLayout> with TickerProviderStateMixin {
 
                         isCollapsed = !isCollapsed;
                       });
-                    }, () {}, () {}, 1)
+                    }, () {}, () {})
                   ]),
                 ),
               ),

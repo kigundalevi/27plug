@@ -206,7 +206,7 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                                     fontWeight: FontWeight.bold,
                                     color: !isSignupScreen
                                         ? Palette.activeColor
-                                        : Palette.textColor1),
+                                        : kBlack.withOpacity(0.4)),
                               ),
                               if (!isSignupScreen)
                                 Container(
@@ -233,7 +233,7 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                                     fontWeight: FontWeight.bold,
                                     color: isSignupScreen
                                         ? Palette.activeColor
-                                        : Palette.textColor1),
+                                        : kBlack.withOpacity(0.4)),
                               ),
                               if (isSignupScreen)
                                 Container(

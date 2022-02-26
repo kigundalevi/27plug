@@ -1,3 +1,4 @@
+import 'package:africanplug/config/base_functions.dart';
 import 'package:africanplug/config/config.dart';
 import 'package:africanplug/config/graphql_config.dart';
 import 'package:africanplug/screens/login/login.dart';
@@ -66,7 +67,7 @@ class _VideosScreenState extends State<VideosScreen>
             current_page != "/upload" ? MainUploadButton() : SizedBox(),
         body: Stack(children: [
           MainMenu(context, current_page, _slideAnimation, _menuScaleAnimation,
-              size, 1),
+              size),
           AnimatedPositioned(
             duration: duration,
             top: 0,
@@ -170,7 +171,7 @@ class _VideosScreenState extends State<VideosScreen>
 
                                         isCollapsed = !isCollapsed;
                                       });
-                                    }, () {}, () {}, 1),
+                                    }, () {}, () {}),
                                     Container(
                                       height: 290,
                                       // color: Colors.red,

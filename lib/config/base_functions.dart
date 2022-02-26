@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:africanplug/main.dart';
 import 'package:africanplug/models/location.dart';
+import 'package:africanplug/models/user.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +11,27 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
+
+User currentUser() {
+  var user = appBox.get("user");
+  if (user == null) {
+    return User(
+        id: 1,
+        first_name: "27Plug",
+        last_name: "Guest",
+        email: "guest@27plug.app");
+  } else {
+    var user = appBox.get("user");
+    return User(
+        id: user["id"],
+        first_name: user["first_name"],
+        last_name: user["last_name"],
+        email: user["email"],
+        logged_in: true,
+        user_type: user["user_type"]["name"],
+        user_type_id: user["user_type"]["id"]);
+  }
+}
 
 Future<bool> checkOnline() async {
   var connectivityResult = await (Connectivity().checkConnectivity());

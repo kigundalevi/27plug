@@ -1,7 +1,9 @@
 import 'dart:convert';
 
 import 'package:africanplug/config/config.dart';
+import 'package:africanplug/main.dart';
 import 'package:africanplug/models/location.dart';
+import 'package:africanplug/models/user.dart';
 import 'package:africanplug/op/mutations.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:africanplug/config/graphql_config.dart';
@@ -44,18 +46,28 @@ class LoginController {
     };
 
     http.Response response = await http.post(
-      Uri.parse('https://plug27.herokuapp.com/login'),
+      Uri.parse(LOGIN_URL),
       body: json.encode(data),
       headers: {"Content-Type": "application/json"},
     );
     Map<String, dynamic> res =
         jsonDecode(response.body); // import 'dart:convert';
-    print(res['access_token']);
+    print(res['token']);
 
-    String token = res['access_token'];
+    String token = res['token'];
 
     if (token != null) {
       GraphQLConfiguration.setToken(token);
+      res['user']['token'] = token;
+      User loggedin_user = User(
+          id: res['user']['id'],
+          first_name: res['user']['first_name'],
+          last_name: res['user']['last_name'],
+          email: res['user']['email'],
+          user_type: res['user']['user_type']['name'],
+          user_type_id: res['user']['user_type']['id'],
+          token: token);
+      appBox.put('user', res['user']);
       return 'success';
     } else {
       return 'Wrong email or password';

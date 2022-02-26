@@ -41,6 +41,21 @@ class Mutations {
     """;
   }
 
+  String addTopic(String name, int user_id, String ip, String lat, String lng,
+      String location_name, bool location_live) {
+    return """
+      mutation{
+        addTopic(name:"$name",userId:$user_id,ip:"$ip",lat:"$lat",lng:"$lng",locationName:"$location_name",locationLive:$location_live){
+          topic{
+            id,
+            name,
+            description,
+          }
+        }
+      }
+    """;
+  }
+
   String uploadVideo(
       File selectedVideo,
       // String selectedVideoName,

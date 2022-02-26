@@ -8,4 +8,16 @@ class Queries {
     return """
       """;
   }
+
+  String getAllTags() {
+    return """
+    query{
+      listTopic(sortField:"created_at",order:"desc"){
+        id,
+        name,
+        description
+      }
+    }
+    """;
+  }
 }

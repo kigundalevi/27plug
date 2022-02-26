@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:africanplug/config/config.dart';
 import 'package:africanplug/models/location.dart';
 import 'package:africanplug/op/mutations.dart';
 import 'package:dio/dio.dart';
@@ -26,6 +27,7 @@ class UploadVideoController {
   }
 
   Future<String?> userUploadVideo(
+      List<String> tags,
       PlatformFile selectedVideo,
       PlatformFile selectedThumbnail,
       String title,
@@ -104,11 +106,19 @@ class UploadVideoController {
         "thumbnail_file": await MultipartFile.fromFile(selectedThumbnail.path!,
             filename: selectedThumbnail.path!.split('/').last),
       });
-      var response = await dio
-          .post("https://brianmutugi.pythonanywhere.com/graphql", data: data);
+      var response = await dio.post(BACKEND_URL, data: data);
 
       if (response.statusCode == 200) {
-        print(response.toString());
+        print(response);
+
+        // int video_id = response['video']['id'];
+        // tags.forEach((tag) {
+        //   _allTags.add(VideoTag(
+        //       id: int.parse(tag['id']),
+        //       name: tag['name'],
+        //       description: tag['description']));
+        // });
+
         return 'success';
       } else {
         print(response.data.toString());

@@ -3,9 +3,11 @@ import 'dart:ui';
 import 'package:africanplug/config/base_functions.dart';
 import 'package:africanplug/config/config.dart';
 import 'package:africanplug/config/graphql_config.dart';
+import 'package:africanplug/controller/add_topic_controller.dart';
 import 'package:africanplug/controller/upload_video_controller.dart';
 import 'package:africanplug/models/location.dart';
 import 'package:africanplug/models/tag.dart';
+import 'package:africanplug/op/queries.dart';
 import 'package:africanplug/player/upload_player.dart';
 import 'package:africanplug/screens/login/login.dart';
 import 'package:africanplug/screens/upload/validation.dart';
@@ -25,6 +27,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:flutter_tagging/flutter_tagging.dart';
+import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:video_player/video_player.dart';
 
 class UploadVideoPage extends StatefulWidget {
@@ -57,9 +60,11 @@ class _UploadVideoPageState extends State<UploadVideoPage>
   String _selectedVideoTagsJson = 'No tags';
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
-  List<VideoTag> _selectedVideoTags = [];
+  // List<VideoTag> _selectedVideoTags = [];
 
   List<VideoTag> _tags = [];
+  List<String> _selectedTags = [];
+  late final List<VideoTag> _selectedVideoTags;
 
   TextEditingController _searchTextEditingController =
       new TextEditingController();
@@ -105,10 +110,13 @@ class _UploadVideoPageState extends State<UploadVideoPage>
     selectedvideotags = [];
     videotagerror = true;
     selectingVideo = false;
+
+    _selectedVideoTags = [];
   }
 
   @override
   void dispose() {
+    selectedvideotags.clear();
     super.dispose();
     _searchTextEditingController.dispose();
   }
@@ -171,7 +179,7 @@ class _UploadVideoPageState extends State<UploadVideoPage>
             current_page != "/upload" ? MainUploadButton() : SizedBox(),
         body: Stack(children: [
           MainMenu(context, current_page, _slideAnimation, _menuScaleAnimation,
-              size, 1),
+              size),
           AnimatedPositioned(
             duration: duration,
             top: 0,
@@ -227,8 +235,7 @@ class _UploadVideoPageState extends State<UploadVideoPage>
                                 () {
                                   Navigator.pushNamed(
                                       context, "/loginRegister");
-                                },
-                                null),
+                                }),
                             selectedVideo != null
                                 ? Column(
                                     children: [
@@ -609,7 +616,7 @@ class _UploadVideoPageState extends State<UploadVideoPage>
                                                     BorderRadius.circular(
                                                         10.0)),
                                             child: FlutterTagging<VideoTag>(
-                                              initialItems: _tagsToSelect,
+                                              initialItems: _selectedVideoTags,
                                               textFieldConfiguration:
                                                   TextFieldConfiguration(
                                                 cursorColor: kPrimaryColor,
@@ -624,17 +631,72 @@ class _UploadVideoPageState extends State<UploadVideoPage>
                                                   labelText: 'Video tags',
                                                 ),
                                               ),
-                                              findSuggestions: TagSearchService
-                                                  .findVideoTags,
+                                              findSuggestions: findVideoTags,
                                               additionCallback: (value) {
+                                                if (value is String &&
+                                                    value.length > 0) {
+                                                  _selectedTags.add(value);
+                                                }
+
                                                 return VideoTag(
                                                     id: 0,
                                                     name: value,
                                                     description: "");
                                               },
-                                              onAdded: (videoTag) {
+                                              onAdded: (videoTag) async {
                                                 // api calls here, triggered when add to tag button is pressed
-                                                return videoTag;
+                                                bool isOnline =
+                                                    await checkOnline();
+                                                if (!isOnline) {
+                                                  Flushbar(
+                                                    icon: Icon(
+                                                      Icons.info_outline,
+                                                      color: Colors.white,
+                                                    ),
+                                                    backgroundColor:
+                                                        Colors.redAccent,
+                                                    title: "Error",
+                                                    message: "No Internet",
+                                                    duration:
+                                                        Duration(seconds: 2),
+                                                  )..show(context);
+                                                  return VideoTag(
+                                                      id: 0,
+                                                      name: "",
+                                                      description: "");
+                                                } else {
+                                                  Loc loc =
+                                                      await currentLocation();
+                                                  AddTopicController ctrl =
+                                                      new AddTopicController();
+                                                  var response =
+                                                      await ctrl.authAddTopic(
+                                                          videoTag.name,
+                                                          currentUser().id,
+                                                          loc);
+
+                                                  if (response == null) {
+                                                    Flushbar(
+                                                      icon: Icon(
+                                                        Icons.info_outline,
+                                                        color: Colors.white,
+                                                      ),
+                                                      backgroundColor:
+                                                          Colors.redAccent,
+                                                      title: "Error",
+                                                      message:
+                                                          "Could not add tag, try again later",
+                                                      duration:
+                                                          Duration(seconds: 2),
+                                                    )..show(context);
+                                                    return VideoTag(
+                                                        id: 0,
+                                                        name: "",
+                                                        description: "");
+                                                  } else {
+                                                    return response;
+                                                  }
+                                                }
                                               },
                                               configureChip: configureChip,
                                               configureSuggestion: (tag) {
@@ -664,6 +726,68 @@ class _UploadVideoPageState extends State<UploadVideoPage>
                                                 );
                                               },
                                             ),
+                                            // child: FlutterTagging<VideoTag>(
+                                            //     initialItems:
+                                            //         _selectedVideoTags,
+                                            //     textFieldConfiguration:
+                                            //         TextFieldConfiguration(
+                                            //       decoration: InputDecoration(
+                                            //         border: InputBorder.none,
+                                            //         filled: true,
+                                            //         fillColor: Colors.green
+                                            //             .withAlpha(30),
+                                            //         hintText: 'Search Tags',
+                                            //         labelText: 'Select Tags',
+                                            //       ),
+                                            //     ),
+                                            //     findSuggestions:
+                                            //         TagSearchService
+                                            //             .findVideoTags,
+                                            //     additionCallback: (value) {
+                                            //       return VideoTag(
+                                            //           name: value,
+                                            //           id: 0,
+                                            //           description: "");
+                                            //     },
+                                            //     onAdded: (language) {
+                                            //       // api calls here, triggered when add to tag button is pressed
+                                            //       return language;
+                                            //     },
+                                            //     configureSuggestion: (tag) {
+                                            //       return SuggestionConfiguration(
+                                            //         title: Text(tag.name),
+                                            //         additionWidget: Chip(
+                                            //           avatar: Icon(
+                                            //             Icons.add_circle,
+                                            //             color: Colors.white,
+                                            //           ),
+                                            //           label:
+                                            //               Text('Add New Tag'),
+                                            //           labelStyle: TextStyle(
+                                            //             color: Colors.white,
+                                            //             fontSize: 14.0,
+                                            //             fontWeight:
+                                            //                 FontWeight.w300,
+                                            //           ),
+                                            //           backgroundColor:
+                                            //               Colors.green,
+                                            //         ),
+                                            //       );
+                                            //     },
+                                            //     configureChip: (lang) {
+                                            //       return ChipConfiguration(
+                                            //         label: Text(lang.name),
+                                            //         backgroundColor:
+                                            //             Colors.green,
+                                            //         labelStyle: TextStyle(
+                                            //             color: Colors.white),
+                                            //         deleteIconColor:
+                                            //             Colors.white,
+                                            //       );
+                                            //     },
+                                            //     onChanged: () {
+                                            //       setState(() {});
+                                            //     })
                                           ),
                                           SizedBox(height: size.height * 0.03),
                                           !_loading
@@ -745,6 +869,7 @@ class _UploadVideoPageState extends State<UploadVideoPage>
                                                         String?
                                                             upload_response =
                                                             await ctrl.userUploadVideo(
+                                                                _selectedTags,
                                                                 selectedVideo!,
                                                                 _selectedThumbnail!,
                                                                 _title!,
@@ -1092,21 +1217,120 @@ class _UploadVideoPageState extends State<UploadVideoPage>
   }
 }
 
-class TagSearchService {
-  var location_suggestions = [];
+Future<List<VideoTag>> findVideoTags(String query) async {
+  List<VideoTag> _allTags = [];
 
-  static Future<List<VideoTag>> findVideoTags(String query) async {
-    await Future.delayed(Duration(milliseconds: 500), null);
-    final List<VideoTag> _allTags = [
-      VideoTag(id: 1, name: 'Entertainment', description: ""),
-      VideoTag(id: 2, name: 'Politics', description: ""),
-      VideoTag(id: 3, name: 'Business', description: ""),
-    ];
-    return _allTags
-        .where((lang) => lang.name.toLowerCase().contains(query.toLowerCase()))
-        .toList();
+  GraphQLConfiguration graphQLConfig = new GraphQLConfiguration();
+  // GraphQLClient _client = GraphQLClient(
+  //   cache: GraphQLCache(store: HiveStore()),
+  //   link: HttpLink("https://plug27.herokuapp.com/graphq"),
+  // );
+  // ;
+  Queries queries = Queries();
+  QueryResult result = await GraphQLClient(
+    cache: GraphQLCache(),
+    link: HttpLink("https://plug27.herokuapp.com/graphq"),
+  ).query(QueryOptions(document: gql("""
+    query{
+          listTopic(sortField:"created_at",order:"desc"){
+            id,
+            name,
+            description
+          }
+        }
+""")));
+
+  print("""
+    query{
+          listTopic(sortField:"created_at",order:"desc"){
+            id,
+            name,
+            description
+          }
+        }
+""");
+  try {
+    print(result);
+    if (result.hasException) {
+      print(result);
+      try {
+        OperationException? registerexception = result.exception;
+        List<GraphQLError>? errors = registerexception?.graphqlErrors;
+        String main_error = errors![0].message;
+        return [];
+      } catch (error) {
+        return [];
+      }
+    } else {
+      var tags = result.data?['listTopic'];
+      tags.forEach((tag) {
+        _allTags.add(VideoTag(
+            id: int.parse(tag['id']),
+            name: tag['name'],
+            description: tag['description']));
+      });
+
+      return _allTags
+          .where((tag) => tag.name.toLowerCase().contains(query.toLowerCase()))
+          .toList();
+    }
+  } catch (e) {
+    print(e);
+    return [];
   }
+}
 
+class TagSearchService {
+  static Future<List<VideoTag>> findVideoTags(String query) async {
+    List<VideoTag> _allTags = [];
+
+    GraphQLConfiguration graphQLConfig = new GraphQLConfiguration();
+    GraphQLClient _client = GraphQLClient(
+      cache: GraphQLCache(store: HiveStore()),
+      link: HttpLink(REGISTER_URL),
+    );
+    ;
+    Queries queries = Queries();
+    print(_client.link);
+    QueryResult result = await _client.query(QueryOptions(document: gql("""
+    query{
+          listTopic(sortField:"created_at",order:"desc"){
+            id,
+            name,
+            description
+          }
+        }
+""")));
+    try {
+      if (result.hasException) {
+        print(result);
+        try {
+          OperationException? registerexception = result.exception;
+          List<GraphQLError>? errors = registerexception?.graphqlErrors;
+          String main_error = errors![0].message;
+          return [];
+        } catch (error) {
+          return [];
+        }
+      } else {
+        var tags = result.data?['listTopic'];
+        tags.forEach((tag) {
+          _allTags.add(VideoTag(
+              id: int.parse(tag['id']),
+              name: tag['name'],
+              description: tag['description']));
+        });
+
+        return _allTags
+            .where(
+                (tag) => tag.name.toLowerCase().contains(query.toLowerCase()))
+            .toList();
+      }
+    } catch (e) {
+      print(e);
+      return [];
+    }
+  }
   // Future<List<VideoTag>> getVideoTagSuggestions(String query) async {
   //   List locations = await _getVideoTags();
   //   List<VideoTag> tagList = <VideoTag>[];

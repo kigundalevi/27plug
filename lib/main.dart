@@ -14,9 +14,11 @@ import 'package:hive/hive.dart';
 import 'package:flutter/services.dart';
 
 GraphQLConfiguration graphQLConfiguration = GraphQLConfiguration();
+late Box appBox;
 
 void main() async {
   await initHiveForFlutter();
+  appBox = await Hive.openBox('appBox');
   runApp(
     GraphQLProvider(
       client: graphQLConfiguration.client,
@@ -67,7 +69,8 @@ class _MyAppState extends State<MyApp> {
           routes: <String, WidgetBuilder>{
             landingRoute: (BuildContext context) => LandingScreen(),
             loginRegisterRoute: (BuildContext context) => LoginSignupScreen(),
-            homeRoute: (BuildContext context) => VideosScreen(),
+            // homeRoute: (BuildContext context) => VideosScreen(),
+            homeRoute: (BuildContext context) => LandingScreen(),
             uploadRoute: (BuildContext context) => UploadVideoPage()
           },
           // WelcomeScreen(
