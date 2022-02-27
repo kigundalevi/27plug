@@ -44,8 +44,8 @@ Container appBar(Size size, left_pressed, center_pressed, right_pressed) {
         user.id != 1
             ? IconButton(
                 icon: CircleAvatar(
-                  backgroundImage: AssetImage(
-                    'assets/images/brian.jpg',
+                  backgroundImage: NetworkImage(
+                    user.dp_url,
                   ),
                   backgroundColor: Colors.black26,
                   foregroundColor: Colors.black26,

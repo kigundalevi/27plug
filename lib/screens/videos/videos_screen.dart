@@ -31,6 +31,12 @@ class _VideosScreenState extends State<VideosScreen>
   bool isCollapsed = true;
   bool collapseFromLeft = true;
 
+  bool videoSelected = false;
+
+  bool trendingPage = true;
+  bool topPage = false;
+  bool latestPage = false;
+
   final Duration duration = const Duration(milliseconds: 300);
   late AnimationController _aController;
   late Animation<double> _scaleAnimation;
@@ -82,13 +88,15 @@ class _VideosScreenState extends State<VideosScreen>
               scale: _scaleAnimation,
               child: Material(
                 animationDuration: duration,
-                borderRadius: BorderRadius.all(Radius.circular(20)),
+                borderRadius: !isCollapsed
+                    ? BorderRadius.all(Radius.circular(20))
+                    : BorderRadius.all(Radius.circular(0)),
                 elevation: 8.0,
                 color: kScaffoldColor,
                 child: Padding(
                   padding: isCollapsed
-                      ? const EdgeInsets.only(bottom: 0.0)
-                      : const EdgeInsets.only(bottom: 15.0),
+                      ? const EdgeInsets.only(top: 0.0, bottom: 0.0)
+                      : const EdgeInsets.only(top: 15.0, bottom: 15.0),
                   child: SafeArea(
                       child: Stack(
                     children: [
@@ -171,17 +179,24 @@ class _VideosScreenState extends State<VideosScreen>
 
                                         isCollapsed = !isCollapsed;
                                       });
-                                    }, () {}, () {}),
-                                    Container(
-                                      height: 290,
-                                      // color: Colors.red,
-                                      child: Column(
-                                        children: [
-                                          playView(context),
-                                          controlView(context)
-                                        ],
-                                      ),
-                                    ),
+                                    }, () {
+                                      Navigator.pushNamed(context, "/home");
+                                    }, () {
+                                      // Navigator.pushNamed(
+                                      //     context, "/loginRegister");
+                                    }),
+                                    videoSelected
+                                        ? Container(
+                                            height: 290,
+                                            // color: Colors.red,
+                                            child: Column(
+                                              children: [
+                                                playView(context),
+                                                controlView(context)
+                                              ],
+                                            ),
+                                          )
+                                        : SizedBox(),
                                   ],
                                 ),
                                 !isPlaying
@@ -190,7 +205,7 @@ class _VideosScreenState extends State<VideosScreen>
                                           SizedBox(height: size.height / 14),
                                           Container(
                                             width: size.width,
-                                            height: 240,
+                                            height: videoSelected ? 240 : 0,
                                             color: Colors.black38,
                                             child: Padding(
                                               padding:
@@ -214,6 +229,8 @@ class _VideosScreenState extends State<VideosScreen>
                                                         'Govt\'s scorecard',
                                                         style: TextStyle(
                                                             color: kWhite,
+                                                            fontWeight:
+                                                                FontWeight.w700,
                                                             fontSize: 17),
                                                       ),
                                                       OutlinedButton(
@@ -331,107 +348,27 @@ class _VideosScreenState extends State<VideosScreen>
                                         ],
                                       )
                                     : SizedBox(),
-                                Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: 12),
-                                  child: DefaultTextStyle(
-                                    style: TextStyle(),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        SizedBox(
-                                          height: size.height * 0.44,
-                                        ),
-                                        Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              Row(
-                                                children: [
-                                                  Container(
-                                                    // width: size.width * 0.25,
-                                                    padding:
-                                                        EdgeInsets.symmetric(
-                                                            vertical: 5.0,
-                                                            horizontal: 10.0),
-                                                    decoration: BoxDecoration(
-                                                      color: kActiveColor,
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              15.0),
-                                                    ),
-                                                    child: Row(
-                                                      children: [
-                                                        Icon(
-                                                          FlutterIcons
-                                                              .fire_alt_faw5s,
-                                                          color: Colors.black,
-                                                          size: size.height *
-                                                              0.025,
-                                                        ),
-                                                        SizedBox(
-                                                          width: 6,
-                                                        ),
-                                                        Text(
-                                                          "Trending",
-                                                          style: TextStyle(
-                                                              color:
-                                                                  Colors.black),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                  SizedBox(
-                                                    width: 10.0,
-                                                  ),
-                                                  Container(
-                                                    padding:
-                                                        EdgeInsets.symmetric(
-                                                            vertical: 5.0,
-                                                            horizontal: 10.0),
-                                                    decoration: BoxDecoration(
-                                                      border: Border.all(
-                                                          color: kActiveColor),
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              15.0),
-                                                    ),
-                                                    child: Row(
-                                                      children: [
-                                                        Icon(
-                                                          FlutterIcons
-                                                              .list_faw5s,
-                                                          color: kActiveColor,
-                                                          size: size.height *
-                                                              0.025,
-                                                        ),
-                                                        SizedBox(
-                                                          width: 6,
-                                                        ),
-                                                        Text(
-                                                          "Top",
-                                                          style: TextStyle(
-                                                              color:
-                                                                  kActiveColor),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                              OutlinedButton(
-                                                child: Icon(Icons.more_horiz),
-                                                style: OutlinedButton.styleFrom(
-                                                  primary: kPrimaryLightColor,
-                                                  // side: BorderSide(
-                                                  //     width: 1, color: Colors.white),
-                                                  shape: CircleBorder(),
-                                                ),
-                                                onPressed: () {},
-                                              )
-                                            ]),
-                                        Container(
-                                          height: 325,
+                                DefaultTextStyle(
+                                  style: TextStyle(),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      videoSelected
+                                          ? SizedBox(
+                                              height: size.height * 0.42,
+                                            )
+                                          : SizedBox(
+                                              height: size.height / 15.5,
+                                            ),
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 8.0),
+                                        child: Container(
+                                          height: videoSelected
+                                              ? size.height / 2.23
+                                              : size.height -
+                                                  (size.height / 5.5),
                                           decoration: BoxDecoration(
                                               borderRadius:
                                                   BorderRadius.circular(
@@ -442,57 +379,11 @@ class _VideosScreenState extends State<VideosScreen>
                                             child: SingleChildScrollView(
                                               child: Column(
                                                 children: [
-                                                  SizedBox(height: 7),
+                                                  videoSelected
+                                                      ? SizedBox(height: 7)
+                                                      : SizedBox(),
                                                   for (var location
                                                       in locations)
-                                                    // ClipRRect(
-                                                    //   borderRadius:
-                                                    //       BorderRadius.circular(8.0),
-                                                    //   child: Stack(
-                                                    //     alignment:
-                                                    //         AlignmentDirectional.center,
-                                                    //     children: [
-                                                    //       ColorFiltered(
-                                                    //         colorFilter: ColorFilter.mode(
-                                                    //           Colors.black45,
-                                                    //           BlendMode.darken,
-                                                    //         ),
-                                                    //         child: Image.network(
-                                                    //           location.imageUrl,
-                                                    //           height: size.height * 0.35,
-                                                    //         ),
-                                                    //       ),
-                                                    //       Column(
-                                                    //         children: [
-                                                    //           Text(
-                                                    //             location.text,
-                                                    //             style: TextStyle(
-                                                    //               color: Colors.white,
-                                                    //               fontSize: 19,
-                                                    //               fontWeight:
-                                                    //                   FontWeight.w600,
-                                                    //             ),
-                                                    //           ),
-                                                    //           Text(location.timing),
-                                                    //           SizedBox(height: 40),
-                                                    //           Text(
-                                                    //             location.temperature
-                                                    //                     .toString() +
-                                                    //                 '°',
-                                                    //             style: TextStyle(
-                                                    //               color: Colors.white,
-                                                    //               fontSize: 40,
-                                                    //               fontWeight:
-                                                    //                   FontWeight.w600,
-                                                    //             ),
-                                                    //           ),
-                                                    //           SizedBox(height: 50),
-                                                    //           Text(location.weather),
-                                                    //         ],
-                                                    //       )
-                                                    //     ],
-                                                    //   ),
-                                                    // ),
                                                     Column(
                                                       children: [
                                                         ClipRRect(
@@ -500,149 +391,141 @@ class _VideosScreenState extends State<VideosScreen>
                                                               BorderRadius
                                                                   .circular(
                                                                       8.0),
-                                                          child: GestureDetector(
-                                                              onTap: () {
-                                                                onVideoTap(1,
-                                                                    "assets/videos/ruto.mp4");
-                                                              },
-                                                              child:
-                                                                  // VideoTile(
-                                                                  //   thumbnail_url:
-                                                                  //       "assets/images/ruto.jpg",
-                                                                  //   title:
-                                                                  //       "The government's scorecard",
-                                                                  //   channel_name: "Visanga Kenya",
-                                                                  //   channel_id: 4,
-                                                                  //   channel_image_url:
-                                                                  //       "assets/images/brian.jpg",
-                                                                  //   lapse: "2 days ago",
-                                                                  //   view_count: "21K",
-                                                                  // ),
-                                                                  Container(
-                                                                width:
-                                                                    size.width *
-                                                                        0.98,
-                                                                child: Material(
-                                                                  elevation:
-                                                                      8.0,
-                                                                  color: Colors
-                                                                      .grey
-                                                                      .shade900,
+                                                          child:
+                                                              GestureDetector(
+                                                                  onTap: () {
+                                                                    videoSelected =
+                                                                        true;
+                                                                    onVideoTap(
+                                                                        1,
+                                                                        "assets/videos/ruto.mp4");
+                                                                  },
                                                                   child:
                                                                       Container(
-                                                                    height:
-                                                                        size.height /
-                                                                            6.3,
-                                                                    padding: EdgeInsets.only(
-                                                                        left: 5,
-                                                                        right:
-                                                                            5),
-                                                                    // width: size.width,
+                                                                    width: !isCollapsed
+                                                                        ? size.width *
+                                                                            1
+                                                                        : size.width *
+                                                                            0.98,
                                                                     child:
-                                                                        Stack(
-                                                                      children: [
-                                                                        ColorFiltered(
-                                                                          colorFilter:
-                                                                              ColorFilter.mode(
-                                                                            Colors.black26,
-                                                                            BlendMode.darken,
-                                                                          ),
-                                                                          child:
-                                                                              Row(
-                                                                            children: [
-                                                                              Container(
-                                                                                width: size.width * 0.45,
-                                                                                height: size.height * 0.147,
-                                                                                child: Container(
-                                                                                  decoration: BoxDecoration(
-                                                                                    borderRadius: BorderRadius.circular(numCurveRadius),
-                                                                                    image: DecorationImage(image: AssetImage("assets/images/ruto.jpg"), fit: BoxFit.fill),
-                                                                                  ),
-                                                                                  alignment: Alignment.center,
-                                                                                ),
-                                                                              ),
-                                                                              SizedBox(
-                                                                                // width: 180,
-                                                                                height: 200,
-                                                                              )
-                                                                            ],
-                                                                          ),
-                                                                        ),
-                                                                        Row(
-                                                                          mainAxisSize:
-                                                                              MainAxisSize.max,
-                                                                          mainAxisAlignment:
-                                                                              MainAxisAlignment.spaceBetween,
+                                                                        Material(
+                                                                      elevation:
+                                                                          8.0,
+                                                                      color: Colors
+                                                                          .grey
+                                                                          .shade900,
+                                                                      child:
+                                                                          Container(
+                                                                        height: size.height /
+                                                                            6.3,
+                                                                        padding: EdgeInsets.only(
+                                                                            left:
+                                                                                5,
+                                                                            right:
+                                                                                5),
+                                                                        // width: size.width,
+                                                                        child:
+                                                                            Stack(
                                                                           children: [
-                                                                            Container(
-                                                                              width: size.width * 0.45,
-                                                                              height: size.height * 0.147,
-                                                                              child: Align(
-                                                                                alignment: Alignment.bottomCenter,
-                                                                                child: Container(
-                                                                                  height: size.width * 0.07,
-                                                                                  child: Stack(
-                                                                                    children: [
-                                                                                      Align(
-                                                                                        alignment: Alignment.bottomLeft,
-                                                                                        child: ThumbNailIconButton(
-                                                                                          icon_data: Icons.watch_later,
-                                                                                          press: () {},
-                                                                                        ),
-                                                                                      ),
-                                                                                      Align(
-                                                                                        alignment: Alignment.bottomRight,
-                                                                                        child: ThumbNailIconButton(
-                                                                                          icon_data: Icons.favorite,
-                                                                                          press: () {},
-                                                                                        ),
-                                                                                      )
-                                                                                    ],
-                                                                                  ),
-                                                                                ),
+                                                                            ColorFiltered(
+                                                                              colorFilter: ColorFilter.mode(
+                                                                                Colors.black26,
+                                                                                BlendMode.darken,
                                                                               ),
-                                                                            ),
-                                                                            Container(
-                                                                              height: size.height * 0.19,
-                                                                              width: size.width / 2.2,
-                                                                              padding: EdgeInsets.symmetric(horizontal: size.width * 0.02),
-                                                                              child: Column(
-                                                                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                                              child: Row(
                                                                                 children: [
-                                                                                  Text(
-                                                                                    "The government's scorecard",
-                                                                                    style: TextStyle(color: kWhite, fontSize: 18),
-                                                                                    textAlign: TextAlign.left,
+                                                                                  Container(
+                                                                                    width: size.width * 0.45,
+                                                                                    height: size.height * 0.147,
+                                                                                    child: Container(
+                                                                                      decoration: BoxDecoration(
+                                                                                        borderRadius: BorderRadius.circular(numCurveRadius),
+                                                                                        image: DecorationImage(image: AssetImage("assets/images/ruto.jpg"), fit: BoxFit.fill),
+                                                                                      ),
+                                                                                      alignment: Alignment.center,
+                                                                                    ),
                                                                                   ),
-                                                                                  // SizedBox(
-                                                                                  //   height: size.height * 0.01,
-                                                                                  // ),
-                                                                                  ImageChip(image_url: "assets/images/brian.jpg", text: "Visanga Kenya"),
-                                                                                  Row(
-                                                                                    mainAxisSize: MainAxisSize.max,
-                                                                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                                                    children: [
-                                                                                      VideoInfoChip(
-                                                                                        icon_data: Icons.remove_red_eye,
-                                                                                        text: "21K",
-                                                                                      ),
-                                                                                      VideoInfoChip(
-                                                                                        icon_data: Icons.access_time,
-                                                                                        text: "2 days ago",
-                                                                                      ),
-                                                                                    ],
+                                                                                  SizedBox(
+                                                                                    // width: 180,
+                                                                                    height: 200,
                                                                                   )
                                                                                 ],
                                                                               ),
                                                                             ),
+                                                                            Row(
+                                                                              mainAxisSize: MainAxisSize.max,
+                                                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                                              children: [
+                                                                                Container(
+                                                                                  width: size.width * 0.45,
+                                                                                  height: size.height * 0.147,
+                                                                                  child: Align(
+                                                                                    alignment: Alignment.bottomCenter,
+                                                                                    child: Container(
+                                                                                      height: size.width * 0.07,
+                                                                                      child: Stack(
+                                                                                        children: [
+                                                                                          Align(
+                                                                                            alignment: Alignment.bottomLeft,
+                                                                                            child: ThumbNailIconButton(
+                                                                                              icon_data: Icons.watch_later,
+                                                                                              press: () {},
+                                                                                            ),
+                                                                                          ),
+                                                                                          Align(
+                                                                                            alignment: Alignment.bottomRight,
+                                                                                            child: ThumbNailIconButton(
+                                                                                              icon_data: Icons.favorite,
+                                                                                              press: () {},
+                                                                                            ),
+                                                                                          )
+                                                                                        ],
+                                                                                      ),
+                                                                                    ),
+                                                                                  ),
+                                                                                ),
+                                                                                Container(
+                                                                                  // height: size.height * 0.19,
+                                                                                  width: !isCollapsed ? size.width / 4 : size.width / 2.2,
+                                                                                  color: Colors.black26,
+                                                                                  padding: EdgeInsets.symmetric(horizontal: size.width * 0.02),
+                                                                                  child: Column(
+                                                                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                                                    children: [
+                                                                                      Text(
+                                                                                        "The government's scorecard",
+                                                                                        style: TextStyle(color: kWhite, fontSize: 18, fontWeight: FontWeight.w300),
+                                                                                        textAlign: TextAlign.left,
+                                                                                      ),
+                                                                                      // SizedBox(
+                                                                                      //   height: size.height * 0.01,
+                                                                                      // ),
+                                                                                      ImageChip(image_url: "assets/images/brian.jpg", text: "Visanga Kenya"),
+                                                                                      Row(
+                                                                                        mainAxisSize: MainAxisSize.max,
+                                                                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                                                        children: [
+                                                                                          VideoInfoChip(
+                                                                                            icon_data: Icons.remove_red_eye,
+                                                                                            text: "21K",
+                                                                                          ),
+                                                                                          VideoInfoChip(
+                                                                                            icon_data: Icons.access_time,
+                                                                                            text: "2 days ago",
+                                                                                          ),
+                                                                                        ],
+                                                                                      )
+                                                                                    ],
+                                                                                  ),
+                                                                                ),
+                                                                              ],
+                                                                            )
                                                                           ],
-                                                                        )
-                                                                      ],
+                                                                        ),
+                                                                      ),
                                                                     ),
-                                                                  ),
-                                                                ),
-                                                              )),
+                                                                  )),
                                                         ),
                                                         SizedBox(
                                                           height: 10.0,
@@ -654,8 +537,193 @@ class _VideosScreenState extends State<VideosScreen>
                                             ),
                                           ),
                                         ),
-                                      ],
-                                    ),
+                                      ),
+                                      Container(
+                                        height: !isCollapsed
+                                            ? size.height / 17
+                                            : size.height / 13,
+                                        width: size.width,
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.max,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceEvenly,
+                                                mainAxisSize: MainAxisSize.max,
+                                                children: [
+                                                  InkWell(
+                                                    onTap: () {
+                                                      setState(() {
+                                                        videoSelected = false;
+                                                        _controller.pause();
+                                                        topPage = false;
+                                                        latestPage = false;
+                                                        trendingPage = true;
+                                                      });
+                                                    },
+                                                    child: Container(
+                                                      // width: size.width * 0.25,
+                                                      padding:
+                                                          EdgeInsets.symmetric(
+                                                              vertical: 5.0,
+                                                              horizontal: 10.0),
+                                                      decoration: BoxDecoration(
+                                                        color: trendingPage
+                                                            ? kActiveColor
+                                                            : kPrimaryColor,
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(15.0),
+                                                      ),
+                                                      child: Row(
+                                                        children: [
+                                                          Icon(
+                                                            FlutterIcons
+                                                                .fire_alt_faw5s,
+                                                            color: trendingPage
+                                                                ? kBlack
+                                                                : kActiveColor,
+                                                            size: size.height *
+                                                                0.025,
+                                                          ),
+                                                          SizedBox(
+                                                            width: 6,
+                                                          ),
+                                                          Text(
+                                                            "Trending",
+                                                            style: TextStyle(
+                                                                color: trendingPage
+                                                                    ? kBlack
+                                                                    : kActiveColor),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  InkWell(
+                                                    onTap: () {
+                                                      setState(() {
+                                                        videoSelected = false;
+                                                        _controller.pause();
+                                                        latestPage = false;
+                                                        trendingPage = false;
+                                                        topPage = true;
+                                                      });
+                                                    },
+                                                    child: Container(
+                                                      padding:
+                                                          EdgeInsets.symmetric(
+                                                              vertical: 5.0,
+                                                              horizontal: 10.0),
+                                                      decoration: BoxDecoration(
+                                                        color: topPage
+                                                            ? kActiveColor
+                                                            : kPrimaryColor,
+                                                        border: Border.all(
+                                                            color: topPage
+                                                                ? kBlack
+                                                                : kActiveColor),
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(15.0),
+                                                      ),
+                                                      child: Row(
+                                                        children: [
+                                                          Icon(
+                                                            FlutterIcons
+                                                                .timeline_mco,
+                                                            color: topPage
+                                                                ? kBlack
+                                                                : kActiveColor,
+                                                            size: size.height *
+                                                                0.025,
+                                                          ),
+                                                          SizedBox(
+                                                            width: 6,
+                                                          ),
+                                                          Text(
+                                                            "Top",
+                                                            style: TextStyle(
+                                                                color: topPage
+                                                                    ? kBlack
+                                                                    : kActiveColor),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  InkWell(
+                                                    onTap: () {
+                                                      setState(() {
+                                                        videoSelected = false;
+                                                        _controller.pause();
+                                                        trendingPage = false;
+                                                        topPage = false;
+                                                        latestPage = true;
+                                                      });
+                                                    },
+                                                    child: Container(
+                                                      padding:
+                                                          EdgeInsets.symmetric(
+                                                              vertical: 5.0,
+                                                              horizontal: 10.0),
+                                                      decoration: BoxDecoration(
+                                                        color: latestPage
+                                                            ? kActiveColor
+                                                            : kPrimaryColor,
+                                                        border: Border.all(
+                                                            color: latestPage
+                                                                ? kBlack
+                                                                : kActiveColor),
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(15.0),
+                                                      ),
+                                                      child: Row(
+                                                        children: [
+                                                          Icon(
+                                                            FlutterIcons
+                                                                .time_slot_ent,
+                                                            color: latestPage
+                                                                ? kBlack
+                                                                : kActiveColor,
+                                                            size: size.height *
+                                                                0.025,
+                                                          ),
+                                                          SizedBox(
+                                                            width: 6,
+                                                          ),
+                                                          Text(
+                                                            "Latest",
+                                                            style: TextStyle(
+                                                                color: latestPage
+                                                                    ? kBlack
+                                                                    : kActiveColor),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  SizedBox(
+                                                      width: size.width / 5)
+                                                  // OutlinedButton(
+                                                  //   child: Icon(Icons.more_horiz),
+                                                  //   style: OutlinedButton.styleFrom(
+                                                  //     primary: kPrimaryLightColor,
+                                                  //     // side: BorderSide(
+                                                  //     //     width: 1, color: Colors.white),
+                                                  //     shape: CircleBorder(),
+                                                  //   ),
+                                                  //   onPressed: () {},
+                                                  // )
+                                                ]),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ],

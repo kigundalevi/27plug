@@ -32,6 +32,7 @@ class UploadVideoController {
       PlatformFile selectedThumbnail,
       String title,
       String description,
+      int duration,
       String ip,
       String lat,
       String lng,
@@ -70,6 +71,7 @@ class UploadVideoController {
       //     }
       // """),
       //   );
+      print("Uploading video");
       Dio dio = Dio(
         BaseOptions(
           contentType: 'multipart/form-data',
@@ -83,12 +85,47 @@ class UploadVideoController {
       // dio.options.headers["authorization"] =
       //     "token ${GraphQLConfiguration.sessionToken}";
 
+      // String live = location_live ? 'true' : 'false';
+      // String query = 'mutation{addVideo(title:"' +
+      //     title +
+      //     '",description:"' +
+      //     description +
+      //     '",ip:"' +
+      //     ip +
+      //     '",lat:"' +
+      //     lat +
+      //     '",lng:"' +
+      //     lng +
+      //     '",locationName:"' +
+      //     location_name +
+      //     '",locationLive:' +
+      //     live +
+      //     '){video{id}}}';
+      // FormData data = FormData.fromMap({
+      //   "query": query,
+      //   "video_file": await MultipartFile.fromFile(selectedVideo.path!,
+      //       filename: selectedVideo.path!.split('/').last),
+      //   "thumbnail_file": await MultipartFile.fromFile(selectedThumbnail.path!,
+      //       filename: selectedThumbnail.path!.split('/').last),
+      // });
+      // var response = await dio.post(BACKEND_URL, data: data);
+      // print(response);
+
+      var req = new http.MultipartRequest("POST", Uri.parse(BACKEND_URL));
+      Map<String, String> headers = {
+        "Accept": "*/*",
+        "Authorization": "Bearer " + GraphQLConfiguration.sessionToken
+      };
+
+      req.headers.addAll(headers);
       String live = location_live ? 'true' : 'false';
-      String query = 'mutation{addVideo(title:"' +
+      req.fields['query'] = 'mutation{addVideo(title:"' +
           title +
           '",description:"' +
           description +
-          '",ip:"' +
+          '",duration:' +
+          duration.toString() +
+          ',ip:"' +
           ip +
           '",lat:"' +
           lat +
@@ -98,32 +135,67 @@ class UploadVideoController {
           location_name +
           '",locationLive:' +
           live +
-          '){title}}';
-      FormData data = FormData.fromMap({
-        "query": query,
-        "video_file": await MultipartFile.fromFile(selectedVideo.path!,
-            filename: selectedVideo.path!.split('/').last),
-        "thumbnail_file": await MultipartFile.fromFile(selectedThumbnail.path!,
-            filename: selectedThumbnail.path!.split('/').last),
-      });
-      var response = await dio.post(BACKEND_URL, data: data);
+          '){video{id}}}';
+
+      // mutation{addVideo(title:"sfdd",description:"zcd",ip:"0.0.0.0",lat:"0.0",lng:"0.0",locationName:"kenya",locationLive:false){title}}
+
+      // {query: mutation{addVideo(title:"sdcdscdsc",description:"cdcc",ip:"197.237.28.26",lat:"37.4216572",lng:"-122.0842089",locationName:"Nairobi Province,Kenya",locationLive:true){id,title}}, video_file: Instance of 'Future<MultipartFile>', thumbnail_file: Instance of 'Future<MultipartFile>'}
+
+      req.files.add(
+          await http.MultipartFile.fromPath('video_file', selectedVideo.path!));
+
+      // req.files.add(http.MultipartFile(
+      //     'video_file',
+      //     File(selectedVideo.path!).readAsBytes().asStream(),
+      //     File(selectedVideo.path!).lengthSync(),
+      //     filename: selectedVideo.path!.split("/").last));
+
+      req.files.add(await http.MultipartFile.fromPath(
+          'thumbnail_file', selectedThumbnail.path!));
+
+      // req.fields['video_file'] =
+      //     await http.MultipartFile.fromPath('video_file', selectedVideo.path!)
+      //         .toString();
+      // req.fields['thumbnail_file'] =
+      //     http.MultipartFile.fromPath('video_file', selectedThumbnail.path!)
+      //         .toString();
+      // var response = await req.send();
+      http.Response response = await http.Response.fromStream(await req.send());
+      var res = jsonDecode(response.body);
+      // print(res['data']['addVideo']['video']['id']);
 
       if (response.statusCode == 200) {
-        print(response);
+        int video_id = int.parse(res['data']['addVideo']['video']['id']);
 
-        // int video_id = response['video']['id'];
-        // tags.forEach((tag) {
-        //   _allTags.add(VideoTag(
-        //       id: int.parse(tag['id']),
-        //       name: tag['name'],
-        //       description: tag['description']));
-        // });
+        GraphQLConfiguration graphQLConfig = new GraphQLConfiguration();
+        GraphQLClient _client = GraphQLClient(
+          cache: GraphQLCache(),
+          link: HttpLink(REGISTER_URL),
+        );
+
+        tags.forEach((tag) async {
+          String query = """
+                        mutation{
+                          addVideoTopic(topicName:"$tag",videoId:$video_id){
+                            ok
+                          }
+                        }
+                        """;
+
+          QueryResult result =
+              await _client.mutate(MutationOptions(document: gql(query)));
+          print(result);
+          // _allTags.add(VideoTag(
+          //     id: int.parse(tag['id']),
+          //     name: tag['name'],
+          //     description: tag['description']));
+        });
 
         return 'success';
       } else {
-        print(response.data.toString());
+        print(response.body);
         // print(response.);
-        print(response.statusMessage);
+        print(response.statusCode);
         return 'Could not upload video. Try again later';
       }
     } catch (e) {

@@ -1,6 +1,8 @@
 import 'package:africanplug/config/base_functions.dart';
 import 'package:africanplug/config/config.dart';
 import 'package:africanplug/config/graphql_config.dart';
+import 'package:africanplug/landing.dart';
+import 'package:africanplug/main.dart';
 import 'package:africanplug/models/user.dart';
 import 'package:africanplug/screens/login/login_signup.dart';
 import 'package:africanplug/screens/upload/upload.dart';
@@ -386,10 +388,13 @@ Container MenuButton(
 }
 
 void logout(context) {
+  appBox.delete('user');
   GraphQLConfiguration.removeToken();
+  Navigator.pop(context);
   Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(
-          builder: (BuildContext context) => LoginSignupScreen(isLogin: true)),
+          // builder: (BuildContext context) => LoginSignupScreen(isLogin: true)),
+          builder: (BuildContext context) => LandingScreen()),
       ModalRoute.withName('/'));
 }

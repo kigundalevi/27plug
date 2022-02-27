@@ -1,8 +1,10 @@
 import 'dart:io';
+import 'package:africanplug/config/base_functions.dart';
 import 'package:africanplug/config/config.dart';
 import 'package:africanplug/config/graphql_config.dart';
 import 'package:africanplug/config/route_names.dart';
 import 'package:africanplug/landing.dart';
+import 'package:africanplug/models/user.dart';
 import 'package:africanplug/screens/login/login.dart';
 import 'package:africanplug/screens/login/login_signup.dart';
 import 'package:africanplug/screens/upload/upload.dart';
@@ -40,6 +42,7 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
+    User user = currentUser();
     // SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark.copyWith(
     //         statusBarColor: kPrimaryLightColor,
     //         /* set Status bar color in Android devices. */
@@ -70,7 +73,8 @@ class _MyAppState extends State<MyApp> {
             landingRoute: (BuildContext context) => LandingScreen(),
             loginRegisterRoute: (BuildContext context) => LoginSignupScreen(),
             // homeRoute: (BuildContext context) => VideosScreen(),
-            homeRoute: (BuildContext context) => LandingScreen(),
+            homeRoute: (BuildContext context) =>
+                user.id == 1 ? LandingScreen() : VideosScreen(),
             uploadRoute: (BuildContext context) => UploadVideoPage()
           },
           // WelcomeScreen(

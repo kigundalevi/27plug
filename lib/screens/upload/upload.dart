@@ -89,6 +89,7 @@ class _UploadVideoPageState extends State<UploadVideoPage>
 
   bool _selectedVideoError = false;
   bool _selectedThumbnailError = false;
+  bool tagging = false;
   @override
   void initState() {
     super.initState();
@@ -124,6 +125,7 @@ class _UploadVideoPageState extends State<UploadVideoPage>
   bool _loading = false;
   bool _autoValidate = false;
   bool _thumnailSelected = false;
+  int videoDuration = 0;
 
   refreshState(VoidCallback fn) {
     if (mounted) setState(fn);
@@ -194,7 +196,9 @@ class _UploadVideoPageState extends State<UploadVideoPage>
               scale: _scaleAnimation,
               child: Material(
                 animationDuration: duration,
-                borderRadius: BorderRadius.all(Radius.circular(20)),
+                borderRadius: !isCollapsed
+                    ? BorderRadius.all(Radius.circular(20))
+                    : BorderRadius.all(Radius.circular(0)),
                 elevation: 8.0,
                 color: kScaffoldColor,
                 child: Padding(
@@ -218,24 +222,21 @@ class _UploadVideoPageState extends State<UploadVideoPage>
                         // }, () {}, () {}),
                         body: Column(
                           children: [
-                            appBar(
-                                size,
-                                () {
-                                  setState(() {
-                                    collapseFromLeft = true;
-                                    if (isCollapsed)
-                                      _aController.forward();
-                                    else
-                                      _aController.reverse();
+                            appBar(size, () {
+                              setState(() {
+                                collapseFromLeft = true;
+                                if (isCollapsed)
+                                  _aController.forward();
+                                else
+                                  _aController.reverse();
 
-                                    isCollapsed = !isCollapsed;
-                                  });
-                                },
-                                () {},
-                                () {
-                                  Navigator.pushNamed(
-                                      context, "/loginRegister");
-                                }),
+                                isCollapsed = !isCollapsed;
+                              });
+                            }, () {
+                              Navigator.pushNamed(context, "/home");
+                            }, () {
+                              Navigator.pushNamed(context, "/loginRegister");
+                            }),
                             selectedVideo != null
                                 ? Column(
                                     children: [
@@ -310,11 +311,20 @@ class _UploadVideoPageState extends State<UploadVideoPage>
                                               if (videoPicked != null) {
                                                 PlatformFile file =
                                                     videoPicked.files.first;
+                                                VideoPlayerController
+                                                    controller =
+                                                    new VideoPlayerController
+                                                        .network(file.path!);
+                                                await controller.initialize();
 
                                                 setState(() {
                                                   selectedVideoPath = file.path;
                                                   selectedVideo =
                                                       videoPicked.files.first;
+                                                  videoDuration = controller
+                                                      .value
+                                                      .duration
+                                                      .inMilliseconds;
                                                 });
                                                 // String out = firstInput.replaceAll(".", "");
                                                 // print(file.name);
@@ -336,8 +346,8 @@ class _UploadVideoPageState extends State<UploadVideoPage>
                                               elevation: 8.0,
                                               color: kPrimaryLightColor
                                                   .withOpacity(0.7),
-                                              borderRadius:
-                                                  BorderRadius.circular(10.0),
+                                              // borderRadius:
+                                              //     BorderRadius.circular(10.0),
                                               child: Padding(
                                                 padding:
                                                     const EdgeInsets.all(8.0),
@@ -441,12 +451,24 @@ class _UploadVideoPageState extends State<UploadVideoPage>
                                                     PlatformFile file =
                                                         videoPicked.files.first;
 
+                                                    VideoPlayerController
+                                                        controller =
+                                                        VideoPlayerController
+                                                            .network(
+                                                                file.path!);
+                                                    await controller
+                                                        .initialize();
+
                                                     setState(() {
                                                       selectedVideoPath =
                                                           file.path;
                                                       selectedVideo =
                                                           videoPicked
                                                               .files.first;
+                                                      videoDuration = controller
+                                                          .value
+                                                          .duration
+                                                          .inMilliseconds;
                                                     });
                                                     _selectedVideoError = false;
                                                     // print(file.name);
@@ -481,11 +503,11 @@ class _UploadVideoPageState extends State<UploadVideoPage>
                                   // margin: EdgeInsets.only(10),
                                   decoration: BoxDecoration(
                                     color: Colors.white,
-                                    borderRadius: BorderRadius.only(
-                                        bottomLeft:
-                                            Radius.circular(numCurveRadius),
-                                        bottomRight:
-                                            Radius.circular(numCurveRadius)),
+                                    // borderRadius: BorderRadius.only(
+                                    //     bottomLeft:
+                                    //         Radius.circular(numCurveRadius),
+                                    //     bottomRight:
+                                    //         Radius.circular(numCurveRadius)),
                                     // boxShadow: [
                                     //   BoxShadow(
                                     //       color:
@@ -633,10 +655,16 @@ class _UploadVideoPageState extends State<UploadVideoPage>
                                               ),
                                               findSuggestions: findVideoTags,
                                               additionCallback: (value) {
+                                                setState(() {
+                                                  tagging = true;
+                                                });
                                                 if (value is String &&
                                                     value.length > 0) {
                                                   _selectedTags.add(value);
                                                 }
+                                                setState(() {
+                                                  tagging = false;
+                                                });
 
                                                 return VideoTag(
                                                     id: 0,
@@ -645,6 +673,9 @@ class _UploadVideoPageState extends State<UploadVideoPage>
                                               },
                                               onAdded: (videoTag) async {
                                                 // api calls here, triggered when add to tag button is pressed
+                                                setState(() {
+                                                  tagging = true;
+                                                });
                                                 bool isOnline =
                                                     await checkOnline();
                                                 if (!isOnline) {
@@ -660,6 +691,7 @@ class _UploadVideoPageState extends State<UploadVideoPage>
                                                     duration:
                                                         Duration(seconds: 2),
                                                   )..show(context);
+                                                  tagging = false;
                                                   return VideoTag(
                                                       id: 0,
                                                       name: "",
@@ -689,11 +721,13 @@ class _UploadVideoPageState extends State<UploadVideoPage>
                                                       duration:
                                                           Duration(seconds: 2),
                                                     )..show(context);
+                                                    tagging = false;
                                                     return VideoTag(
                                                         id: 0,
                                                         name: "",
                                                         description: "");
                                                   } else {
+                                                    tagging = false;
                                                     return response;
                                                   }
                                                 }
@@ -704,25 +738,29 @@ class _UploadVideoPageState extends State<UploadVideoPage>
                                                   splashColor: kActiveColor,
                                                   title: Text(tag.name),
                                                   // subtitle: Text(tag.id.toString()),
-                                                  additionWidget: Chip(
-                                                    avatar: Icon(
-                                                      Icons.add_circle,
-                                                      color: Colors.white,
-                                                    ),
-                                                    label: Text(
-                                                      'Add New Tag',
-                                                      style: TextStyle(
-                                                          color: kBlack),
-                                                    ),
-                                                    labelStyle: TextStyle(
-                                                      color: Colors.white,
-                                                      fontSize: 14.0,
-                                                      fontWeight:
-                                                          FontWeight.w300,
-                                                    ),
-                                                    backgroundColor:
-                                                        kActiveColor,
-                                                  ),
+                                                  additionWidget: tagging
+                                                      ? CircularProgressIndicator(
+                                                          color: kActiveColor,
+                                                        )
+                                                      : Chip(
+                                                          avatar: Icon(
+                                                            Icons.add_circle,
+                                                            color: Colors.white,
+                                                          ),
+                                                          label: Text(
+                                                            'Add New Tag',
+                                                            style: TextStyle(
+                                                                color: kBlack),
+                                                          ),
+                                                          labelStyle: TextStyle(
+                                                            color: Colors.white,
+                                                            fontSize: 14.0,
+                                                            fontWeight:
+                                                                FontWeight.w300,
+                                                          ),
+                                                          backgroundColor:
+                                                              kActiveColor,
+                                                        ),
                                                 );
                                               },
                                             ),
@@ -874,6 +912,7 @@ class _UploadVideoPageState extends State<UploadVideoPage>
                                                                 _selectedThumbnail!,
                                                                 _title!,
                                                                 _description!,
+                                                                videoDuration,
                                                                 location.ip,
                                                                 location.lat,
                                                                 location.lng,
@@ -1239,16 +1278,6 @@ Future<List<VideoTag>> findVideoTags(String query) async {
           }
         }
 """)));
-
-  print("""
-    query{
-          listTopic(sortField:"created_at",order:"desc"){
-            id,
-            name,
-            description
-          }
-        }
-""");
   try {
     print(result);
     if (result.hasException) {
