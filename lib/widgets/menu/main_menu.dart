@@ -390,6 +390,12 @@ Container MenuButton(
 void logout(context) {
   appBox.delete('user');
   GraphQLConfiguration.removeToken();
-  Navigator.pop(context);
-  Navigator.pushNamed(context, '/landing');
+  // Navigator.pop(context);
+  // Navigator.pushNamed(context, '/landing');
+  Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(
+        builder: (context) => LandingScreen(),
+      ),
+      (route) => false);
 }

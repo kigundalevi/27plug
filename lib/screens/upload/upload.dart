@@ -11,6 +11,7 @@ import 'package:africanplug/op/queries.dart';
 import 'package:africanplug/player/upload_player.dart';
 import 'package:africanplug/screens/login/login.dart';
 import 'package:africanplug/screens/upload/validation.dart';
+import 'package:africanplug/screens/videos/videos_screen.dart';
 import 'package:africanplug/widgets/app/appbar.dart';
 import 'package:africanplug/widgets/button/main_upload_button.dart';
 import 'package:africanplug/widgets/button/rounded_button.dart';
@@ -86,6 +87,8 @@ class _UploadVideoPageState extends State<UploadVideoPage>
   late bool selectingVideo;
   late bool uploadingNewVideo;
 
+  late bool uploadingNewThumbnail;
+
   late VideoPlayerController _controller;
   PlatformFile? _selectedThumbnail;
   String? _selectedThumbnailPath;
@@ -101,12 +104,19 @@ class _UploadVideoPageState extends State<UploadVideoPage>
   bool uploaded = false;
 
   late String uploadedVideoUrl;
+  late String uploadedVideoName;
+  late String uploadedThumbnailUrl;
+  late String uploadedThumbnailName;
 
   @override
   void initState() {
     super.initState();
 
     uploadedVideoUrl = "";
+    uploadedThumbnailUrl = "";
+
+    uploadedVideoName = "";
+    uploadedThumbnailName = "";
 
     _aController = AnimationController(duration: duration, vsync: this);
     _scaleAnimation = Tween<double>(begin: 1, end: 0.85).animate(_aController);
@@ -126,6 +136,7 @@ class _UploadVideoPageState extends State<UploadVideoPage>
     videotagerror = true;
     selectingVideo = false;
     uploadingNewVideo = false;
+    uploadingNewThumbnail = false;
     _selectedVideoTags = [];
   }
 
@@ -444,25 +455,25 @@ class _UploadVideoPageState extends State<UploadVideoPage>
                                           // SizedBox(
                                           //   height: size.height / 12,
                                           // ),
-                                          Container(
-                                            color: kBackgroundColor,
-                                            child: Column(
-                                              children: [
-                                                StreamBuilder<dynamic>(
-                                                    stream: _simpleS3
-                                                        .getUploadPercentage,
-                                                    builder:
-                                                        (context, snapshot) {
-                                                      return new Text(
-                                                        snapshot.data != null
-                                                            ? "Uploaded: ${snapshot.data}"
-                                                            : "Simple S3",
-                                                      );
-                                                    }),
-                                                Text(uploadedVideoUrl),
-                                              ],
-                                            ),
-                                          ),
+                                          // Container(
+                                          //   color: kBackgroundColor,
+                                          //   child: Column(
+                                          //     children: [
+                                          //       StreamBuilder<dynamic>(
+                                          //           stream: _simpleS3
+                                          //               .getUploadPercentage,
+                                          //           builder:
+                                          //               (context, snapshot) {
+                                          //             return new Text(
+                                          //               snapshot.data != null
+                                          //                   ? "Uploaded: ${snapshot.data}"
+                                          //                   : "Simple S3",
+                                          //             );
+                                          //           }),
+                                          //       Text(uploadedVideoUrl),
+                                          //     ],
+                                          //   ),
+                                          // ),
                                           TextInputField(
                                               placeholder: "Video Title",
                                               icondata: FlutterIcons.play_faw5s,
@@ -514,40 +525,7 @@ class _UploadVideoPageState extends State<UploadVideoPage>
                                                     iconsize: 20,
                                                     enabled: false,
                                                   ),
-                                                  onTap: () async {
-                                                    setState(() {
-                                                      _thumnailSelected = true;
-                                                    });
-                                                    FilePickerResult?
-                                                        _thumbnailSelection =
-                                                        await FilePicker
-                                                            .platform
-                                                            .pickFiles(
-                                                                type: FileType
-                                                                    .image);
-                                                    if (_thumbnailSelection !=
-                                                        null) {
-                                                      PlatformFile file =
-                                                          _thumbnailSelection
-                                                              .files.first;
-
-                                                      setState(() {
-                                                        _selectedThumbnailPath =
-                                                            file.path;
-                                                        _selectedThumbnail =
-                                                            _thumbnailSelection
-                                                                .files.first;
-                                                      });
-                                                      _selectedThumbnailError =
-                                                          false;
-                                                    } else {
-                                                      setState(() {
-                                                        _selectedThumbnailError =
-                                                            true;
-                                                      });
-                                                      //TODO:Snackbarshoww error
-                                                    }
-                                                  }),
+                                                  onTap: _uploadNewThumbnail),
                                               _selectedThumbnailError
                                                   ? Container(
                                                       color: kWhite,
@@ -794,6 +772,7 @@ class _UploadVideoPageState extends State<UploadVideoPage>
                                                       footer: new Text(
                                                         "Uploading..",
                                                         style: new TextStyle(
+                                                            color: kBlack,
                                                             fontWeight:
                                                                 FontWeight.bold,
                                                             fontSize: 17.0),
@@ -802,7 +781,7 @@ class _UploadVideoPageState extends State<UploadVideoPage>
                                                           CircularStrokeCap
                                                               .round,
                                                       progressColor:
-                                                          Colors.purple,
+                                                          kActiveColor,
                                                     );
                                                   })
                                               : videoDuration > 300000
@@ -883,6 +862,14 @@ class _UploadVideoPageState extends State<UploadVideoPage>
                                                                         .bold),
                                                           ),
                                                           onPressed: () async {
+                                                            if (uploadedVideoUrl ==
+                                                                "") {
+                                                              setState(() {
+                                                                _selectedVideoError =
+                                                                    true;
+                                                              });
+                                                              return;
+                                                            }
                                                             if (selectedVideo ==
                                                                 null) {
                                                               setState(() {
@@ -892,7 +879,9 @@ class _UploadVideoPageState extends State<UploadVideoPage>
                                                               return;
                                                             }
                                                             if (_selectedThumbnail ==
-                                                                null) {
+                                                                    null ||
+                                                                uploadedThumbnailUrl ==
+                                                                    "") {
                                                               setState(() {
                                                                 _selectedThumbnailError =
                                                                     true;
@@ -938,8 +927,10 @@ class _UploadVideoPageState extends State<UploadVideoPage>
                                                                     "uploading");
                                                                 String? upload_response = await ctrl.userUploadVideo(
                                                                     _selectedTags,
-                                                                    selectedVideo!,
-                                                                    _selectedThumbnail!,
+                                                                    uploadedVideoUrl,
+                                                                    uploadedVideoName,
+                                                                    uploadedThumbnailUrl,
+                                                                    uploadedThumbnailName,
                                                                     _title!,
                                                                     _description!,
                                                                     videoDuration,
@@ -980,11 +971,14 @@ class _UploadVideoPageState extends State<UploadVideoPage>
                                                                             3),
                                                                   )..show(
                                                                       context);
-                                                                  Navigator.pop(
-                                                                      context);
-                                                                  Navigator.pushNamed(
+                                                                  Navigator.pushAndRemoveUntil(
                                                                       context,
-                                                                      "/home");
+                                                                      MaterialPageRoute(
+                                                                        builder:
+                                                                            (context) =>
+                                                                                VideosScreen(),
+                                                                      ),
+                                                                      (route) => false);
                                                                 } else {
                                                                   setState(() {
                                                                     _loading =
@@ -1302,7 +1296,7 @@ class _UploadVideoPageState extends State<UploadVideoPage>
         deleteIconColor: kPrimaryColor);
   }
 
-  Future<String?> _uploadToS3(File file) async {
+  Future<String?> _uploadVideoToS3(File file) async {
     String? result;
 
     if (result == null) {
@@ -1335,6 +1329,66 @@ class _UploadVideoPageState extends State<UploadVideoPage>
       }
     }
     return result;
+  }
+
+  Future<String?> _uploadThumbnailToS3(File file) async {
+    String? result;
+
+    if (result == null) {
+      try {
+        setState(() {
+          uploadingNewThumbnail = true;
+        });
+        result = await _simpleS3.uploadFile(
+          file,
+          kS3BucketName,
+          kS3PoolID,
+          AWSRegions.euWest3,
+          debugLog: true,
+          s3FolderPath: "uploads/thumbnails",
+          accessControl: S3AccessControl.publicRead,
+          useTimeStamp: true,
+        );
+
+        setState(() {
+          uploaded = true;
+          uploadedThumbnailUrl = result!;
+          isLoading = false;
+        });
+      } catch (e) {
+        print(e);
+        setState(() {
+          uploadingNewThumbnail = false;
+          isLoading = false;
+        });
+      }
+    }
+    return result;
+  }
+
+  void _uploadNewThumbnail() async {
+    setState(() {
+      _thumnailSelected = true;
+    });
+    FilePickerResult? _thumbnailSelection =
+        await FilePicker.platform.pickFiles(type: FileType.image);
+    if (_thumbnailSelection != null) {
+      PlatformFile file = _thumbnailSelection.files.first;
+
+      setState(() {
+        _selectedThumbnailPath = file.path;
+        _selectedThumbnail = _thumbnailSelection.files.first;
+        uploadedThumbnailName = file.name;
+      });
+
+      _uploadThumbnailToS3(File(file.path!));
+      _selectedThumbnailError = false;
+    } else {
+      setState(() {
+        _selectedThumbnailError = true;
+      });
+      //TODO:Snackbarshoww error
+    }
   }
 
   void _uploadNewVideo() async {
@@ -1376,7 +1430,7 @@ class _UploadVideoPageState extends State<UploadVideoPage>
           selectingVideo = false;
         });
 
-        print("VIDEO DURATION " + videoDuration.toString());
+        // print("VIDEO DURATION " + videoDuration.toString());
         // String out = firstInput.replaceAll(".", "");
         // print(file.name);
         // print(file.bytes);
@@ -1420,10 +1474,11 @@ class _UploadVideoPageState extends State<UploadVideoPage>
           )..show(context);
         } else {
           setState(() {
+            uploadedVideoName = file.name;
             uploadingNewVideo = true;
             isLoading = true;
           });
-          _uploadToS3(File(file.path!));
+          _uploadVideoToS3(File(file.path!));
         }
 
         setState(() {});

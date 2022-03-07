@@ -375,15 +375,25 @@ class AspectRatioVideoState extends State<AspectRatioVideo> {
           //   child: VideoPlayPause(controller, file),
           // ),
           child: FittedBox(
-        fit: BoxFit.cover,
-        child: SizedBox(
-          // height: controller.value.size.height,
-          // width: controller.value.size.width,
-          height: size.height / 3.5,
-          width: size.width,
-          child: VideoPlayPause(controller, file),
-        ),
-      ));
+              fit: BoxFit.cover,
+              child: FittedBox(
+                fit: BoxFit.cover,
+                child: SizedBox(
+                  height: controller.value.size?.height ?? 0,
+                  width: controller.value.size?.width ?? 0,
+                  child: VideoPlayPause(controller, file),
+                ),
+              )
+
+              // SizedBox(
+              //   // height: controller.value.size.height,
+              //   // width: controller.value.size.width,
+              //   height: size.height / 3.5,
+              //   width: size.width,
+              //   child: VideoPlayPause(controller, file),
+              // ),
+
+              ));
     } else {
       return Container();
     }

@@ -3,6 +3,7 @@ import 'package:africanplug/config/base_functions.dart';
 import 'package:africanplug/controller/login_controller.dart';
 import 'package:africanplug/controller/register_controller.dart';
 import 'package:africanplug/models/location.dart';
+import 'package:africanplug/screens/videos/videos_screen.dart';
 import 'package:africanplug/widgets/input/text_input_field.dart';
 import 'package:another_flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
@@ -104,6 +105,7 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
+    double height = size.height;
     return Scaffold(
       backgroundColor: Palette.backgroundColor,
       body: Stack(
@@ -113,7 +115,7 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
             right: 0,
             left: 0,
             child: Container(
-              height: 300,
+              height: height / 2.5,
               decoration: BoxDecoration(
                   image: DecorationImage(
                       image: AssetImage("assets/images/rev.gif"),
@@ -168,13 +170,15 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
           AnimatedPositioned(
             duration: Duration(milliseconds: 700),
             curve: Curves.bounceInOut,
-            top: isSignupScreen ? 200 : 230,
+            // top: isSignupScreen ? 200 : 230,
+            top: isSignupScreen ? height / 4 : height / 3.7,
             child: AnimatedContainer(
               duration: Duration(milliseconds: 700),
               curve: Curves.bounceInOut,
-              height: isSignupScreen ? 410 : 250,
+              // height: isSignupScreen ? 410 : 250,
+              height: isSignupScreen ? height / 1.8 : height / 2.8,
               padding: EdgeInsets.all(20),
-              width: MediaQuery.of(context).size.width - 40,
+              width: MediaQuery.of(context).size.width / 1.1,
               margin: EdgeInsets.symmetric(horizontal: 20),
               decoration: BoxDecoration(
                   color: kActiveColor.withOpacity(0.9),
@@ -793,7 +797,7 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
           AnimatedPositioned(
             duration: Duration(milliseconds: 700),
             curve: Curves.bounceInOut,
-            top: isSignupScreen ? 565 : 430,
+            top: isSignupScreen ? height / 1.34 : height / 1.76,
             right: 0,
             left: 0,
             child: Center(
@@ -896,8 +900,12 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                                   message: "Logged in successfully",
                                   duration: Duration(seconds: 3),
                                 )..show(context);
-                                Navigator.pop(context);
-                                Navigator.pushNamed(context, '/home');
+                                Navigator.pushAndRemoveUntil(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => VideosScreen(),
+                                    ),
+                                    (route) => false);
                               } else {
                                 setState(() {
                                   _loading = false;
@@ -987,8 +995,13 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                                       )..show(context);
                                       // Navigator.pop(context);
                                       // Navigator.pushNamed(context, "/home");
-                                      Navigator.pop(context);
-                                      Navigator.pushNamed(context, '/home');
+                                      Navigator.pushAndRemoveUntil(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                VideosScreen(),
+                                          ),
+                                          (route) => false);
                                     } else {
                                       setState(() {
                                         _loading = false;
@@ -1034,7 +1047,7 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
           ),
           // Bottom buttons
           Positioned(
-            top: MediaQuery.of(context).size.height - 100,
+            top: MediaQuery.of(context).size.height / 1.15,
             right: 0,
             left: 0,
             child: Column(

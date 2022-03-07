@@ -28,8 +28,10 @@ class UploadVideoController {
 
   Future<String?> userUploadVideo(
       List<String> tags,
-      PlatformFile selectedVideo,
-      PlatformFile selectedThumbnail,
+      String uploadedVideoUrl,
+      String uploadedVideoName,
+      String uploadedThumbnailUrl,
+      String uploadedThumbnailName,
       String title,
       String description,
       int duration,
@@ -119,7 +121,15 @@ class UploadVideoController {
 
       req.headers.addAll(headers);
       String live = location_live ? 'true' : 'false';
-      req.fields['query'] = 'mutation{addVideo(title:"' +
+      req.fields['query'] = 'mutation{addVideo(videoUrl:"' +
+          uploadedVideoUrl +
+          '",videoName:"' +
+          uploadedVideoName +
+          '",thumbnailUrl:"' +
+          uploadedThumbnailUrl +
+          '",thumbnailName:"' +
+          uploadedThumbnailName +
+          '",title:"' +
           title +
           '",description:"' +
           description +
@@ -141,8 +151,8 @@ class UploadVideoController {
 
       // {query: mutation{addVideo(title:"sdcdscdsc",description:"cdcc",ip:"197.237.28.26",lat:"37.4216572",lng:"-122.0842089",locationName:"Nairobi Province,Kenya",locationLive:true){id,title}}, video_file: Instance of 'Future<MultipartFile>', thumbnail_file: Instance of 'Future<MultipartFile>'}
 
-      req.files.add(
-          await http.MultipartFile.fromPath('video_file', selectedVideo.path!));
+      // req.files.add(
+      //     await http.MultipartFile.fromPath('video_file', selectedVideo.path!));
 
       // req.files.add(http.MultipartFile(
       //     'video_file',
@@ -150,8 +160,8 @@ class UploadVideoController {
       //     File(selectedVideo.path!).lengthSync(),
       //     filename: selectedVideo.path!.split("/").last));
 
-      req.files.add(await http.MultipartFile.fromPath(
-          'thumbnail_file', selectedThumbnail.path!));
+      // req.files.add(await http.MultipartFile.fromPath(
+      //     'thumbnail_file', selectedThumbnail.path!));
 
       // req.fields['video_file'] =
       //     await http.MultipartFile.fromPath('video_file', selectedVideo.path!)
@@ -162,7 +172,7 @@ class UploadVideoController {
       // var response = await req.send();
       http.Response response = await http.Response.fromStream(await req.send());
       var res = jsonDecode(response.body);
-      // print(res['data']['addVideo']['video']['id']);
+      print(res);
 
       if (response.statusCode == 200) {
         int video_id = int.parse(res['data']['addVideo']['video']['id']);
@@ -262,8 +272,8 @@ class UploadVideoController {
 
       // {query: mutation{addVideo(title:"sdcdscdsc",description:"cdcc",ip:"197.237.28.26",lat:"37.4216572",lng:"-122.0842089",locationName:"Nairobi Province,Kenya",locationLive:true){id,title}}, video_file: Instance of 'Future<MultipartFile>', thumbnail_file: Instance of 'Future<MultipartFile>'}
 
-      req.files.add(
-          await http.MultipartFile.fromPath('video_file', selectedVideo.path!));
+      // req.files.add(
+      //     await http.MultipartFile.fromPath('video_file', selectedVideo.path!));
 
       // req.files.add(http.MultipartFile(
       //     'video_file',
@@ -271,8 +281,8 @@ class UploadVideoController {
       //     File(selectedVideo.path!).lengthSync(),
       //     filename: selectedVideo.path!.split("/").last));
 
-      req.files.add(await http.MultipartFile.fromPath(
-          'thumbnail_file', selectedThumbnail.path!));
+      // req.files.add(await http.MultipartFile.fromPath(
+      //     'thumbnail_file', selectedThumbnail.path!));
 
       // req.fields['video_file'] =
       //     await http.MultipartFile.fromPath('video_file', selectedVideo.path!)

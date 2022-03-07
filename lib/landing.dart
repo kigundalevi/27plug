@@ -330,7 +330,7 @@ class _LandingScreenState extends State<LandingScreen>
                                                                                                   // height: size.height * 0.19,
                                                                                                   width: !isCollapsed ? size.width / 4 : size.width / 2.2,
                                                                                                   // color: Colors.black26,
-                                                                                                  padding: EdgeInsets.symmetric(horizontal: size.width * 0.02),
+                                                                                                  // padding: EdgeInsets.symmetric(horizontal: size.width * 0.02),
                                                                                                   child: Column(
                                                                                                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                                                                                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -710,8 +710,10 @@ query{
             name: video['name'],
             thumbnail_url: video['thumbnailUrl'],
             thumbnail_name: video['thumbnailName'],
-            views: video['views'].length.toString() + " views",
-            upload_lapse: lapse,
+            views: video['views'].length.toString(),
+            upload_lapse: lapse.length > 12
+                ? lapse.replaceRange(9, lapse.length, '...')
+                : lapse,
             uploaded_by: video['uploader']['firstName'].length > 20
                 ? video['uploader']['firstName'].replaceRange(
                     20, video['uploader']['firstName'].length, '...')
@@ -1128,11 +1130,13 @@ void addVideoView(int video_id) async {
 
   String query = """
 mutation{
-  addVideoView(videoId:$video_id,userId:$user_id){
+  addVideoView(videoId:$video_id,userId:$user_id,ip:"$ip",lat:"$lat",lng:"$lng",locationName:"$locationName",locationLive:$locationLive){
     ok
   }
 }
 """;
+
+  // print(query);
 
   GraphQLConfiguration graphQLConfig = new GraphQLConfiguration();
   // GraphQLClient _client = graphQLConfig.clientToQuery();
@@ -1140,8 +1144,8 @@ mutation{
     cache: GraphQLCache(),
     link: HttpLink("https://plug27.herokuapp.com/graphq"),
   ).mutate(MutationOptions(document: gql(query)));
-  print("VIEW RESULT");
-  print(result);
+  // print("VIEW RESULT");
+  // print(result);
 }
 
 class Location {
