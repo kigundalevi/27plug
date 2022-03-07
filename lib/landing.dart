@@ -1,8 +1,10 @@
 import 'package:africanplug/config/base_functions.dart';
 import 'package:africanplug/config/config.dart';
 import 'package:africanplug/config/graphql_config.dart';
+import 'package:africanplug/models/location.dart';
 import 'package:africanplug/models/user.dart';
 import 'package:africanplug/models/video.dart';
+import 'package:africanplug/player/upload_player.dart';
 import 'package:africanplug/screens/login/login.dart';
 import 'package:africanplug/widgets/app/appbar.dart';
 import 'package:africanplug/widgets/button/main_upload_button.dart';
@@ -46,6 +48,25 @@ class _LandingScreenState extends State<LandingScreen>
   late Animation<Offset> _slideAnimation;
 
   var latest_videos = [];
+  late VoidCallback listener;
+  int currentDurationInSecond = 0;
+
+  FadeAnimation imageFadeAnim =
+      FadeAnimation(child: const Icon(Icons.play_arrow, size: 100.0));
+  Widget controlIcon = SizedBox();
+  Widget overLay = SizedBox();
+
+  bool _paused = false;
+  bool _overlayed = false;
+
+  late String videoTitle;
+  _VideoPlayPauseState() {
+    listener = () {
+      setState(() {});
+    };
+  }
+
+  late VideoProgressIndicator progressIndicator;
 
   @override
   void initState() {
@@ -63,12 +84,17 @@ class _LandingScreenState extends State<LandingScreen>
         Tween<double>(begin: 0.5, end: 1).animate(_aController);
     _slideAnimation = Tween<Offset>(begin: Offset(-1, 0), end: Offset(0, 0))
         .animate(_aController);
-    updateVideos();
+    // updateVideos();
   }
 
-  void updateVideos() async {
-    latest_videos = await fetchLatestVideos();
-    setState(() {});
+  @override
+  void dispose() {
+    _controller.setVolume(0);
+    _controller.pause();
+    _controller.dispose();
+    disposed = true;
+    _aController.dispose();
+    super.dispose();
   }
 
   @override
@@ -111,69 +137,8 @@ class _LandingScreenState extends State<LandingScreen>
                   child: SafeArea(
                       child: Stack(
                     children: [
-                      // Positioned(
-                      //   bottom: 0,
-                      //   height: size.height,
-                      //   child: Image.asset(
-                      //     'assets/images/grey.jpg',
-                      //     height: size.height,
-                      //   ),
-                      // ),
-                      // Positioned(
-                      //   bottom: 0,
-                      //   child: Container(
-                      //     height: size.height / 2.4,
-                      //     width: size.width,
-                      //     color: kScaffoldColor,
-                      //   ),
-                      // ),
                       Scaffold(
                         backgroundColor: kScaffoldColor,
-                        // appBar: AppBar(
-                        //   elevation: 0,
-                        //   backgroundColor: Colors.transparent,
-                        //   iconTheme: IconThemeData(color: Colors.white),
-                        //   leading: IconButton(
-                        //     icon: Icon(Icons.menu),
-                        //     onPressed: () {
-                        //       setState(() {
-                        //         collapseFromLeft = true;
-                        //         if (isCollapsed)
-                        //           _aController.forward();
-                        //         else
-                        //           _aController.reverse();
-
-                        //         isCollapsed = !isCollapsed;
-                        //       });
-                        //     },
-                        //   ),
-                        //   title: Center(
-                        //     child: Row(
-                        //       mainAxisSize: MainAxisSize.max,
-                        //       children: [
-                        //         SizedBox(
-                        //           width: size.width / 5,
-                        //         ),
-                        //         Icon(FlutterIcons.plug_faw5s,
-                        //             color: kActiveColor),
-                        //         Text("27Plug",
-                        //             style: TextStyle(color: kActiveColor))
-                        //       ],
-                        //     ),
-                        //   ),
-                        //   actions: [
-                        //     IconButton(
-                        //       icon: CircleAvatar(
-                        //         backgroundImage: AssetImage(
-                        //           'assets/images/brian.jpg',
-                        //         ),
-                        //         backgroundColor: Colors.black26,
-                        //         foregroundColor: Colors.black26,
-                        //       ),
-                        //       onPressed: () {},
-                        //     )
-                        //   ],
-                        // ),
                         body: Column(
                           children: [
                             Stack(
@@ -191,174 +156,36 @@ class _LandingScreenState extends State<LandingScreen>
                                         isCollapsed = !isCollapsed;
                                       });
                                     }, () {
+                                      Navigator.pop(context);
                                       Navigator.pushNamed(context, "/landing");
                                     }, () {
+                                      Navigator.pop(context);
                                       Navigator.pushNamed(
                                           context, "/loginRegister");
                                     }),
                                     videoSelected
                                         ? Container(
-                                            height: 290,
-                                            // color: Colors.red,
+                                            height: 310,
                                             child: Column(
                                               children: [
                                                 playView(context),
-                                                controlView(context)
+                                                // controlView(context)
+                                                Padding(
+                                                  padding:
+                                                      const EdgeInsets.all(8.0),
+                                                  child: Container(
+                                                    color: kActiveColor,
+                                                    width: size.width,
+                                                    height: size.height / 18,
+                                                    child: Text(videoTitle),
+                                                  ),
+                                                )
                                               ],
                                             ),
                                           )
                                         : SizedBox(),
                                   ],
                                 ),
-                                !isPlaying
-                                    ? Column(
-                                        children: [
-                                          SizedBox(height: size.height / 14),
-                                          Container(
-                                            width: size.width,
-                                            height: videoSelected ? 240 : 0,
-                                            color: Colors.black38,
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsets.all(4.0),
-                                              child: Column(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .spaceBetween,
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.stretch,
-                                                mainAxisSize: MainAxisSize.max,
-                                                children: [
-                                                  Row(
-                                                    mainAxisSize:
-                                                        MainAxisSize.max,
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .spaceBetween,
-                                                    children: [
-                                                      Text(
-                                                        'Govt\'s scorecard',
-                                                        style: TextStyle(
-                                                            color: kWhite,
-                                                            fontWeight:
-                                                                FontWeight.w700,
-                                                            fontSize: 17),
-                                                      ),
-                                                      OutlinedButton(
-                                                        child: Icon(
-                                                            Icons.more_horiz),
-                                                        style: OutlinedButton
-                                                            .styleFrom(
-                                                          primary: kWhite,
-                                                          side: BorderSide(
-                                                              width: 0,
-                                                              color: Colors
-                                                                  .black12),
-                                                          shape: CircleBorder(),
-                                                        ),
-                                                        onPressed: () {},
-                                                      )
-                                                    ],
-                                                  ),
-                                                  Container(
-                                                    width: size.width,
-                                                    child: Row(
-                                                      mainAxisSize:
-                                                          MainAxisSize.max,
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .center,
-                                                      children: [
-                                                        Icon(
-                                                          FlutterIcons
-                                                              .skip_previous_mdi,
-                                                          color: kWhite,
-                                                          size: 45.0,
-                                                        ),
-                                                        SizedBox(
-                                                          width: 30.0,
-                                                        ),
-                                                        TextButton(
-                                                          onPressed: () async {
-                                                            if (isPlaying) {
-                                                              _controller
-                                                                  .pause();
-                                                              setState(() {
-                                                                isPlaying =
-                                                                    false;
-                                                              });
-                                                            } else {
-                                                              _controller
-                                                                  .play();
-                                                              setState(() {
-                                                                isPlaying =
-                                                                    true;
-                                                              });
-                                                            }
-                                                          },
-                                                          child: Icon(
-                                                            isPlaying
-                                                                ? FlutterIcons
-                                                                    .pause_faw5s
-                                                                : FlutterIcons
-                                                                    .play_faw5s,
-                                                            color: kWhite,
-                                                            size: 50.0,
-                                                          ),
-                                                        ),
-                                                        SizedBox(
-                                                          width: 30.0,
-                                                        ),
-                                                        Icon(
-                                                          FlutterIcons
-                                                              .skip_next_mdi,
-                                                          color: kWhite,
-                                                          size: 45.0,
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                  Row(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment.end,
-                                                    mainAxisSize:
-                                                        MainAxisSize.max,
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .spaceBetween,
-                                                    children: [
-                                                      Text(
-                                                        '00:23/1:59',
-                                                        style: TextStyle(
-                                                          color: kWhite,
-                                                          fontSize: 15,
-                                                          fontWeight:
-                                                              FontWeight.w700,
-                                                        ),
-                                                      ),
-                                                      OutlinedButton(
-                                                        child: Icon(FlutterIcons
-                                                            .fullscreen_mco),
-                                                        style: OutlinedButton
-                                                            .styleFrom(
-                                                          primary: kWhite,
-                                                          side: BorderSide(
-                                                              width: 0,
-                                                              color: Colors
-                                                                  .black12),
-                                                          shape: CircleBorder(),
-                                                        ),
-                                                        onPressed: () {},
-                                                      )
-                                                    ],
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      )
-                                    : SizedBox(),
                                 DefaultTextStyle(
                                   style: TextStyle(),
                                   child: Column(
@@ -397,40 +224,39 @@ class _LandingScreenState extends State<LandingScreen>
                                                           child:
                                                               CircularProgressIndicator());
                                                     } else {
-                                                      print(snapshot);
-                                                      return Container(
-                                                        height: 300,
-                                                        child:
-                                                            SingleChildScrollView(
-                                                          child:
-                                                              Column(children: [
-                                                            videoSelected
-                                                                ? SizedBox(
-                                                                    height: 7)
-                                                                : SizedBox(),
-                                                            Container(
-                                                              height:
-                                                                  size.height -
-                                                                      100,
-                                                              child: ListView
-                                                                  .builder(
-                                                                      itemCount: snapshot
-                                                                          .data
-                                                                          .length,
-                                                                      scrollDirection:
-                                                                          Axis
-                                                                              .vertical,
-                                                                      itemBuilder:
-                                                                          (BuildContext context,
-                                                                              int index) {
-                                                                        return Column(
-                                                                          children: [
-                                                                            ClipRRect(
+                                                      return SingleChildScrollView(
+                                                        child: Column(
+                                                            children: [
+                                                              Container(
+                                                                height: videoSelected
+                                                                    ? size.height -
+                                                                        450
+                                                                    : size.height -
+                                                                        120,
+                                                                child: ListView
+                                                                    .builder(
+                                                                        itemCount: snapshot
+                                                                            .data
+                                                                            .length,
+                                                                        scrollDirection:
+                                                                            Axis
+                                                                                .vertical,
+                                                                        itemBuilder:
+                                                                            (BuildContext context,
+                                                                                int index) {
+                                                                          return Padding(
+                                                                            padding:
+                                                                                const EdgeInsets.symmetric(vertical: 3.0),
+                                                                            child:
+                                                                                ClipRRect(
                                                                               borderRadius: BorderRadius.circular(8.0),
                                                                               child: GestureDetector(
                                                                                   onTap: () {
                                                                                     videoSelected = true;
-                                                                                    onVideoTap(1, snapshot.data[index].url);
+                                                                                    onVideoTap(1, snapshot.data[index].url, snapshot.data[index].id);
+
+                                                                                    videoTitle = snapshot.data[index].title;
+                                                                                    setState(() {});
                                                                                   },
                                                                                   child: Container(
                                                                                     width: !isCollapsed ? size.width * 1 : size.width * 0.98,
@@ -481,20 +307,20 @@ class _LandingScreenState extends State<LandingScreen>
                                                                                                       height: size.width * 0.07,
                                                                                                       child: Stack(
                                                                                                         children: [
-                                                                                                          Align(
-                                                                                                            alignment: Alignment.bottomLeft,
-                                                                                                            child: ThumbNailIconButton(
-                                                                                                              icon_data: Icons.watch_later,
-                                                                                                              press: () {},
-                                                                                                            ),
-                                                                                                          ),
-                                                                                                          Align(
-                                                                                                            alignment: Alignment.bottomRight,
-                                                                                                            child: ThumbNailIconButton(
-                                                                                                              icon_data: Icons.favorite,
-                                                                                                              press: () {},
-                                                                                                            ),
-                                                                                                          )
+                                                                                                          // Align(
+                                                                                                          //   alignment: Alignment.bottomLeft,
+                                                                                                          //   child: ThumbNailIconButton(
+                                                                                                          //     icon_data: Icons.watch_later,
+                                                                                                          //     press: () {},
+                                                                                                          //   ),
+                                                                                                          // ),
+                                                                                                          // Align(
+                                                                                                          //   alignment: Alignment.bottomRight,
+                                                                                                          //   child: ThumbNailIconButton(
+                                                                                                          //     icon_data: Icons.favorite,
+                                                                                                          //     press: () {},
+                                                                                                          //   ),
+                                                                                                          // )
                                                                                                         ],
                                                                                                       ),
                                                                                                     ),
@@ -503,7 +329,7 @@ class _LandingScreenState extends State<LandingScreen>
                                                                                                 Container(
                                                                                                   // height: size.height * 0.19,
                                                                                                   width: !isCollapsed ? size.width / 4 : size.width / 2.2,
-                                                                                                  color: Colors.black26,
+                                                                                                  // color: Colors.black26,
                                                                                                   padding: EdgeInsets.symmetric(horizontal: size.width * 0.02),
                                                                                                   child: Column(
                                                                                                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -517,18 +343,18 @@ class _LandingScreenState extends State<LandingScreen>
                                                                                                       // SizedBox(
                                                                                                       //   height: size.height * 0.01,
                                                                                                       // ),
-                                                                                                      ImageChip(image_url: "assets/images/brian.jpg", text: snapshot.data[index].uploaded_by),
+                                                                                                      ImageChip(image_url: (snapshot.data[index].uploader_dpurl == '' || snapshot.data[index].uploader_dpurl == null) ? 'https://www.pngitem.com/pimgs/m/421-4212617_person-placeholder-image-transparent-hd-png-download.png' : snapshot.data[index].uploader_dpurl, text: snapshot.data[index].uploaded_by),
                                                                                                       Row(
                                                                                                         mainAxisSize: MainAxisSize.max,
                                                                                                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                                                                         children: [
                                                                                                           VideoInfoChip(
                                                                                                             icon_data: Icons.remove_red_eye,
-                                                                                                            text: "21K",
+                                                                                                            text: snapshot.data[index].views,
                                                                                                           ),
                                                                                                           VideoInfoChip(
                                                                                                             icon_data: Icons.access_time,
-                                                                                                            text: "2 days ago",
+                                                                                                            text: snapshot.data[index].upload_lapse,
                                                                                                           ),
                                                                                                         ],
                                                                                                       )
@@ -543,15 +369,15 @@ class _LandingScreenState extends State<LandingScreen>
                                                                                     ),
                                                                                   )),
                                                                             ),
-                                                                            SizedBox(
-                                                                              height: 5,
-                                                                            )
-                                                                          ],
-                                                                        );
-                                                                      }),
-                                                            )
-                                                          ]),
-                                                        ),
+                                                                          );
+                                                                        }),
+                                                              ),
+                                                              // videoSelected
+                                                              //     ? SizedBox(
+                                                              //         height:
+                                                              //             200)
+                                                              //     : SizedBox(),
+                                                            ]),
                                                       );
                                                     }
                                                   }),
@@ -728,6 +554,7 @@ class _LandingScreenState extends State<LandingScreen>
                                                   ),
                                                   InkWell(
                                                     onTap: () {
+                                                      Navigator.pop(context);
                                                       Navigator.pushNamed(
                                                           context,
                                                           "/loginRegister");
@@ -792,50 +619,7 @@ class _LandingScreenState extends State<LandingScreen>
                         ),
                       )
                     ],
-                  )
-                      //  Stack(children: [
-                      //   pageBody(size, context),
-                      //   Container(
-                      //     color: kPrimaryColor.withOpacity(0.979),
-                      //     height: size.height / 14,
-                      //     child: Container(
-                      //       alignment: Alignment.bottomCenter,
-                      //       decoration: BoxDecoration(color: kPrimaryLightColor),
-                      //       child: Row(
-                      //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      //         children: [
-                      //           IconButton(
-                      //             onPressed: () {
-                      //               setState(() {
-                      //                 collapseFromLeft = true;
-                      //                 if (isCollapsed)
-                      //                   _aController.forward();
-                      //                 else
-                      //                   _aController.reverse();
-
-                      //                 isCollapsed = !isCollapsed;
-                      //               });
-                      //             },
-                      //             icon: Icon(Icons.menu),
-                      //             color: kPrimaryColor,
-                      //           ),
-                      //           Text(
-                      //             txtAppName,
-                      //             style: TextStyle(
-                      //                 fontWeight: FontWeight.bold,
-                      //                 color: kPrimaryColor),
-                      //           ),
-                      //           IconButton(
-                      //             onPressed: () {},
-                      //             icon: Icon(Icons.search),
-                      //             color: kPrimaryColor,
-                      //           )
-                      //         ],
-                      //       ),
-                      //     ),
-                      //   )
-                      // ]),
-                      ),
+                  )),
                 ),
               ),
             ),
@@ -846,15 +630,9 @@ class _LandingScreenState extends State<LandingScreen>
   Future<List<Video>> fetchLatestVideos() async {
     List<Video> _latestVideos = [];
 
-    GraphQLConfiguration graphQLConfig = new GraphQLConfiguration();
-    // GraphQLClient _client = GraphQLClient(
-    //   cache: GraphQLCache(store: HiveStore()),
-    //   link: HttpLink("https://plug27.herokuapp.com/graphq"),
-    // );
-    // ;
     QueryResult result = await GraphQLClient(
       cache: GraphQLCache(),
-      link: HttpLink(REGISTER_URL),
+      link: HttpLink("https://plug27.herokuapp.com/graphq"),
     ).query(QueryOptions(document: gql("""
 query{
   listVideo(sortField:"created_at",order:"desc",limit:5){
@@ -907,19 +685,39 @@ query{
         }
       } else {
         var videos = result.data?['listVideo'];
+
         videos.forEach((video) {
+          DateTime dateTimeCreatedAt = DateTime.parse(video['createdAt']);
+          DateTime dateTimeNow = DateTime.now();
+          final days_lapse = dateTimeNow.difference(dateTimeCreatedAt).inDays;
+          String lapse = "Today";
+          if (days_lapse < 1) {
+            String lapse = "Today";
+          } else if (days_lapse == 1) {
+            lapse = "yesterday";
+          } else {
+            lapse = days_lapse.toString() + " days ago";
+          }
+
           _latestVideos.add(Video(
-              id: int.parse(video['id']),
-              title: video['title'],
-              url: video['url'],
-              description: video['description'],
-              duration_millisec: video['durationMillisec'],
-              name: video['name'],
-              thumbnail_url: video['thumbnailUrl'],
-              thumbnail_name: video['thumbnailName'],
-              views: "2",
-              upload_lapse: " hours ago",
-              uploaded_by: video['uploader']['email']));
+            id: int.parse(video['id']),
+            title: video['title'].length > 20
+                ? video['title'].replaceRange(20, video['title'].length, '...')
+                : video['title'],
+            url: video['url'],
+            description: video['description'],
+            duration_millisec: video['durationMillisec'],
+            name: video['name'],
+            thumbnail_url: video['thumbnailUrl'],
+            thumbnail_name: video['thumbnailName'],
+            views: video['views'].length.toString() + " views",
+            upload_lapse: lapse,
+            uploaded_by: video['uploader']['firstName'].length > 20
+                ? video['uploader']['firstName'].replaceRange(
+                    20, video['uploader']['firstName'].length, '...')
+                : video['uploader']['firstName'],
+            uploader_dpurl: video['uploader']['dpUrl'],
+          ));
         });
         return _latestVideos;
         // return _allTags
@@ -983,25 +781,6 @@ query{
               ),
             ),
           ),
-          Expanded(
-              child: ListView.builder(
-                  itemCount: 10,
-                  itemBuilder: (_, int index) {
-                    return GestureDetector(
-                      onTap: () {
-                        onVideoTap(index, "assets/videos/ruto.mp4");
-                      },
-                      child: VideoTile(
-                        thumbnail_url: "assets/images/ruto.jpg",
-                        title: "The government's scorecard",
-                        channel_name: "Visanga Kenya",
-                        channel_id: 4,
-                        channel_image_url: "assets/images/brian.jpg",
-                        lapse: "2 days ago",
-                        view_count: "21K",
-                      ),
-                    );
-                  }))
         ],
       ),
     ));
@@ -1031,8 +810,7 @@ query{
     }
   }
 
-  onVideoTap(int index, String url) {
-    debugPrint("Trying to play");
+  onVideoTap(int index, String url, int id) {
     final controller = VideoPlayerController.network(url);
     final old_controller = _controller;
     _controller = controller;
@@ -1040,20 +818,46 @@ query{
       onControllerUpdate();
     });
     old_controller.pause;
+    old_controller.dispose();
     setState(() {});
-    controller
-      ..initialize().then((_) {
-        old_controller.dispose();
-        controller.addListener(() {
-          onControllerUpdate;
-        });
-        _controller.play();
+    WidgetsBinding.instance?.addPostFrameCallback((_) {
+      // ignore: avoid_single_cascade_in_expression_statements
+      controller
+        ..initialize().then((_) {
+          // controller.addListener(listener);
+          controller.addListener(() {
+            // setState(() {
+            currentDurationInSecond = _controller.value.position.inSeconds;
+            // });
+            if (_controller.value.position.inSeconds >=
+                _controller.value.duration.inSeconds) {
+              print("ended");
+            }
 
-        setState(() {
-          playArea = true;
-          isPlaying = true;
+            onControllerUpdate;
+          });
+          _controller.play();
+
+          // _controller.addListener(() => setState(() {}));
+
+          progressIndicator = VideoProgressIndicator(
+            _controller,
+            allowScrubbing: true,
+            colors: VideoProgressColors(
+              playedColor: Colors.red,
+              bufferedColor: Colors.grey.shade400,
+              backgroundColor: Colors.grey,
+            ),
+          );
+
+          addVideoView(id);
+
+          setState(() {
+            playArea = true;
+            isPlaying = true;
+          });
         });
-      });
+    });
   }
 
   Widget playView(BuildContext context) {
@@ -1064,7 +868,166 @@ query{
         // margin: EdgeInsets.only(top: size.height / 12),
         height: 240,
         width: double.infinity,
-        child: VideoPlayer(controller),
+        child: Stack(
+          children: [
+            GestureDetector(
+                child: VideoPlayer(controller),
+                onTap: () {
+                  if (!controller.value.isInitialized) {
+                    return;
+                  }
+                  if (controller.value.isPlaying) {
+                    controller.pause();
+                    _paused = true;
+                    setState(() {});
+                    imageFadeAnim = FadeAnimation(
+                        child: const Icon(Icons.pause, size: 100.0));
+
+                    // controller.pause();
+                    // controlIcon = ;
+                    overLay = Container(
+                      height: 240,
+                      color: Colors.black38,
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 8.0),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          mainAxisSize: MainAxisSize.max,
+                          children: [
+                            Row(
+                              mainAxisSize: MainAxisSize.max,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  videoTitle.length > 25
+                                      ? videoTitle.replaceRange(
+                                          25, videoTitle.length, '...')
+                                      : videoTitle,
+                                  style: TextStyle(color: kWhite, fontSize: 15),
+                                ),
+                                OutlinedButton(
+                                  child: Icon(Icons.more_horiz),
+                                  style: OutlinedButton.styleFrom(
+                                    primary: kWhite,
+                                    side: BorderSide(
+                                        width: 0, color: Colors.black12),
+                                    shape: CircleBorder(),
+                                  ),
+                                  onPressed: () {},
+                                )
+                              ],
+                            ),
+                            Container(
+                              child: Row(
+                                mainAxisSize: MainAxisSize.max,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    FlutterIcons.skip_previous_mdi,
+                                    color: kWhite,
+                                    size: 45.0,
+                                  ),
+                                  SizedBox(
+                                    width: 30.0,
+                                  ),
+                                  _paused
+                                      ? InkWell(
+                                          child: Icon(FlutterIcons.play_faw5s,
+                                              color: kWhite, size: 55.0),
+                                          onTap: () {
+                                            controlIcon = SizedBox();
+                                            overLay = SizedBox();
+
+                                            controller.play();
+                                            _paused = false;
+                                            setState(() {});
+                                          },
+                                        )
+                                      : InkWell(
+                                          child: Icon(FlutterIcons.pause_faw5s,
+                                              size: 80.0),
+                                          onTap: () {
+                                            controlIcon = SizedBox();
+                                            overLay = SizedBox();
+                                            controller.pause();
+                                            _paused = true;
+                                            setState(() {});
+                                          },
+                                        ),
+                                  SizedBox(
+                                    width: 30.0,
+                                  ),
+                                  Icon(
+                                    FlutterIcons.skip_next_mdi,
+                                    color: kWhite,
+                                    size: 45.0,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Row(
+                              // crossAxisAlignment: CrossAxisAlignment.end,
+                              mainAxisSize: MainAxisSize.max,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  formattedTime(currentDurationInSecond) +
+                                      ' / ' +
+                                      formattedTime(
+                                          controller.value.duration.inSeconds),
+                                  style: TextStyle(
+                                    color: kWhite, fontSize: 15,
+                                    // color: kWhite,
+                                    // fontSize: 15,
+                                    // fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                OutlinedButton(
+                                  child: Icon(FlutterIcons.fullscreen_mco),
+                                  style: OutlinedButton.styleFrom(
+                                    primary: kWhite,
+                                    side: BorderSide(
+                                        width: 0, color: Colors.black12),
+                                    shape: CircleBorder(),
+                                  ),
+                                  onPressed: () {},
+                                )
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  } else {
+                    _paused = false;
+                    overLay = SizedBox();
+
+                    controller.play();
+                    imageFadeAnim = FadeAnimation(
+                        child:
+                            const Icon(FlutterIcons.play_faw5s, size: 100.0));
+                    setState(() {});
+                  }
+                }),
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: progressIndicator,
+            ),
+            Center(child: imageFadeAnim),
+            Center(
+                child: Material(
+                    elevation: 8.0,
+                    color: Colors.white38,
+                    borderRadius: BorderRadius.circular(10.0),
+                    child: controlIcon)),
+            Center(
+                child: controller.value.isBuffering
+                    ? const CircularProgressIndicator(color: kPrimaryColor)
+                    : null),
+            overLay
+          ],
+        ),
       );
     } else {
       return Container(
@@ -1143,44 +1106,43 @@ query{
           ModalRoute.withName('/'));
     });
   }
-
-  @override
-  void dispose() {
-    super.dispose();
-    _controller.pause();
-    disposed = true;
-    _controller.dispose();
-    _aController.dispose();
-  }
 }
 
-// class HomeScreen extends StatelessWidget {
-//   @override
-//   Widget build(BuildContext context) {
-//     final height = MediaQuery.of(context).size.height;
-//     final width = MediaQuery.of(context).size.width;
-//     return Stack(
-//       children: [
-//         Positioned(
-//           bottom: height / 2.4,
-//           child: Image.network(
-//             'https://i.ibb.co/Y2CNM8V/new-york.jpg',
-//             height: height,
-//           ),
-//         ),
-//         Positioned(
-//           bottom: 0,
-//           child: Container(
-//             height: height / 2.4,
-//             width: width,
-//             color: Color(0xFF2D2C35),
-//           ),
-//         ),
-//         Foreground()
-//       ],
-//     );
+void addVideoView(int video_id) async {
+  User current_user = currentUser();
+  int user_id = current_user.id;
+  Loc loc = await currentLocation();
+  String lat = loc.lat;
+  String lng = loc.lng;
+  String ip = loc.ip;
+  String locationName = loc.name;
+  bool locationLive = loc.live;
+
+//   String query = """
+// mutation{
+//   addVideoView(videoId:$video_id,userId:$user_id,lat:"$lat",lng:"$lng",ip:"$ip",locationName:"$locationName",locationLive:$locationLive){
+//     ok
 //   }
 // }
+// """;
+
+  String query = """
+mutation{
+  addVideoView(videoId:$video_id,userId:$user_id){
+    ok
+  }
+}
+""";
+
+  GraphQLConfiguration graphQLConfig = new GraphQLConfiguration();
+  // GraphQLClient _client = graphQLConfig.clientToQuery();
+  QueryResult result = await GraphQLClient(
+    cache: GraphQLCache(),
+    link: HttpLink("https://plug27.herokuapp.com/graphq"),
+  ).mutate(MutationOptions(document: gql(query)));
+  print("VIEW RESULT");
+  print(result);
+}
 
 class Location {
   final String text;

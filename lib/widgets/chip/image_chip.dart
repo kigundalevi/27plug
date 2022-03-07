@@ -19,7 +19,7 @@ class ImageChip extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
           // color: kPrimaryLightColor,
-          borderRadius: BorderRadius.circular(30)),
+          borderRadius: BorderRadius.circular(50)),
       child: Padding(
         padding: EdgeInsets.symmetric(
             vertical: size.height * 0.007, horizontal: size.width * 0.01),
@@ -28,8 +28,8 @@ class ImageChip extends StatelessWidget {
             Padding(
               padding: EdgeInsets.symmetric(horizontal: size.height * 0.005),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(8.0),
-                child: Image.asset(
+                borderRadius: BorderRadius.circular(17.0),
+                child: Image.network(
                   image_url,
                   height: size.height * 0.03,
                 ),

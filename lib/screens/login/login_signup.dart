@@ -897,7 +897,7 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                                   duration: Duration(seconds: 3),
                                 )..show(context);
                                 Navigator.pop(context);
-                                Navigator.pushNamed(context, "/home");
+                                Navigator.pushNamed(context, '/home');
                               } else {
                                 setState(() {
                                   _loading = false;
@@ -985,8 +985,10 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                                         message: "Logged in successfully",
                                         duration: Duration(seconds: 3),
                                       )..show(context);
+                                      // Navigator.pop(context);
+                                      // Navigator.pushNamed(context, "/home");
                                       Navigator.pop(context);
-                                      Navigator.pushNamed(context, "/home");
+                                      Navigator.pushNamed(context, '/home');
                                     } else {
                                       setState(() {
                                         _loading = false;

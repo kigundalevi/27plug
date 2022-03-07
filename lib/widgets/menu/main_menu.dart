@@ -129,41 +129,41 @@ Widget MainMenu(
                         color: Colors.black38,
                       ),
                     ),
-                    MenuOption(context, size, Icons.watch_later, "Watch Later",
-                        "watchlater", current_page),
-                    Container(
-                      width: size.width / 1.8,
-                      child: Divider(
-                        color: Colors.black38,
-                      ),
-                    ),
-                    MenuOption(context, size, Icons.favorite, "Favourites",
-                        "favourites", current_page),
-                    Container(
-                      width: size.width / 1.8,
-                      child: Divider(
-                        color: Colors.black38,
-                      ),
-                    ),
-                    MenuOption(context, size, Icons.history, "History",
-                        "history", current_page),
-                    Container(
-                      width: size.width / 1.8,
-                      child: Divider(
-                        color: Colors.black38,
-                      ),
-                    ),
+                    // MenuOption(context, size, Icons.watch_later, "Watch Later",
+                    //     "watchlater", current_page),
+                    // Container(
+                    //   width: size.width / 1.8,
+                    //   child: Divider(
+                    //     color: Colors.black38,
+                    //   ),
+                    // ),
+                    // MenuOption(context, size, Icons.favorite, "Favourites",
+                    //     "favourites", current_page),
+                    // Container(
+                    //   width: size.width / 1.8,
+                    //   child: Divider(
+                    //     color: Colors.black38,
+                    //   ),
+                    // ),
+                    // MenuOption(context, size, Icons.history, "History",
+                    //     "history", current_page),
+                    // Container(
+                    //   width: size.width / 1.8,
+                    //   child: Divider(
+                    //     color: Colors.black38,
+                    //   ),
+                    // ),
                     SizedBox(
                       height: size.height / 5.1,
                     ),
-                    MenuOption(context, size, Icons.help, "Contact Support",
-                        "support", current_page),
-                    Container(
-                      width: size.width / 1.8,
-                      child: Divider(
-                        color: Colors.black38,
-                      ),
-                    ),
+                    // MenuOption(context, size, Icons.help, "Contact Support",
+                    //     "support", current_page),
+                    // Container(
+                    //   width: size.width / 1.8,
+                    //   child: Divider(
+                    //     color: Colors.black38,
+                    //   ),
+                    // ),
                     MenuButton(
                         context, size, Icons.logout, "Log Out", "support", () {
                       logout(context);
@@ -292,14 +292,14 @@ Widget MainMenu(
                     //     color: Colors.black38,
                     //   ),
                     // ),
-                    MenuOption(context, size, Icons.info_outline, "About",
-                        "about", current_page),
-                    Container(
-                      width: size.width / 1.8,
-                      child: Divider(
-                        color: Colors.black38,
-                      ),
-                    ),
+                    // MenuOption(context, size, Icons.info_outline, "About",
+                    //     "about", current_page),
+                    // Container(
+                    //   width: size.width / 1.8,
+                    //   child: Divider(
+                    //     color: Colors.black38,
+                    //   ),
+                    // ),
                     MenuButton(
                         context,
                         size,
@@ -310,7 +310,7 @@ Widget MainMenu(
                             " " +
                             DateTime.now().year.toString(),
                         "App", () {
-                      logout(context);
+                      // logout(context);
                     })
 
                     // MenuButton(
@@ -341,7 +341,7 @@ Container MenuOption(context, size, IconData icon, String text, String page,
     child: FlatButton.icon(
         // minWidth: size.width,
         onPressed: () {
-          // Navigator.pop(context);
+          Navigator.pop(context);
           Navigator.pushNamed(context, "/${page}");
           // Navigator.push(context,
           //     MaterialPageRoute(builder: (context) {
@@ -391,10 +391,5 @@ void logout(context) {
   appBox.delete('user');
   GraphQLConfiguration.removeToken();
   Navigator.pop(context);
-  Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(
-          // builder: (BuildContext context) => LoginSignupScreen(isLogin: true)),
-          builder: (BuildContext context) => LandingScreen()),
-      ModalRoute.withName('/'));
+  Navigator.pushNamed(context, '/landing');
 }

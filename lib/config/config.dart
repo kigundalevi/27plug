@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:simple_s3/simple_s3.dart';
 
 // BACKEND
 // const BACKEND_URL = "https://plug-apis.herokuapp.com/graphql";
@@ -58,5 +59,26 @@ class Palette {
   static const Color googleColor = Color(0xFFDE4B39);
   static const Color backgroundColor = Color(0xFFECF3F9);
 }
+
 /// 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 ///
 /// git clone https://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@github.com/MutugiBrian/27Plug-Apis.git
+///
+/// S3 Credentials
+///
+/// s3_endpoint = 'https://27-plug-files.s3.eu-west-3.amazonaws.com/uploads/'
+// s3_key_id = 'AKIA3KIAET77MPMN4WNZ'
+// s3_secret = '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'
+// s3_region_name = 'eu-west-3'
+
+// s3_client = boto3.client('s3', region_name=s3_region_name, endpoint_url=s3_endpoint +
+//                          'videos/', aws_access_key_id=s3_key_id, aws_secret_access_key=s3_secret)
+// thumbnail_upload_output = s3_client.put_object(Body=thumbnail_file, Bucket='thumbnails', Key=secure_filename(
+//     thumbnail_file.filename), ContentType=content_type)
+
+// s3_client = boto3.client('s3', region_name=s3_region_name, endpoint_url=s3_endpoint,
+//                          aws_access_key_id=s3_key_id, aws_secret_access_key=s3_secret)
+// video_upload_output = s3_client.put_object(Body=video_file, Bucket='videos', Key=secure_filename(
+//     video_file.filename), ContentType=content_type)
+const kS3BucketName = "27-plug-files";
+const kS3PoolID = "eu-west-3:b9ff5831-45ac-46b4-b0b2-c06a1c509ad4";
+//const kS3Region = AWSRegions.euWest3;

@@ -73,8 +73,7 @@ class _MyAppState extends State<MyApp> {
             landingRoute: (BuildContext context) => LandingScreen(),
             loginRegisterRoute: (BuildContext context) => LoginSignupScreen(),
             // homeRoute: (BuildContext context) => VideosScreen(),
-            homeRoute: (BuildContext context) =>
-                user.id == 1 ? LandingScreen() : VideosScreen(),
+            homeRoute: (BuildContext context) => VideosScreen(),
             uploadRoute: (BuildContext context) => UploadVideoPage()
           },
           // WelcomeScreen(
