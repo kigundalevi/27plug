@@ -14,7 +14,7 @@ class VideoInfoChip extends StatelessWidget {
     Size size = MediaQuery.of(context).size;
     return Container(
       // width: size.width * 0.25,
-      padding: EdgeInsets.all(2),
+      // padding: EdgeInsets.all(2),
       decoration: BoxDecoration(
         color: Colors.grey.shade900,
         borderRadius: BorderRadius.all(Radius.circular(numCurveRadius)),
@@ -27,7 +27,7 @@ class VideoInfoChip extends StatelessWidget {
             size: size.height * 0.025,
           ),
           SizedBox(
-            width: 6,
+            width: 2,
           ),
           Text(
             text,

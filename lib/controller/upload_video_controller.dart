@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:africanplug/config/config.dart';
+import 'package:africanplug/main.dart';
 import 'package:africanplug/models/location.dart';
 import 'package:africanplug/op/mutations.dart';
 import 'package:dio/dio.dart';
@@ -74,12 +75,14 @@ class UploadVideoController {
       // """),
       //   );
       print("Uploading video");
+      var user = appBox.get("user");
+      print(user['token']);
       Dio dio = Dio(
         BaseOptions(
           contentType: 'multipart/form-data',
           headers: {
             "Accept": "*/*",
-            "Authorization": "Bearer " + GraphQLConfiguration.sessionToken
+            "Authorization": "Bearer " + user['token']
           },
         ),
       );
@@ -116,7 +119,7 @@ class UploadVideoController {
       var req = new http.MultipartRequest("POST", Uri.parse(BACKEND_URL));
       Map<String, String> headers = {
         "Accept": "*/*",
-        "Authorization": "Bearer " + GraphQLConfiguration.sessionToken
+        "Authorization": "Bearer " + user['token']
       };
 
       req.headers.addAll(headers);

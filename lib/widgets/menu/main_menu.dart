@@ -154,7 +154,7 @@ Widget MainMenu(
                     //   ),
                     // ),
                     SizedBox(
-                      height: size.height / 5.1,
+                      height: size.height / 2.2,
                     ),
                     // MenuOption(context, size, Icons.help, "Contact Support",
                     //     "support", current_page),

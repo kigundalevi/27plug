@@ -172,12 +172,19 @@ class _LandingScreenState extends State<LandingScreen>
                                                 // controlView(context)
                                                 Padding(
                                                   padding:
-                                                      const EdgeInsets.all(8.0),
+                                                      const EdgeInsets.only(
+                                                          left: 8.0,
+                                                          right: 8.0,
+                                                          top: 2.0,
+                                                          bottom: 2.0),
                                                   child: Container(
-                                                    color: kActiveColor,
+                                                    // color: kActiveColor,
                                                     width: size.width,
                                                     height: size.height / 18,
-                                                    child: Text(videoTitle),
+                                                    child: Text(videoTitle,
+                                                        style: TextStyle(
+                                                            color: kActiveColor,
+                                                            fontSize: 17.0)),
                                                   ),
                                                 )
                                               ],
@@ -194,7 +201,7 @@ class _LandingScreenState extends State<LandingScreen>
                                     children: [
                                       videoSelected
                                           ? SizedBox(
-                                              height: size.height * 0.42,
+                                              height: size.height * 0.43,
                                             )
                                           : SizedBox(
                                               height: size.height / 15.5,
@@ -232,7 +239,7 @@ class _LandingScreenState extends State<LandingScreen>
                                                                     ? size.height -
                                                                         450
                                                                     : size.height -
-                                                                        120,
+                                                                        150,
                                                                 child: ListView
                                                                     .builder(
                                                                         itemCount: snapshot
@@ -247,131 +254,275 @@ class _LandingScreenState extends State<LandingScreen>
                                                                           return Padding(
                                                                             padding:
                                                                                 const EdgeInsets.symmetric(vertical: 3.0),
-                                                                            child:
-                                                                                ClipRRect(
-                                                                              borderRadius: BorderRadius.circular(8.0),
-                                                                              child: GestureDetector(
-                                                                                  onTap: () {
-                                                                                    videoSelected = true;
-                                                                                    onVideoTap(1, snapshot.data[index].url, snapshot.data[index].id);
+                                                                            child: index + 1 == snapshot.data.length
+                                                                                ? Column(
+                                                                                    children: [
+                                                                                      ClipRRect(
+                                                                                        borderRadius: BorderRadius.circular(8.0),
+                                                                                        child: GestureDetector(
+                                                                                            onTap: () {
+                                                                                              videoSelected = true;
+                                                                                              onVideoTap(1, snapshot.data[index].url, snapshot.data[index].id);
 
-                                                                                    videoTitle = snapshot.data[index].title;
-                                                                                    setState(() {});
-                                                                                  },
-                                                                                  child: Container(
-                                                                                    width: !isCollapsed ? size.width * 1 : size.width * 0.98,
-                                                                                    child: Material(
-                                                                                      elevation: 8.0,
-                                                                                      color: Colors.grey.shade900,
-                                                                                      child: Container(
-                                                                                        height: size.height / 6.3,
-                                                                                        padding: EdgeInsets.only(left: 5, right: 5),
-                                                                                        // width: size.width,
-                                                                                        child: Stack(
-                                                                                          children: [
-                                                                                            ColorFiltered(
-                                                                                              colorFilter: ColorFilter.mode(
-                                                                                                Colors.black26,
-                                                                                                BlendMode.darken,
-                                                                                              ),
-                                                                                              child: Row(
-                                                                                                children: [
-                                                                                                  Container(
-                                                                                                    width: size.width * 0.45,
-                                                                                                    height: size.height * 0.147,
-                                                                                                    child: Container(
-                                                                                                      decoration: BoxDecoration(
-                                                                                                        borderRadius: BorderRadius.circular(numCurveRadius),
-                                                                                                        image: DecorationImage(image: NetworkImage(snapshot.data[index].thumbnail_url == null ? "https://redmoonrecord.co.uk/tech/wp-content/uploads/2019/11/YouTube-thumbnail-size-guide-best-practices-top-examples.png" : snapshot.data[index].thumbnail_url), fit: BoxFit.fill),
-                                                                                                      ),
-                                                                                                      alignment: Alignment.center,
-                                                                                                    ),
-                                                                                                  ),
-                                                                                                  SizedBox(
-                                                                                                    // width: 180,
-                                                                                                    height: 200,
-                                                                                                  )
-                                                                                                ],
-                                                                                              ),
-                                                                                            ),
-                                                                                            Row(
-                                                                                              mainAxisSize: MainAxisSize.max,
-                                                                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                                                              children: [
-                                                                                                Container(
-                                                                                                  width: size.width * 0.45,
-                                                                                                  height: size.height * 0.147,
-                                                                                                  child: Align(
-                                                                                                    alignment: Alignment.bottomCenter,
-                                                                                                    child: Container(
-                                                                                                      height: size.width * 0.07,
-                                                                                                      child: Stack(
-                                                                                                        children: [
-                                                                                                          // Align(
-                                                                                                          //   alignment: Alignment.bottomLeft,
-                                                                                                          //   child: ThumbNailIconButton(
-                                                                                                          //     icon_data: Icons.watch_later,
-                                                                                                          //     press: () {},
-                                                                                                          //   ),
-                                                                                                          // ),
-                                                                                                          // Align(
-                                                                                                          //   alignment: Alignment.bottomRight,
-                                                                                                          //   child: ThumbNailIconButton(
-                                                                                                          //     icon_data: Icons.favorite,
-                                                                                                          //     press: () {},
-                                                                                                          //   ),
-                                                                                                          // )
-                                                                                                        ],
-                                                                                                      ),
-                                                                                                    ),
-                                                                                                  ),
-                                                                                                ),
-                                                                                                Container(
-                                                                                                  // height: size.height * 0.19,
-                                                                                                  width: !isCollapsed ? size.width / 4 : size.width / 2.2,
-                                                                                                  // color: Colors.black26,
-                                                                                                  // padding: EdgeInsets.symmetric(horizontal: size.width * 0.02),
-                                                                                                  child: Column(
-                                                                                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                                                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                                                              videoTitle = snapshot.data[index].title;
+                                                                                              setState(() {});
+                                                                                            },
+                                                                                            child: Container(
+                                                                                              width: !isCollapsed ? size.width * 1 : size.width * 0.98,
+                                                                                              child: Material(
+                                                                                                elevation: 8.0,
+                                                                                                color: Colors.grey.shade900,
+                                                                                                child: Container(
+                                                                                                  height: size.height / 6.3,
+                                                                                                  padding: EdgeInsets.only(left: 5, right: 5),
+                                                                                                  // width: size.width,
+                                                                                                  child: Stack(
                                                                                                     children: [
-                                                                                                      Text(
-                                                                                                        snapshot.data[index].title,
-                                                                                                        style: TextStyle(color: kWhite, fontSize: 18, fontWeight: FontWeight.w300),
-                                                                                                        textAlign: TextAlign.left,
+                                                                                                      ColorFiltered(
+                                                                                                        colorFilter: ColorFilter.mode(
+                                                                                                          Colors.black26,
+                                                                                                          BlendMode.darken,
+                                                                                                        ),
+                                                                                                        child: Row(
+                                                                                                          children: [
+                                                                                                            Container(
+                                                                                                              width: size.width * 0.45,
+                                                                                                              height: size.height * 0.147,
+                                                                                                              child: Container(
+                                                                                                                decoration: BoxDecoration(
+                                                                                                                  borderRadius: BorderRadius.circular(numCurveRadius),
+                                                                                                                  image: DecorationImage(image: NetworkImage(snapshot.data[index].thumbnail_url == null ? "https://redmoonrecord.co.uk/tech/wp-content/uploads/2019/11/YouTube-thumbnail-size-guide-best-practices-top-examples.png" : snapshot.data[index].thumbnail_url), fit: BoxFit.fill),
+                                                                                                                ),
+                                                                                                                alignment: Alignment.center,
+                                                                                                              ),
+                                                                                                            ),
+                                                                                                            SizedBox(
+                                                                                                              // width: 180,
+                                                                                                              height: 200,
+                                                                                                            )
+                                                                                                          ],
+                                                                                                        ),
                                                                                                       ),
-                                                                                                      // SizedBox(
-                                                                                                      //   height: size.height * 0.01,
-                                                                                                      // ),
-                                                                                                      ImageChip(image_url: (snapshot.data[index].uploader_dpurl == '' || snapshot.data[index].uploader_dpurl == null) ? 'https://www.pngitem.com/pimgs/m/421-4212617_person-placeholder-image-transparent-hd-png-download.png' : snapshot.data[index].uploader_dpurl, text: snapshot.data[index].uploaded_by),
                                                                                                       Row(
                                                                                                         mainAxisSize: MainAxisSize.max,
                                                                                                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                                                                         children: [
-                                                                                                          VideoInfoChip(
-                                                                                                            icon_data: Icons.remove_red_eye,
-                                                                                                            text: snapshot.data[index].views,
+                                                                                                          Container(
+                                                                                                            width: size.width * 0.45,
+                                                                                                            height: size.height * 0.147,
+                                                                                                            child: Align(
+                                                                                                              alignment: Alignment.bottomCenter,
+                                                                                                              child: Container(
+                                                                                                                height: size.width * 0.07,
+                                                                                                                child: Stack(
+                                                                                                                  children: [
+                                                                                                                    // Align(
+                                                                                                                    //   alignment: Alignment.bottomLeft,
+                                                                                                                    //   child: ThumbNailIconButton(
+                                                                                                                    //     icon_data: Icons.watch_later,
+                                                                                                                    //     press: () {},
+                                                                                                                    //   ),
+                                                                                                                    // ),
+                                                                                                                    // Align(
+                                                                                                                    //   alignment: Alignment.bottomRight,
+                                                                                                                    //   child: ThumbNailIconButton(
+                                                                                                                    //     icon_data: Icons.favorite,
+                                                                                                                    //     press: () {},
+                                                                                                                    //   ),
+                                                                                                                    // )
+                                                                                                                  ],
+                                                                                                                ),
+                                                                                                              ),
+                                                                                                            ),
                                                                                                           ),
-                                                                                                          VideoInfoChip(
-                                                                                                            icon_data: Icons.access_time,
-                                                                                                            text: snapshot.data[index].upload_lapse,
+                                                                                                          Container(
+                                                                                                            // height: size.height * 0.19,
+                                                                                                            width: !isCollapsed ? size.width / 4 : size.width / 2.2,
+                                                                                                            // color: Colors.black26,
+                                                                                                            // padding: EdgeInsets.symmetric(horizontal: size.width * 0.02),
+                                                                                                            child: Column(
+                                                                                                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                                                                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                                                                                              children: [
+                                                                                                                Text(
+                                                                                                                  snapshot.data[index].title,
+                                                                                                                  style: TextStyle(color: kWhite, fontSize: 18, fontWeight: FontWeight.w300),
+                                                                                                                  textAlign: TextAlign.left,
+                                                                                                                ),
+                                                                                                                // SizedBox(
+                                                                                                                //   height: size.height * 0.01,
+                                                                                                                // ),
+                                                                                                                ImageChip(image_url: (snapshot.data[index].uploader_dpurl == '' || snapshot.data[index].uploader_dpurl == null) ? 'https://www.pngitem.com/pimgs/m/421-4212617_person-placeholder-image-transparent-hd-png-download.png' : snapshot.data[index].uploader_dpurl, text: snapshot.data[index].uploaded_by),
+                                                                                                                Row(
+                                                                                                                  mainAxisSize: MainAxisSize.max,
+                                                                                                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                                                                                  children: [
+                                                                                                                    VideoInfoChip(
+                                                                                                                      icon_data: Icons.remove_red_eye,
+                                                                                                                      text: snapshot.data[index].views,
+                                                                                                                    ),
+                                                                                                                    VideoInfoChip(
+                                                                                                                      icon_data: Icons.access_time,
+                                                                                                                      text: snapshot.data[index].upload_lapse,
+                                                                                                                    ),
+                                                                                                                  ],
+                                                                                                                )
+                                                                                                              ],
+                                                                                                            ),
                                                                                                           ),
                                                                                                         ],
                                                                                                       )
                                                                                                     ],
                                                                                                   ),
                                                                                                 ),
-                                                                                              ],
-                                                                                            )
-                                                                                          ],
-                                                                                        ),
+                                                                                              ),
+                                                                                            )),
                                                                                       ),
-                                                                                    ),
-                                                                                  )),
-                                                                            ),
+                                                                                      TextButton(
+                                                                                          style: ButtonStyle(
+                                                                                              elevation: MaterialStateProperty.all(3.0),
+                                                                                              backgroundColor: MaterialStateProperty.all(kActiveColor),
+                                                                                              shape: MaterialStateProperty.all<RoundedRectangleBorder>(RoundedRectangleBorder(
+                                                                                                borderRadius: BorderRadius.circular(18.0),
+                                                                                                // side: BorderSide(color: Colors.red)
+                                                                                              ))),
+                                                                                          onPressed: () {
+                                                                                            // Navigator.pop(context);
+                                                                                            Navigator.pushNamed(context, "/loginRegister");
+                                                                                          },
+                                                                                          child: Text("Register/Login for more", style: TextStyle(color: kPrimaryColor, fontWeight: FontWeight.bold)))
+                                                                                      // Container(
+                                                                                      //   width: size.width,
+                                                                                      //   color: kRed,
+                                                                                      //   height: height / 10,
+                                                                                      // ),
+                                                                                    ],
+                                                                                  )
+                                                                                : ClipRRect(
+                                                                                    borderRadius: BorderRadius.circular(8.0),
+                                                                                    child: GestureDetector(
+                                                                                        onTap: () {
+                                                                                          videoSelected = true;
+                                                                                          onVideoTap(1, snapshot.data[index].url, snapshot.data[index].id);
+
+                                                                                          videoTitle = snapshot.data[index].title;
+                                                                                          setState(() {});
+                                                                                        },
+                                                                                        child: Container(
+                                                                                          width: !isCollapsed ? size.width * 1 : size.width * 0.98,
+                                                                                          child: Material(
+                                                                                            elevation: 8.0,
+                                                                                            color: Colors.grey.shade900,
+                                                                                            child: Container(
+                                                                                              height: size.height / 6.3,
+                                                                                              padding: EdgeInsets.only(left: 5, right: 5),
+                                                                                              // width: size.width,
+                                                                                              child: Stack(
+                                                                                                children: [
+                                                                                                  ColorFiltered(
+                                                                                                    colorFilter: ColorFilter.mode(
+                                                                                                      Colors.black26,
+                                                                                                      BlendMode.darken,
+                                                                                                    ),
+                                                                                                    child: Row(
+                                                                                                      children: [
+                                                                                                        Container(
+                                                                                                          width: size.width * 0.45,
+                                                                                                          height: size.height * 0.147,
+                                                                                                          child: Container(
+                                                                                                            decoration: BoxDecoration(
+                                                                                                              borderRadius: BorderRadius.circular(numCurveRadius),
+                                                                                                              image: DecorationImage(image: NetworkImage(snapshot.data[index].thumbnail_url == null ? "https://redmoonrecord.co.uk/tech/wp-content/uploads/2019/11/YouTube-thumbnail-size-guide-best-practices-top-examples.png" : snapshot.data[index].thumbnail_url), fit: BoxFit.fill),
+                                                                                                            ),
+                                                                                                            alignment: Alignment.center,
+                                                                                                          ),
+                                                                                                        ),
+                                                                                                        SizedBox(
+                                                                                                          // width: 180,
+                                                                                                          height: 200,
+                                                                                                        )
+                                                                                                      ],
+                                                                                                    ),
+                                                                                                  ),
+                                                                                                  Row(
+                                                                                                    mainAxisSize: MainAxisSize.max,
+                                                                                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                                                                    children: [
+                                                                                                      Container(
+                                                                                                        width: size.width * 0.45,
+                                                                                                        height: size.height * 0.147,
+                                                                                                        child: Align(
+                                                                                                          alignment: Alignment.bottomCenter,
+                                                                                                          child: Container(
+                                                                                                            height: size.width * 0.07,
+                                                                                                            child: Stack(
+                                                                                                              children: [
+                                                                                                                // Align(
+                                                                                                                //   alignment: Alignment.bottomLeft,
+                                                                                                                //   child: ThumbNailIconButton(
+                                                                                                                //     icon_data: Icons.watch_later,
+                                                                                                                //     press: () {},
+                                                                                                                //   ),
+                                                                                                                // ),
+                                                                                                                // Align(
+                                                                                                                //   alignment: Alignment.bottomRight,
+                                                                                                                //   child: ThumbNailIconButton(
+                                                                                                                //     icon_data: Icons.favorite,
+                                                                                                                //     press: () {},
+                                                                                                                //   ),
+                                                                                                                // )
+                                                                                                              ],
+                                                                                                            ),
+                                                                                                          ),
+                                                                                                        ),
+                                                                                                      ),
+                                                                                                      Container(
+                                                                                                        // height: size.height * 0.19,
+                                                                                                        width: !isCollapsed ? size.width / 4 : size.width / 2.2,
+                                                                                                        // color: Colors.black26,
+                                                                                                        // padding: EdgeInsets.symmetric(horizontal: size.width * 0.02),
+                                                                                                        child: Column(
+                                                                                                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                                                                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                                                                                          children: [
+                                                                                                            Text(
+                                                                                                              snapshot.data[index].title,
+                                                                                                              style: TextStyle(color: kWhite, fontSize: 18, fontWeight: FontWeight.w300),
+                                                                                                              textAlign: TextAlign.left,
+                                                                                                            ),
+                                                                                                            // SizedBox(
+                                                                                                            //   height: size.height * 0.01,
+                                                                                                            // ),
+                                                                                                            ImageChip(image_url: (snapshot.data[index].uploader_dpurl == '' || snapshot.data[index].uploader_dpurl == null) ? 'https://www.pngitem.com/pimgs/m/421-4212617_person-placeholder-image-transparent-hd-png-download.png' : snapshot.data[index].uploader_dpurl, text: snapshot.data[index].uploaded_by),
+                                                                                                            Row(
+                                                                                                              mainAxisSize: MainAxisSize.max,
+                                                                                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                                                                              children: [
+                                                                                                                VideoInfoChip(
+                                                                                                                  icon_data: Icons.remove_red_eye,
+                                                                                                                  text: snapshot.data[index].views,
+                                                                                                                ),
+                                                                                                                VideoInfoChip(
+                                                                                                                  icon_data: Icons.access_time,
+                                                                                                                  text: snapshot.data[index].upload_lapse,
+                                                                                                                ),
+                                                                                                              ],
+                                                                                                            )
+                                                                                                          ],
+                                                                                                        ),
+                                                                                                      ),
+                                                                                                    ],
+                                                                                                  )
+                                                                                                ],
+                                                                                              ),
+                                                                                            ),
+                                                                                          ),
+                                                                                        )),
+                                                                                  ),
                                                                           );
                                                                         }),
                                                               ),
+
                                                               // videoSelected
                                                               //     ? SizedBox(
                                                               //         height:
@@ -635,7 +786,7 @@ class _LandingScreenState extends State<LandingScreen>
       link: HttpLink("https://plug27.herokuapp.com/graphq"),
     ).query(QueryOptions(document: gql("""
 query{
-  listVideo(sortField:"created_at",order:"desc",limit:5){
+  listVideo(sortField:"created_at",order:"desc",limit:8){
     id,
     title,
     url,
@@ -698,6 +849,7 @@ query{
           } else {
             lapse = days_lapse.toString() + " days ago";
           }
+          String views = video['views'].length.toString() + " views";
 
           _latestVideos.add(Video(
             id: int.parse(video['id']),
@@ -710,7 +862,9 @@ query{
             name: video['name'],
             thumbnail_url: video['thumbnailUrl'],
             thumbnail_name: video['thumbnailName'],
-            views: video['views'].length.toString(),
+            views: views.length > 12
+                ? views.replaceRange(9, views.length, '...')
+                : views,
             upload_lapse: lapse.length > 12
                 ? lapse.replaceRange(9, lapse.length, '...')
                 : lapse,
@@ -870,10 +1024,32 @@ query{
         // margin: EdgeInsets.only(top: size.height / 12),
         height: 240,
         width: double.infinity,
+        color: kBlack,
         child: Stack(
           children: [
+            // Container(
+            //     width: size.width,
+            //     color: kRed,
+            //     child: Center(
+            //       child: Transform.scale(
+            //         scale: getScale(),
+            //         child: AspectRatio(
+            //           aspectRatio: controller.value.aspectRatio,
+            //           child: VideoPlayer(controller),
+            //         ),
+            //       ),
+            //     )),
             GestureDetector(
-                child: VideoPlayer(controller),
+                child: Center(
+                  child: FittedBox(
+                    fit: BoxFit.cover,
+                    child: SizedBox(
+                      height: controller.value.size.height,
+                      width: controller.value.size.width,
+                      child: VideoPlayer(controller),
+                    ),
+                  ),
+                ),
                 onTap: () {
                   if (!controller.value.isInitialized) {
                     return;
@@ -1052,6 +1228,197 @@ query{
       );
     }
   }
+
+  // Widget playView(BuildContext context) {
+  //   Size size = MediaQuery.of(context).size;
+  //   final controller = _controller;
+  //   if (controller != null && controller.value.isInitialized) {
+  //     return Container(
+  //       // margin: EdgeInsets.only(top: size.height / 12),
+  //       height: 240,
+  //       width: double.infinity,
+  //       child: Stack(
+  //         children: [
+  //           GestureDetector(
+  //               child: VideoPlayer(controller),
+  //               onTap: () {
+  //                 if (!controller.value.isInitialized) {
+  //                   return;
+  //                 }
+  //                 if (controller.value.isPlaying) {
+  //                   controller.pause();
+  //                   _paused = true;
+  //                   setState(() {});
+  //                   imageFadeAnim = FadeAnimation(
+  //                       child: const Icon(Icons.pause, size: 100.0));
+
+  //                   // controller.pause();
+  //                   // controlIcon = ;
+  //                   overLay = Container(
+  //                     height: 240,
+  //                     color: Colors.black38,
+  //                     child: Padding(
+  //                       padding: const EdgeInsets.only(left: 8.0),
+  //                       child: Column(
+  //                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //                         crossAxisAlignment: CrossAxisAlignment.stretch,
+  //                         mainAxisSize: MainAxisSize.max,
+  //                         children: [
+  //                           Row(
+  //                             mainAxisSize: MainAxisSize.max,
+  //                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //                             children: [
+  //                               Text(
+  //                                 videoTitle.length > 25
+  //                                     ? videoTitle.replaceRange(
+  //                                         25, videoTitle.length, '...')
+  //                                     : videoTitle,
+  //                                 style: TextStyle(color: kWhite, fontSize: 15),
+  //                               ),
+  //                               OutlinedButton(
+  //                                 child: Icon(Icons.more_horiz),
+  //                                 style: OutlinedButton.styleFrom(
+  //                                   primary: kWhite,
+  //                                   side: BorderSide(
+  //                                       width: 0, color: Colors.black12),
+  //                                   shape: CircleBorder(),
+  //                                 ),
+  //                                 onPressed: () {},
+  //                               )
+  //                             ],
+  //                           ),
+  //                           Container(
+  //                             child: Row(
+  //                               mainAxisSize: MainAxisSize.max,
+  //                               mainAxisAlignment: MainAxisAlignment.center,
+  //                               children: [
+  //                                 Icon(
+  //                                   FlutterIcons.skip_previous_mdi,
+  //                                   color: kWhite,
+  //                                   size: 45.0,
+  //                                 ),
+  //                                 SizedBox(
+  //                                   width: 30.0,
+  //                                 ),
+  //                                 _paused
+  //                                     ? InkWell(
+  //                                         child: Icon(FlutterIcons.play_faw5s,
+  //                                             color: kWhite, size: 55.0),
+  //                                         onTap: () {
+  //                                           controlIcon = SizedBox();
+  //                                           overLay = SizedBox();
+
+  //                                           controller.play();
+  //                                           _paused = false;
+  //                                           setState(() {});
+  //                                         },
+  //                                       )
+  //                                     : InkWell(
+  //                                         child: Icon(FlutterIcons.pause_faw5s,
+  //                                             size: 80.0),
+  //                                         onTap: () {
+  //                                           controlIcon = SizedBox();
+  //                                           overLay = SizedBox();
+  //                                           controller.pause();
+  //                                           _paused = true;
+  //                                           setState(() {});
+  //                                         },
+  //                                       ),
+  //                                 SizedBox(
+  //                                   width: 30.0,
+  //                                 ),
+  //                                 Icon(
+  //                                   FlutterIcons.skip_next_mdi,
+  //                                   color: kWhite,
+  //                                   size: 45.0,
+  //                                 ),
+  //                               ],
+  //                             ),
+  //                           ),
+  //                           Row(
+  //                             // crossAxisAlignment: CrossAxisAlignment.end,
+  //                             mainAxisSize: MainAxisSize.max,
+  //                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //                             children: [
+  //                               Text(
+  //                                 formattedTime(currentDurationInSecond) +
+  //                                     ' / ' +
+  //                                     formattedTime(
+  //                                         controller.value.duration.inSeconds),
+  //                                 style: TextStyle(
+  //                                   color: kWhite, fontSize: 15,
+  //                                   // color: kWhite,
+  //                                   // fontSize: 15,
+  //                                   // fontWeight: FontWeight.w700,
+  //                                 ),
+  //                               ),
+  //                               OutlinedButton(
+  //                                 child: Icon(FlutterIcons.fullscreen_mco),
+  //                                 style: OutlinedButton.styleFrom(
+  //                                   primary: kWhite,
+  //                                   side: BorderSide(
+  //                                       width: 0, color: Colors.black12),
+  //                                   shape: CircleBorder(),
+  //                                 ),
+  //                                 onPressed: () {},
+  //                               )
+  //                             ],
+  //                           ),
+  //                         ],
+  //                       ),
+  //                     ),
+  //                   );
+  //                 } else {
+  //                   _paused = false;
+  //                   overLay = SizedBox();
+
+  //                   controller.play();
+  //                   imageFadeAnim = FadeAnimation(
+  //                       child:
+  //                           const Icon(FlutterIcons.play_faw5s, size: 100.0));
+  //                   setState(() {});
+  //                 }
+  //               }),
+  //           Align(
+  //             alignment: Alignment.bottomCenter,
+  //             child: progressIndicator,
+  //           ),
+  //           Center(child: imageFadeAnim),
+  //           Center(
+  //               child: Material(
+  //                   elevation: 8.0,
+  //                   color: Colors.white38,
+  //                   borderRadius: BorderRadius.circular(10.0),
+  //                   child: controlIcon)),
+  //           Center(
+  //               child: controller.value.isBuffering
+  //                   ? const CircularProgressIndicator(color: kPrimaryColor)
+  //                   : null),
+  //           overLay
+  //         ],
+  //       ),
+  //     );
+  //   } else {
+  //     return Container(
+  //       height: 240,
+  //       // margin: EdgeInsets.only(top: size.height / 12),
+  //       color: Colors.white,
+  //       width: double.infinity,
+  //       child: Column(
+  //         mainAxisAlignment: MainAxisAlignment.center,
+  //         children: [
+  //           Icon(Icons.slow_motion_video_rounded, color: kPrimaryLightColor),
+  //           Text(
+  //             "Loading. Please wait..",
+  //             style: TextStyle(
+  //               fontSize: 14,
+  //             ),
+  //           )
+  //         ],
+  //       ),
+  //     );
+  //   }
+  // }
 
   Widget controlView(BuildContext context) {
     Size size = MediaQuery.of(context).size;

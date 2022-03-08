@@ -182,7 +182,7 @@ class _VideosScreenState extends State<VideosScreen>
                                                       videoTitle,
                                                       style: TextStyle(
                                                           color: kActiveColor,
-                                                          fontSize: 16),
+                                                          fontSize: 17),
                                                     ),
                                                   ),
                                                 )
@@ -200,7 +200,7 @@ class _VideosScreenState extends State<VideosScreen>
                                     children: [
                                       videoSelected
                                           ? SizedBox(
-                                              height: size.height * 0.42,
+                                              height: size.height * 0.43,
                                             )
                                           : SizedBox(
                                               height: size.height / 15.5,
@@ -662,6 +662,7 @@ query{
           } else {
             lapse = days_lapse.toString() + " days ago";
           }
+          String views = video['views'].length.toString() + " views";
 
           _latestVideos.add(Video(
             id: int.parse(video['id']),
@@ -674,7 +675,9 @@ query{
             name: video['name'],
             thumbnail_url: video['thumbnailUrl'],
             thumbnail_name: video['thumbnailName'],
-            views: video['views'].length.toString(),
+            views: views.length > 12
+                ? views.replaceRange(9, views.length, '...')
+                : views,
             upload_lapse: lapse.length > 12
                 ? lapse.replaceRange(9, lapse.length, '...')
                 : lapse,

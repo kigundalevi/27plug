@@ -66,9 +66,10 @@ class _MyAppState extends State<MyApp> {
                 focusedBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: kPrimaryColor)),
               )),
-          home: GraphQLConfiguration.sessionToken == ''
-              ? LandingScreen()
-              : VideosScreen(),
+          // home: GraphQLConfiguration.sessionToken == ''
+          //     ? LandingScreen()
+          //     : VideosScreen(),
+          home: appBox.get("user") == null ? LandingScreen() : VideosScreen(),
           routes: <String, WidgetBuilder>{
             landingRoute: (BuildContext context) => LandingScreen(),
             loginRegisterRoute: (BuildContext context) => LoginSignupScreen(),

@@ -259,9 +259,14 @@ class _UploadVideoPageState extends State<UploadVideoPage>
                                 isCollapsed = !isCollapsed;
                               });
                             }, () {
-                              Navigator.pushNamed(context, "/home");
+                              Navigator.pushAndRemoveUntil(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => VideosScreen(),
+                                  ),
+                                  (route) => false);
                             }, () {
-                              Navigator.pushNamed(context, "/loginRegister");
+                              // Navigator.pushNamed(context, "/loginRegister");
                             }),
                             selectedVideo != null
                                 ? Column(
@@ -525,7 +530,9 @@ class _UploadVideoPageState extends State<UploadVideoPage>
                                                     iconsize: 20,
                                                     enabled: false,
                                                   ),
-                                                  onTap: _uploadNewThumbnail),
+                                                  onTap: isLoading
+                                                      ? () {}
+                                                      : _uploadNewThumbnail),
                                               _selectedThumbnailError
                                                   ? Container(
                                                       color: kWhite,
