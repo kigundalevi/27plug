@@ -108,9 +108,33 @@ class _UploadVideoPageState extends State<UploadVideoPage>
   late String uploadedThumbnailUrl;
   late String uploadedThumbnailName;
 
+  //PLAYAREA
+  bool playArea = false;
+  bool isPlaying = false;
+  bool disposed = false;
+
+  FadeAnimation imageFadeAnim =
+      FadeAnimation(child: const Icon(Icons.play_arrow, size: 100.0));
+  Widget controlIcon = SizedBox();
+  Widget overLay = SizedBox();
+
+  bool _paused = false;
+  bool _overlayed = false;
+  int currentDurationInSecond = 0;
+
+  late String videoTitle;
+
+  late VideoProgressIndicator progressIndicator;
+
   @override
   void initState() {
     super.initState();
+    _controller = VideoPlayerController.network(
+        'https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4')
+      ..initialize().then((_) {
+        setState(() {});
+        // _controller.play();
+      });
 
     uploadedVideoUrl = "";
     uploadedThumbnailUrl = "";
@@ -144,6 +168,13 @@ class _UploadVideoPageState extends State<UploadVideoPage>
   void dispose() {
     selectedVideo = null;
     selectedvideotags.clear();
+
+    _controller.setVolume(0);
+    _controller.pause();
+    _controller.dispose();
+    disposed = true;
+    _aController.dispose();
+
     super.dispose();
     _searchTextEditingController.dispose();
   }
@@ -279,16 +310,18 @@ class _UploadVideoPageState extends State<UploadVideoPage>
                                         children: [
                                           Column(
                                             children: [
-                                              new NetworkPlayerLifeCycle(
-                                                  '$selectedVideoPath',
-                                                  selectedVideo!,
-                                                  (BuildContext context,
-                                                          VideoPlayerController
-                                                              controller) =>
-                                                      AspectRatioVideo(
-                                                          controller,
-                                                          selectedVideo!,
-                                                          size)),
+                                              // new NetworkPlayerLifeCycle(
+                                              //     '$selectedVideoPath',
+                                              //     selectedVideo!,
+                                              //     (BuildContext context,
+                                              //             VideoPlayerController
+                                              //                 controller) =>
+                                              //         AspectRatioVideo(
+                                              //             controller,
+                                              //             selectedVideo!,
+                                              //             size)),
+
+                                              playView(context),
                                               Container(
                                                   alignment: Alignment.topLeft,
                                                   padding:
@@ -1066,6 +1099,219 @@ class _UploadVideoPageState extends State<UploadVideoPage>
         ]));
   }
 
+  Widget playView(BuildContext context) {
+    Size size = MediaQuery.of(context).size;
+    final controller = _controller;
+    if (controller != null && controller.value.isInitialized) {
+      return Container(
+        // margin: EdgeInsets.only(top: size.height / 12),
+        height: 240,
+        width: double.infinity,
+        color: kBlack,
+        child: Stack(
+          children: [
+            // Container(
+            //     width: size.width,
+            //     color: kRed,
+            //     child: Center(
+            //       child: Transform.scale(
+            //         scale: getScale(),
+            //         child: AspectRatio(
+            //           aspectRatio: controller.value.aspectRatio,
+            //           child: VideoPlayer(controller),
+            //         ),
+            //       ),
+            //     )),
+            GestureDetector(
+                child: Center(
+                  child: FittedBox(
+                    fit: BoxFit.cover,
+                    child: SizedBox(
+                      height: controller.value.size.height,
+                      width: controller.value.size.width,
+                      child: VideoPlayer(controller),
+                    ),
+                  ),
+                ),
+                onTap: () {
+                  if (!controller.value.isInitialized) {
+                    return;
+                  }
+                  if (controller.value.isPlaying) {
+                    controller.pause();
+                    _paused = true;
+                    setState(() {});
+                    imageFadeAnim = FadeAnimation(
+                        child: const Icon(Icons.pause, size: 100.0));
+
+                    // controller.pause();
+                    // controlIcon = ;
+                    overLay = Container(
+                      height: 240,
+                      color: Colors.black38,
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 8.0),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          mainAxisSize: MainAxisSize.max,
+                          children: [
+                            Row(
+                              mainAxisSize: MainAxisSize.max,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  videoTitle.length > 25
+                                      ? videoTitle.replaceRange(
+                                          25, videoTitle.length, '...')
+                                      : videoTitle,
+                                  style: TextStyle(color: kWhite, fontSize: 15),
+                                ),
+                                OutlinedButton(
+                                  child: Icon(Icons.more_horiz),
+                                  style: OutlinedButton.styleFrom(
+                                    primary: kWhite,
+                                    side: BorderSide(
+                                        width: 0, color: Colors.black12),
+                                    shape: CircleBorder(),
+                                  ),
+                                  onPressed: () {},
+                                )
+                              ],
+                            ),
+                            Container(
+                              child: Row(
+                                mainAxisSize: MainAxisSize.max,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    FlutterIcons.skip_previous_mdi,
+                                    color: kWhite,
+                                    size: 45.0,
+                                  ),
+                                  SizedBox(
+                                    width: 30.0,
+                                  ),
+                                  _paused
+                                      ? InkWell(
+                                          child: Icon(FlutterIcons.play_faw5s,
+                                              color: kWhite, size: 55.0),
+                                          onTap: () {
+                                            controlIcon = SizedBox();
+                                            overLay = SizedBox();
+
+                                            controller.play();
+                                            _paused = false;
+                                            setState(() {});
+                                          },
+                                        )
+                                      : InkWell(
+                                          child: Icon(FlutterIcons.pause_faw5s,
+                                              size: 80.0),
+                                          onTap: () {
+                                            controlIcon = SizedBox();
+                                            overLay = SizedBox();
+                                            controller.pause();
+                                            _paused = true;
+                                            setState(() {});
+                                          },
+                                        ),
+                                  SizedBox(
+                                    width: 30.0,
+                                  ),
+                                  Icon(
+                                    FlutterIcons.skip_next_mdi,
+                                    color: kWhite,
+                                    size: 45.0,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Row(
+                              // crossAxisAlignment: CrossAxisAlignment.end,
+                              mainAxisSize: MainAxisSize.max,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  formattedTime(currentDurationInSecond) +
+                                      ' / ' +
+                                      formattedTime(
+                                          controller.value.duration.inSeconds),
+                                  style: TextStyle(
+                                    color: kWhite, fontSize: 15,
+                                    // color: kWhite,
+                                    // fontSize: 15,
+                                    // fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                OutlinedButton(
+                                  child: Icon(FlutterIcons.fullscreen_mco),
+                                  style: OutlinedButton.styleFrom(
+                                    primary: kWhite,
+                                    side: BorderSide(
+                                        width: 0, color: Colors.black12),
+                                    shape: CircleBorder(),
+                                  ),
+                                  onPressed: () {},
+                                )
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  } else {
+                    _paused = false;
+                    overLay = SizedBox();
+
+                    controller.play();
+                    imageFadeAnim = FadeAnimation(
+                        child:
+                            const Icon(FlutterIcons.play_faw5s, size: 100.0));
+                    setState(() {});
+                  }
+                }),
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: progressIndicator,
+            ),
+            Center(child: imageFadeAnim),
+            Center(
+                child: Material(
+                    elevation: 8.0,
+                    color: Colors.white38,
+                    borderRadius: BorderRadius.circular(10.0),
+                    child: controlIcon)),
+            Center(
+                child: controller.value.isBuffering
+                    ? const CircularProgressIndicator(color: kPrimaryColor)
+                    : null),
+            overLay
+          ],
+        ),
+      );
+    } else {
+      return Container(
+        height: 240,
+        // margin: EdgeInsets.only(top: size.height / 12),
+        color: Colors.white,
+        width: double.infinity,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.slow_motion_video_rounded, color: kPrimaryLightColor),
+            Text(
+              "Loading. Please wait..",
+              style: TextStyle(
+                fontSize: 14,
+              ),
+            )
+          ],
+        ),
+      );
+    }
+  }
+
   Widget uploadHeader() => Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
@@ -1398,6 +1644,30 @@ class _UploadVideoPageState extends State<UploadVideoPage>
     }
   }
 
+  var onUpdateControllerTime;
+  void onControllerUpdate() async {
+    if (disposed) {
+      return;
+    }
+    onUpdateControllerTime = 0;
+    final now = DateTime.now().millisecondsSinceEpoch;
+
+    if (onUpdateControllerTime < now) {
+      onUpdateControllerTime = now + 500;
+    }
+    final controller = _controller;
+    if (controller == null || !controller.value.isInitialized) {
+      debugPrint("Controller error");
+      return;
+    } else {
+      final playing = controller.value.isPlaying;
+
+      setState(() {
+        isPlaying = playing;
+      });
+    }
+  }
+
   void _uploadNewVideo() async {
     bool isOnline = await checkOnline();
     if (!isOnline) {
@@ -1426,9 +1696,55 @@ class _UploadVideoPageState extends State<UploadVideoPage>
           await FilePicker.platform.pickFiles(type: FileType.video);
       if (videoPicked != null) {
         PlatformFile file = videoPicked.files.first;
+
+        // await controller.initialize();
+
         VideoPlayerController controller =
             new VideoPlayerController.network(file.path!);
-        await controller.initialize();
+        final old_controller = _controller;
+        _controller = controller;
+        old_controller.removeListener(() {
+          onControllerUpdate();
+        });
+        old_controller.pause;
+        old_controller.dispose();
+        setState(() {});
+        WidgetsBinding.instance?.addPostFrameCallback((_) {
+          // ignore: avoid_single_cascade_in_expression_statements
+          controller
+            ..initialize().then((_) {
+              // controller.addListener(listener);
+              controller.addListener(() {
+                // setState(() {
+                currentDurationInSecond = _controller.value.position.inSeconds;
+                // });
+                if (_controller.value.position.inSeconds >=
+                    _controller.value.duration.inSeconds) {
+                  print("ended");
+                }
+
+                onControllerUpdate;
+              });
+              _controller.play();
+
+              // _controller.addListener(() => setState(() {}));
+
+              progressIndicator = VideoProgressIndicator(
+                _controller,
+                allowScrubbing: true,
+                colors: VideoProgressColors(
+                  playedColor: Colors.red,
+                  bufferedColor: Colors.grey.shade400,
+                  backgroundColor: Colors.grey,
+                ),
+              );
+
+              setState(() {
+                playArea = true;
+                isPlaying = true;
+              });
+            });
+        });
 
         setState(() {
           selectedVideoPath = file.path;
@@ -1486,6 +1802,10 @@ class _UploadVideoPageState extends State<UploadVideoPage>
             isLoading = true;
           });
           _uploadVideoToS3(File(file.path!));
+
+//
+
+          /////////
         }
 
         setState(() {});
