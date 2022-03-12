@@ -59,11 +59,24 @@ class LoginController {
     if (token != null) {
       GraphQLConfiguration.setToken(token);
       res['user']['token'] = token;
+
+      String dp_url = txtDefaultDpUrl;
+      if (res['user']["dp_url"] != null && res['user']["dp_url"] != "") {
+        dp_url = res['user']["dp_url"];
+      }
+
       User loggedin_user = User(
           id: res['user']['id'],
           first_name: res['user']['first_name'],
           last_name: res['user']['last_name'],
+          channel_name: res['user']['channel_name'],
+          phone_no: res['user']['phoneNo'],
           email: res['user']['email'],
+          fb_name: res['user']['fb_name'],
+          fb_url: res['user']['fb_url'],
+          instagram_name: res['user']['instagram_name'],
+          instagram_url: res['user']['instagram_url'],
+          dp_url: dp_url,
           user_type: res['user']['user_type']['name'],
           user_type_id: res['user']['user_type']['id'],
           token: token);

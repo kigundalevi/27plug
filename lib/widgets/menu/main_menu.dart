@@ -389,6 +389,7 @@ Container MenuButton(
 
 void logout(context) {
   appBox.delete('user');
+  appBox.delete('cached_location');
   GraphQLConfiguration.removeToken();
   // Navigator.pop(context);
   // Navigator.pushNamed(context, '/landing');

@@ -61,6 +61,7 @@ dependencies:
     # aws_s3: ^0.1.1+hotfix.5
     simple_s3: ^0.3.2
     percent_indicator: ^4.0.0
+    expansion_tile_card: ^2.0.0
     # flutter_uploader: ^1.2.1
     # aws_s3: ^0.1.1+hotfix.5
     # d
@@ -102,6 +103,7 @@ flutter:
         - assets/images/
         - assets/videos/
         - assets/icons/
+        - assets/travel/
 
     # An image asset can refer to one or more resolution-specific "variants", see
     # https://flutter.dev/assets-and-images/#resolution-aware.

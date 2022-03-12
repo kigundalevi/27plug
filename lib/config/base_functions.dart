@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:africanplug/config/config.dart';
 import 'package:africanplug/main.dart';
 import 'package:africanplug/models/location.dart';
 import 'package:africanplug/models/user.dart';
@@ -11,22 +12,59 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
+import 'package:simple_s3/simple_s3.dart';
+
+Future<String> uploadFileToS3(File file, String folder) async {
+  String? result;
+  SimpleS3 _simpleS3 = SimpleS3();
+  try {
+    result = await _simpleS3.uploadFile(
+      file,
+      kS3BucketName,
+      kS3PoolID,
+      AWSRegions.euWest3,
+      debugLog: true,
+      s3FolderPath: folder,
+      accessControl: S3AccessControl.publicRead,
+      useTimeStamp: true,
+    );
+
+    return result;
+  } catch (e) {
+    print(e);
+    return 'error :' + e.toString();
+  }
+}
 
 User currentUser() {
   var user = appBox.get("user");
   if (user == null) {
     return User(
-        id: 1,
-        first_name: "27Plug",
-        last_name: "Guest",
-        email: "guest@27plug.app");
+      id: 1,
+      first_name: "27Plug",
+      last_name: "Guest",
+      channel_name: "",
+      email: "guest@27plug.app",
+    );
   } else {
     var user = appBox.get("user");
+    String dp_url = txtDefaultDpUrl;
+    if (user["dp_url"] != null && user["dp_url"] != "") {
+      dp_url = user["dp_url"];
+      print(dp_url);
+    }
     return User(
         id: user["id"],
         first_name: user["first_name"],
         last_name: user["last_name"],
+        channel_name: user["channel_name"],
+        phone_no: user["phoneNo"],
         email: user["email"],
+        fb_name: user['fb_name'],
+        fb_url: user['fb_url'],
+        instagram_name: user['instagram_name'],
+        instagram_url: user['instagram_url'],
+        dp_url: dp_url,
         logged_in: true,
         user_type: user["user_type"]["name"],
         user_type_id: user["user_type"]["id"]);
@@ -103,20 +141,27 @@ Future<Loc> currentLocation() async {
 
 Future<Loc> _locFromIp() async {
   Loc location;
-  try {
-    http.Response res = await http.get(Uri.parse('http://ip-api.com/json'));
-    location = Loc(
-        lat: json.decode(res.body)['lat'].toString(),
-        lng: json.decode(res.body)['lon'].toString(),
-        ip: json.decode(res.body)['query'],
-        name: json.decode(res.body)['regionName'] +
-            ',' +
-            json.decode(res.body)['country']);
+  var cached_location = appBox.get("cached_location");
 
-    return location;
+  try {
+    if (cached_location == null) {
+      http.Response res = await http.get(Uri.parse('http://ip-api.com/json'));
+
+      location = Loc(
+          lat: json.decode(res.body)['lat'].toString(),
+          lng: json.decode(res.body)['lon'].toString(),
+          ip: json.decode(res.body)['query'],
+          name: json.decode(res.body)['regionName'] +
+              ',' +
+              json.decode(res.body)['country']);
+      appBox.put('cached_location', location);
+      return location;
+    } else {
+      return cached_location;
+    }
   } catch (err) {
-    print(err);
-    print("Error getting Loc from IP");
+    // print(err);
+    // print("Error getting Loc from IP");
 
     location = Loc(lat: "0", lng: "0", ip: "0.0.0.0", name: "unknown");
     return location;

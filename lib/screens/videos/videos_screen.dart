@@ -160,8 +160,11 @@ class _VideosScreenState extends State<VideosScreen>
                                       Navigator.pushNamed(context, "/home");
                                     }, () {
                                       // Navigator.pop(context);
-                                      // Navigator.pushNamed(
-                                      //     context, "/loginRegister");
+                                      Navigator.pushNamed(context, "/profile",
+                                          arguments: [
+                                            currentUser().id,
+                                            'profile'
+                                          ]);
                                     }),
                                     videoSelected
                                         ? Container(

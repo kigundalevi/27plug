@@ -946,62 +946,93 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                                     _loading = false;
                                   });
                                 } else {
-                                  Loc location = await currentLocation();
-                                  String? response = await _registerUser(
-                                      _registerFirstName.toString(),
-                                      _registerLastName.toString(),
-                                      isMale,
-                                      minAge,
-                                      maxAge,
-                                      _registerPhoneNo.toString(),
-                                      _registerEmail.toString(),
-                                      _registerpassword.toString(),
-                                      location);
-
-                                  if (response.toString() == 'success') {
-                                    // setState(() {
-                                    //   _loading = false;
-                                    // });
+                                  bool isOnline = await checkOnline();
+                                  if (!isOnline) {
+                                    setState(() {
+                                      _loading = false;
+                                    });
                                     Flushbar(
-                                      isDismissible: false,
                                       icon: Icon(
-                                        Icons.check_circle_rounded,
-                                        color: kPrimaryColor,
+                                        Icons.info_outline,
+                                        color: Colors.white,
                                       ),
-                                      backgroundColor: kPrimaryLightColor,
-                                      title: "Registered successfully",
-                                      message: "logging in..",
+                                      backgroundColor: Colors.redAccent,
+                                      title: "Error",
+                                      message: "No Internet",
                                       duration: Duration(seconds: 3),
                                     )..show(context);
-                                    String? _loginResponse = await _loginUser(
-                                        _registerEmail,
-                                        _registerpassword,
+                                  } else {
+                                    Loc location = await currentLocation();
+                                    String? response = await _registerUser(
+                                        _registerFirstName.toString(),
+                                        _registerLastName.toString(),
+                                        isMale,
+                                        minAge,
+                                        maxAge,
+                                        _registerPhoneNo.toString(),
+                                        _registerEmail.toString(),
+                                        _registerpassword.toString(),
                                         location);
 
-                                    if (_loginResponse.toString() ==
-                                        'success') {
+                                    if (response.toString() == 'success') {
                                       // setState(() {
                                       //   _loading = false;
                                       // });
                                       Flushbar(
+                                        isDismissible: false,
                                         icon: Icon(
                                           Icons.check_circle_rounded,
                                           color: kPrimaryColor,
                                         ),
                                         backgroundColor: kPrimaryLightColor,
-                                        title: "Success",
-                                        message: "Logged in successfully",
+                                        title: "Registered successfully",
+                                        message: "logging in..",
                                         duration: Duration(seconds: 3),
                                       )..show(context);
-                                      // Navigator.pop(context);
-                                      // Navigator.pushNamed(context, "/home");
-                                      Navigator.pushAndRemoveUntil(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) =>
-                                                VideosScreen(),
+                                      String? _loginResponse = await _loginUser(
+                                          _registerEmail,
+                                          _registerpassword,
+                                          location);
+
+                                      if (_loginResponse.toString() ==
+                                          'success') {
+                                        // setState(() {
+                                        //   _loading = false;
+                                        // });
+                                        Flushbar(
+                                          icon: Icon(
+                                            Icons.check_circle_rounded,
+                                            color: kPrimaryColor,
                                           ),
-                                          (route) => false);
+                                          backgroundColor: kPrimaryLightColor,
+                                          title: "Success",
+                                          message: "Logged in successfully",
+                                          duration: Duration(seconds: 3),
+                                        )..show(context);
+                                        // Navigator.pop(context);
+                                        // Navigator.pushNamed(context, "/home");
+                                        Navigator.pushAndRemoveUntil(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  VideosScreen(),
+                                            ),
+                                            (route) => false);
+                                      } else {
+                                        setState(() {
+                                          _loading = false;
+                                        });
+                                        Flushbar(
+                                          icon: Icon(
+                                            Icons.info_outline,
+                                            color: Colors.white,
+                                          ),
+                                          backgroundColor: Colors.redAccent,
+                                          title: "Error",
+                                          message: response.toString(),
+                                          duration: Duration(seconds: 3),
+                                        )..show(context);
+                                      }
                                     } else {
                                       setState(() {
                                         _loading = false;
@@ -1017,20 +1048,6 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                                         duration: Duration(seconds: 3),
                                       )..show(context);
                                     }
-                                  } else {
-                                    setState(() {
-                                      _loading = false;
-                                    });
-                                    Flushbar(
-                                      icon: Icon(
-                                        Icons.info_outline,
-                                        color: Colors.white,
-                                      ),
-                                      backgroundColor: Colors.redAccent,
-                                      title: "Error",
-                                      message: response.toString(),
-                                      duration: Duration(seconds: 3),
-                                    )..show(context);
                                   }
                                 }
                               } else {

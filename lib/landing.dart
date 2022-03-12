@@ -378,19 +378,22 @@ class _LandingScreenState extends State<LandingScreen>
                                                                                               ),
                                                                                             )),
                                                                                       ),
-                                                                                      TextButton(
-                                                                                          style: ButtonStyle(
-                                                                                              elevation: MaterialStateProperty.all(3.0),
-                                                                                              backgroundColor: MaterialStateProperty.all(kActiveColor),
-                                                                                              shape: MaterialStateProperty.all<RoundedRectangleBorder>(RoundedRectangleBorder(
-                                                                                                borderRadius: BorderRadius.circular(18.0),
-                                                                                                // side: BorderSide(color: Colors.red)
-                                                                                              ))),
-                                                                                          onPressed: () {
-                                                                                            // Navigator.pop(context);
-                                                                                            Navigator.pushNamed(context, "/loginRegister");
-                                                                                          },
-                                                                                          child: Text("Register/Login for more", style: TextStyle(color: kPrimaryColor, fontWeight: FontWeight.bold)))
+                                                                                      Container(
+                                                                                        width: size.width,
+                                                                                        child: TextButton(
+                                                                                            style: ButtonStyle(
+                                                                                                elevation: MaterialStateProperty.all(3.0),
+                                                                                                backgroundColor: MaterialStateProperty.all(kActiveColor),
+                                                                                                shape: MaterialStateProperty.all<RoundedRectangleBorder>(RoundedRectangleBorder(
+                                                                                                  borderRadius: BorderRadius.circular(numCurveRadius),
+                                                                                                  // side: BorderSide(color: Colors.red)
+                                                                                                ))),
+                                                                                            onPressed: () {
+                                                                                              // Navigator.pop(context);
+                                                                                              Navigator.pushNamed(context, "/loginRegister");
+                                                                                            },
+                                                                                            child: Text("Register/Login for more", style: TextStyle(color: kPrimaryColor, fontWeight: FontWeight.bold))),
+                                                                                      )
                                                                                       // Container(
                                                                                       //   width: size.width,
                                                                                       //   color: kRed,

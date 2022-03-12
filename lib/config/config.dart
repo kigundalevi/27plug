@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:simple_s3/simple_s3.dart';
+import 'package:flutter/cupertino.dart';
 
 // BACKEND
 // const BACKEND_URL = "https://plug-apis.herokuapp.com/graphql";
@@ -41,6 +42,8 @@ const txtSignIn = "Sign In";
 const txtYourName = "Your Name";
 const txtFirstName = "First Name";
 const txtLastName = "Last Name";
+const txtDefaultDpUrl =
+    "https://www.pngitem.com/pimgs/m/421-4212617_person-placeholder-image-transparent-hd-png-download.png";
 const defaultMinAge = 18.0;
 const defaultMaxAge = 35.0;
 const phoneNoPlaceHolder = "254---------";
@@ -82,3 +85,45 @@ class Palette {
 const kS3BucketName = "27-plug-files";
 const kS3PoolID = "eu-west-3:b9ff5831-45ac-46b4-b0b2-c06a1c509ad4";
 //const kS3Region = AWSRegions.euWest3;
+
+class SizeConfig {
+  late double _screenWidth;
+  late double _screenHeight;
+  double _blockSizeHorizontal = 0;
+  double _blockSizeVertical = 0;
+
+  late double textMultiplier;
+  late double imageSizeMultiplier;
+  late double heightMultiplier;
+  late double widthMultiplier;
+  bool isPortrait = true;
+  bool isMobilePortrait = false;
+
+  @override
+  void initState(BoxConstraints constraints, Orientation orientation) {
+    if (orientation == Orientation.portrait) {
+      _screenWidth = constraints.maxWidth;
+      _screenHeight = constraints.maxHeight;
+      isPortrait = true;
+      if (_screenWidth < 450) {
+        isMobilePortrait = true;
+      }
+    } else {
+      _screenWidth = constraints.maxHeight;
+      _screenHeight = constraints.maxWidth;
+      isPortrait = false;
+      isMobilePortrait = false;
+    }
+
+    _blockSizeHorizontal = _screenWidth / 100;
+    _blockSizeVertical = _screenHeight / 100;
+
+    textMultiplier = _blockSizeVertical;
+    imageSizeMultiplier = _blockSizeHorizontal;
+    heightMultiplier = _blockSizeVertical;
+    widthMultiplier = _blockSizeHorizontal;
+
+    print(_blockSizeHorizontal);
+    print(_blockSizeVertical);
+  }
+}

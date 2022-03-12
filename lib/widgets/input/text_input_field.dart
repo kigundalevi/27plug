@@ -3,9 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 
 class TextInputField extends StatefulWidget {
+  final String? value;
   final String placeholder;
   final IconData icondata;
   final double? iconsize;
+  final double? placeholderSize;
+  final bool? singleLine;
   final bool lightlayout;
   final Color? iconcolor;
   final bool enabled;
@@ -18,10 +21,13 @@ class TextInputField extends StatefulWidget {
   final Color borderColor;
   const TextInputField({
     Key? key,
+    this.value = null,
     required this.placeholder,
     required this.icondata,
     this.iconsize = 30,
+    this.placeholderSize = 18,
     this.iconcolor = Palette.iconColor,
+    this.singleLine = false,
     this.obsuretext = false,
     this.lightlayout = false,
     this.inputController,
@@ -42,6 +48,7 @@ class _TextInputFieldState extends State<TextInputField> {
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+      initialValue: widget.value,
       style: TextStyle(
           fontSize: 18,
           fontWeight: widget.lightlayout ? FontWeight.w500 : FontWeight.normal,
@@ -50,7 +57,11 @@ class _TextInputFieldState extends State<TextInputField> {
       obscureText: widget.obsuretext ? _inputObscured : false,
       keyboardType: widget.keyboardtype,
       minLines: 1,
-      maxLines: widget.obsuretext ? 1 : 5,
+      maxLines: widget.singleLine == true
+          ? 1
+          : widget.obsuretext
+              ? 1
+              : 5,
       autofocus: false,
       controller: widget.inputController,
       validator: widget.inputValidator,
@@ -78,7 +89,9 @@ class _TextInputFieldState extends State<TextInputField> {
                   });
                 },
               )
-            : SizedBox(),
+            : SizedBox(
+                width: 0,
+              ),
         // enabledBorder: OutlineInputBorder(
         //   borderSide: BorderSide(color: borderColor),
         //   borderRadius: BorderRadius.all(Radius.circular(10.0)),
@@ -90,8 +103,10 @@ class _TextInputFieldState extends State<TextInputField> {
         // contentPadding: EdgeInsets.all(0.0),
         hintText: widget.placeholder,
         hintStyle: TextStyle(
-            fontSize: 18,
-            color: !widget.lightlayout ? Palette.textColor1 : kPrimaryColor),
+            fontSize: widget.placeholderSize,
+            color: !widget.lightlayout
+                ? Palette.textColor1.withOpacity(0.6)
+                : kPrimaryColor.withOpacity(0.6)),
       ),
     );
   }

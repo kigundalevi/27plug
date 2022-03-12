@@ -3,10 +3,12 @@ import 'package:africanplug/config/base_functions.dart';
 import 'package:africanplug/config/config.dart';
 import 'package:africanplug/config/graphql_config.dart';
 import 'package:africanplug/config/route_names.dart';
+import 'package:africanplug/config/router.dart';
 import 'package:africanplug/landing.dart';
 import 'package:africanplug/models/user.dart';
 import 'package:africanplug/screens/login/login.dart';
 import 'package:africanplug/screens/login/login_signup.dart';
+import 'package:africanplug/screens/profile/user_profile.dart';
 import 'package:africanplug/screens/upload/upload.dart';
 import 'package:africanplug/screens/videos/videos_screen.dart';
 import 'package:flutter/material.dart';
@@ -70,13 +72,8 @@ class _MyAppState extends State<MyApp> {
           //     ? LandingScreen()
           //     : VideosScreen(),
           home: appBox.get("user") == null ? LandingScreen() : VideosScreen(),
-          routes: <String, WidgetBuilder>{
-            landingRoute: (BuildContext context) => LandingScreen(),
-            loginRegisterRoute: (BuildContext context) => LoginSignupScreen(),
-            // homeRoute: (BuildContext context) => VideosScreen(),
-            homeRoute: (BuildContext context) => VideosScreen(),
-            uploadRoute: (BuildContext context) => UploadVideoPage()
-          },
+          onGenerateRoute: CustomRouter.generateRoute,
+          initialRoute: homeRoute,
           // WelcomeScreen(
           //   key: key,
           // ),

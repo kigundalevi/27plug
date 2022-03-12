@@ -379,8 +379,8 @@ class AspectRatioVideoState extends State<AspectRatioVideo> {
               child: FittedBox(
                 fit: BoxFit.cover,
                 child: SizedBox(
-                  height: controller.value.size?.height ?? 0,
-                  width: controller.value.size?.width ?? 0,
+                  height: controller.value.size.height,
+                  width: controller.value.size.width,
                   child: VideoPlayPause(controller, file),
                 ),
               )

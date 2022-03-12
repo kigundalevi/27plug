@@ -4,7 +4,7 @@ import 'package:africanplug/config/base_functions.dart';
 import 'package:africanplug/config/config.dart';
 import 'package:africanplug/config/graphql_config.dart';
 import 'package:africanplug/controller/add_topic_controller.dart';
-import 'package:africanplug/controller/upload_video_controller.dart';
+import 'package:africanplug/controller/user_controller.dart';
 import 'package:africanplug/models/location.dart';
 import 'package:africanplug/models/tag.dart';
 import 'package:africanplug/op/queries.dart';
@@ -107,6 +107,8 @@ class _UploadVideoPageState extends State<UploadVideoPage>
   late String uploadedVideoName;
   late String uploadedThumbnailUrl;
   late String uploadedThumbnailName;
+
+  String s3UploadStatus = "listening";
 
   //PLAYAREA
   bool playArea = false;
@@ -234,8 +236,8 @@ class _UploadVideoPageState extends State<UploadVideoPage>
     );
     return Scaffold(
         backgroundColor: kBackgroundColor,
-        floatingActionButton:
-            current_page != "/upload" ? MainUploadButton() : SizedBox(),
+        // floatingActionButton:
+        //     current_page != "/upload" ? MainUploadButton() : SizedBox(),
         body: Stack(children: [
           MainMenu(context, current_page, _slideAnimation, _menuScaleAnimation,
               size),
@@ -864,166 +866,78 @@ class _UploadVideoPageState extends State<UploadVideoPage>
                                                       ),
                                                       onPressed: () async {})
                                                   : (!_loading
-                                                      ? TextButton.icon(
-                                                          style: TextButton
-                                                              .styleFrom(
-                                                            elevation: 8.0,
-                                                            padding: EdgeInsets
-                                                                .symmetric(
-                                                                    horizontal:
-                                                                        14.0,
-                                                                    vertical:
-                                                                        8.0),
-                                                            textStyle: TextStyle(
-                                                                color: Colors
-                                                                    .blue),
-                                                            backgroundColor:
-                                                                kActiveColor,
-                                                            shape:
-                                                                RoundedRectangleBorder(
-                                                              borderRadius:
-                                                                  BorderRadius
-                                                                      .circular(
-                                                                          24.0),
-                                                            ),
-                                                          ),
-                                                          icon: Icon(
-                                                            FlutterIcons
-                                                                .plug_faw5s,
-                                                            color: kWhite,
-                                                          ),
-                                                          label: Text(
-                                                            'Upload',
-                                                            style: TextStyle(
-                                                                color: kBlack,
-                                                                fontSize: 17,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .bold),
-                                                          ),
-                                                          onPressed: () async {
-                                                            if (uploadedVideoUrl ==
-                                                                "") {
-                                                              setState(() {
-                                                                _selectedVideoError =
-                                                                    true;
-                                                              });
-                                                              return;
-                                                            }
-                                                            if (selectedVideo ==
-                                                                null) {
-                                                              setState(() {
-                                                                _selectedVideoError =
-                                                                    true;
-                                                              });
-                                                              return;
-                                                            }
-                                                            if (_selectedThumbnail ==
-                                                                    null ||
-                                                                uploadedThumbnailUrl ==
-                                                                    "") {
-                                                              setState(() {
-                                                                _selectedThumbnailError =
-                                                                    true;
-                                                              });
-                                                              return;
-                                                            }
-                                                            bool isOnline =
-                                                                await checkOnline();
-                                                            if (!isOnline) {
-                                                              Flushbar(
-                                                                icon: Icon(
-                                                                  Icons
-                                                                      .info_outline,
-                                                                  color: Colors
-                                                                      .white,
-                                                                ),
+                                                      ? uploadedVideoUrl == ""
+                                                          ? Text(s3UploadStatus)
+                                                          : TextButton.icon(
+                                                              style: TextButton
+                                                                  .styleFrom(
+                                                                elevation: 8.0,
+                                                                padding: EdgeInsets
+                                                                    .symmetric(
+                                                                        horizontal:
+                                                                            14.0,
+                                                                        vertical:
+                                                                            8.0),
+                                                                textStyle: TextStyle(
+                                                                    color: Colors
+                                                                        .blue),
                                                                 backgroundColor:
-                                                                    Colors
-                                                                        .redAccent,
-                                                                title: "Error",
-                                                                message:
-                                                                    "No Internet",
-                                                                duration:
-                                                                    Duration(
-                                                                        seconds:
-                                                                            3),
-                                                              )..show(context);
-                                                            } else {
-                                                              /// POST FUNCTIONALITY
-                                                              if (_uploadFormKey
-                                                                  .currentState!
-                                                                  .validate()) {
-                                                                setState(() {
-                                                                  _loading =
-                                                                      true;
-                                                                });
-                                                                Loc location =
-                                                                    await currentLocation();
-                                                                UploadVideoController
-                                                                    ctrl =
-                                                                    new UploadVideoController();
-                                                                print(
-                                                                    "uploading");
-                                                                String? upload_response = await ctrl.userUploadVideo(
-                                                                    _selectedTags,
-                                                                    uploadedVideoUrl,
-                                                                    uploadedVideoName,
-                                                                    uploadedThumbnailUrl,
-                                                                    uploadedThumbnailName,
-                                                                    _title!,
-                                                                    _description!,
-                                                                    videoDuration,
-                                                                    location.ip,
-                                                                    location
-                                                                        .lat,
-                                                                    location
-                                                                        .lng,
-                                                                    location
-                                                                        .name,
-                                                                    location
-                                                                        .live);
-
-                                                                if (upload_response
-                                                                        .toString() ==
-                                                                    'success') {
+                                                                    kActiveColor,
+                                                                shape:
+                                                                    RoundedRectangleBorder(
+                                                                  borderRadius:
+                                                                      BorderRadius
+                                                                          .circular(
+                                                                              24.0),
+                                                                ),
+                                                              ),
+                                                              icon: Icon(
+                                                                FlutterIcons
+                                                                    .plug_faw5s,
+                                                                color: kWhite,
+                                                              ),
+                                                              label: Text(
+                                                                'Upload',
+                                                                style: TextStyle(
+                                                                    color:
+                                                                        kBlack,
+                                                                    fontSize:
+                                                                        17,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .bold),
+                                                              ),
+                                                              onPressed:
+                                                                  () async {
+                                                                if (uploadedVideoUrl ==
+                                                                    "") {
                                                                   setState(() {
-                                                                    _loading =
-                                                                        false;
+                                                                    _selectedVideoError =
+                                                                        true;
                                                                   });
-                                                                  Flushbar(
-                                                                    isDismissible:
-                                                                        false,
-                                                                    icon: Icon(
-                                                                      Icons
-                                                                          .check_circle_rounded,
-                                                                      color:
-                                                                          kPrimaryColor,
-                                                                    ),
-                                                                    backgroundColor:
-                                                                        kPrimaryLightColor,
-                                                                    title:
-                                                                        "Success",
-                                                                    message:
-                                                                        "Video uploaded successfully",
-                                                                    duration: Duration(
-                                                                        seconds:
-                                                                            3),
-                                                                  )..show(
-                                                                      context);
-                                                                  Navigator.pushAndRemoveUntil(
-                                                                      context,
-                                                                      MaterialPageRoute(
-                                                                        builder:
-                                                                            (context) =>
-                                                                                VideosScreen(),
-                                                                      ),
-                                                                      (route) => false);
-                                                                } else {
+                                                                  return;
+                                                                }
+                                                                if (selectedVideo ==
+                                                                    null) {
                                                                   setState(() {
-                                                                    _loading =
-                                                                        false;
+                                                                    _selectedVideoError =
+                                                                        true;
                                                                   });
+                                                                  return;
+                                                                }
+                                                                if (_selectedThumbnail ==
+                                                                        null ||
+                                                                    uploadedThumbnailUrl ==
+                                                                        "") {
+                                                                  setState(() {
+                                                                    _selectedThumbnailError =
+                                                                        true;
+                                                                  });
+                                                                  return;
+                                                                }
+                                                                bool isOnline =
+                                                                    await checkOnline();
+                                                                if (!isOnline) {
                                                                   Flushbar(
                                                                     icon: Icon(
                                                                       Icons
@@ -1037,17 +951,112 @@ class _UploadVideoPageState extends State<UploadVideoPage>
                                                                     title:
                                                                         "Error",
                                                                     message:
-                                                                        upload_response
-                                                                            .toString(),
+                                                                        "No Internet",
                                                                     duration: Duration(
                                                                         seconds:
                                                                             3),
                                                                   )..show(
                                                                       context);
+                                                                } else {
+                                                                  /// POST FUNCTIONALITY
+                                                                  if (_uploadFormKey
+                                                                      .currentState!
+                                                                      .validate()) {
+                                                                    setState(
+                                                                        () {
+                                                                      _loading =
+                                                                          true;
+                                                                    });
+                                                                    Loc location =
+                                                                        await currentLocation();
+                                                                    UserController
+                                                                        ctrl =
+                                                                        new UserController();
+                                                                    print(
+                                                                        "uploading");
+                                                                    String? upload_response = await ctrl.userUploadVideo(
+                                                                        _selectedTags,
+                                                                        uploadedVideoUrl,
+                                                                        uploadedVideoName,
+                                                                        uploadedThumbnailUrl,
+                                                                        uploadedThumbnailName,
+                                                                        _title!,
+                                                                        _description!,
+                                                                        videoDuration,
+                                                                        location
+                                                                            .ip,
+                                                                        location
+                                                                            .lat,
+                                                                        location
+                                                                            .lng,
+                                                                        location
+                                                                            .name,
+                                                                        location
+                                                                            .live);
+
+                                                                    if (upload_response
+                                                                            .toString() ==
+                                                                        'success') {
+                                                                      setState(
+                                                                          () {
+                                                                        _loading =
+                                                                            false;
+                                                                      });
+                                                                      Flushbar(
+                                                                        isDismissible:
+                                                                            false,
+                                                                        icon:
+                                                                            Icon(
+                                                                          Icons
+                                                                              .check_circle_rounded,
+                                                                          color:
+                                                                              kPrimaryColor,
+                                                                        ),
+                                                                        backgroundColor:
+                                                                            kPrimaryLightColor,
+                                                                        title:
+                                                                            "Success",
+                                                                        message:
+                                                                            "Video uploaded successfully",
+                                                                        duration:
+                                                                            Duration(seconds: 3),
+                                                                      )..show(
+                                                                          context);
+                                                                      Navigator.pushAndRemoveUntil(
+                                                                          context,
+                                                                          MaterialPageRoute(
+                                                                            builder: (context) =>
+                                                                                VideosScreen(),
+                                                                          ),
+                                                                          (route) => false);
+                                                                    } else {
+                                                                      setState(
+                                                                          () {
+                                                                        _loading =
+                                                                            false;
+                                                                      });
+                                                                      Flushbar(
+                                                                        icon:
+                                                                            Icon(
+                                                                          Icons
+                                                                              .info_outline,
+                                                                          color:
+                                                                              Colors.white,
+                                                                        ),
+                                                                        backgroundColor:
+                                                                            Colors.redAccent,
+                                                                        title:
+                                                                            "Error",
+                                                                        message:
+                                                                            upload_response.toString(),
+                                                                        duration:
+                                                                            Duration(seconds: 3),
+                                                                      )..show(
+                                                                          context);
+                                                                    }
+                                                                  }
                                                                 }
-                                                              }
-                                                            }
-                                                          })
+                                                              })
                                                       : Center(
                                                           child: Column(
                                                             children: [
@@ -1553,6 +1562,8 @@ class _UploadVideoPageState extends State<UploadVideoPage>
     String? result;
 
     if (result == null) {
+      s3UploadStatus = "Starting upload";
+
       try {
         setState(() {
           uploadingNewVideo = true;
@@ -1575,6 +1586,9 @@ class _UploadVideoPageState extends State<UploadVideoPage>
         });
       } catch (e) {
         print(e);
+
+        s3UploadStatus = "ERROR: " + e.toString();
+
         setState(() {
           uploadingNewVideo = false;
           isLoading = false;
