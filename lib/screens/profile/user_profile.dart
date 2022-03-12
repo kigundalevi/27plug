@@ -291,9 +291,7 @@ class _UserProfileScreenState extends State<UserProfileScreen>
                         child: Container(
                             height: size.width / 7,
                             width: size.width / 7,
-                            child: const CircularProgressIndicator(
-                              strokeWidth: 8.0,
-                            )))
+                            child: const CircularProgressIndicator()))
                     : Padding(
                         padding: isCollapsed
                             ? const EdgeInsets.only(top: 0.0, bottom: 0.0)
@@ -336,8 +334,6 @@ class _UserProfileScreenState extends State<UserProfileScreen>
                                                               Transform.scale(
                                                             scale: 0.5,
                                                             child: CircularProgressIndicator(
-                                                                strokeWidth:
-                                                                    8.0,
                                                                 color:
                                                                     kActiveColor),
                                                           ),

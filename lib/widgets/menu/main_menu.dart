@@ -340,14 +340,19 @@ Container MenuOption(context, size, IconData icon, String text, String page,
     // width: size.width / 1.8,
     child: FlatButton.icon(
         // minWidth: size.width,
-        onPressed: () {
-          Navigator.pop(context);
-          Navigator.pushNamed(context, "/${page}");
-          // Navigator.push(context,
-          //     MaterialPageRoute(builder: (context) {
-          //   return VideosScreen();
-          // }));
-        },
+        onPressed: page == 'myvideos'
+            ? () {
+                Navigator.pushNamed(context, "/profile",
+                    arguments: [currentUser().id, 'videos']);
+              }
+            : () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, "/${page}");
+                // Navigator.push(context,
+                //     MaterialPageRoute(builder: (context) {
+                //   return VideosScreen();
+                // }));
+              },
         icon: Icon(
           icon,
           color: currentPage == "/${page}" ? kActiveColor : kPrimaryColor,

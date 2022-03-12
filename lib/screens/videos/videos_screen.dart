@@ -610,6 +610,7 @@ query{
     name,
     durationMillisec,
     createdAt,
+    deletedAt,
     thumbnailUrl,
     thumbnailName,
     uploader{
@@ -654,42 +655,45 @@ query{
         var videos = result.data?['listVideo'];
 
         videos.forEach((video) {
-          DateTime dateTimeCreatedAt = DateTime.parse(video['createdAt']);
-          DateTime dateTimeNow = DateTime.now();
-          final days_lapse = dateTimeNow.difference(dateTimeCreatedAt).inDays;
-          String lapse = "Today";
-          if (days_lapse < 1) {
+          if (video['deletedAt'] == null || video['deletedAt'] == "") {
+            DateTime dateTimeCreatedAt = DateTime.parse(video['createdAt']);
+            DateTime dateTimeNow = DateTime.now();
+            final days_lapse = dateTimeNow.difference(dateTimeCreatedAt).inDays;
             String lapse = "Today";
-          } else if (days_lapse == 1) {
-            lapse = "yesterday";
-          } else {
-            lapse = days_lapse.toString() + " days ago";
-          }
-          String views = video['views'].length.toString() + " views";
+            if (days_lapse < 1) {
+              String lapse = "Today";
+            } else if (days_lapse == 1) {
+              lapse = "yesterday";
+            } else {
+              lapse = days_lapse.toString() + " days ago";
+            }
+            String views = video['views'].length.toString() + " views";
 
-          _latestVideos.add(Video(
-            id: int.parse(video['id']),
-            title: video['title'].length > 20
-                ? video['title'].replaceRange(20, video['title'].length, '...')
-                : video['title'],
-            url: video['url'],
-            description: video['description'],
-            duration_millisec: video['durationMillisec'],
-            name: video['name'],
-            thumbnail_url: video['thumbnailUrl'],
-            thumbnail_name: video['thumbnailName'],
-            views: views.length > 12
-                ? views.replaceRange(9, views.length, '...')
-                : views,
-            upload_lapse: lapse.length > 12
-                ? lapse.replaceRange(9, lapse.length, '...')
-                : lapse,
-            uploaded_by: video['uploader']['firstName'].length > 20
-                ? video['uploader']['firstName'].replaceRange(
-                    20, video['uploader']['firstName'].length, '...')
-                : video['uploader']['firstName'],
-            uploader_dpurl: video['uploader']['dpUrl'],
-          ));
+            _latestVideos.add(Video(
+              id: int.parse(video['id']),
+              title: video['title'].length > 20
+                  ? video['title']
+                      .replaceRange(20, video['title'].length, '...')
+                  : video['title'],
+              url: video['url'],
+              description: video['description'],
+              duration_millisec: video['durationMillisec'],
+              name: video['name'],
+              thumbnail_url: video['thumbnailUrl'],
+              thumbnail_name: video['thumbnailName'],
+              views: views.length > 12
+                  ? views.replaceRange(9, views.length, '...')
+                  : views,
+              upload_lapse: lapse.length > 12
+                  ? lapse.replaceRange(9, lapse.length, '...')
+                  : lapse,
+              uploaded_by: video['uploader']['firstName'].length > 20
+                  ? video['uploader']['firstName'].replaceRange(
+                      20, video['uploader']['firstName'].length, '...')
+                  : video['uploader']['firstName'],
+              uploader_dpurl: video['uploader']['dpUrl'],
+            ));
+          }
         });
         return _latestVideos;
         // return _allTags
