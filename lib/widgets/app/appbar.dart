@@ -6,8 +6,8 @@ import 'package:flutter_icons/flutter_icons.dart';
 
 Container appBar(Size size, left_pressed, center_pressed, right_pressed) {
   User user = currentUser();
-  print('-------DP URL-------');
-  print(user.dp_url);
+  // print('-------DP URL-------');
+  // print(user.dp_url);
   return Container(
     color: Colors.transparent,
     height: size.height / 14,

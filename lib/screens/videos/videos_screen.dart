@@ -1,6 +1,11 @@
 import 'package:africanplug/config/base_functions.dart';
 import 'package:africanplug/config/config.dart';
 import 'package:africanplug/config/graphql_config.dart';
+import 'package:africanplug/controller/custom_full_player_with_controls.dart';
+import 'package:africanplug/controller/custom_player_with_controls.dart';
+import 'package:africanplug/controller/data_manager.dart';
+import 'package:africanplug/controller/user_controller.dart';
+import 'package:africanplug/controller/video_controls.dart';
 import 'package:africanplug/models/location.dart';
 import 'package:africanplug/models/user.dart';
 import 'package:africanplug/models/video.dart';
@@ -14,10 +19,13 @@ import 'package:africanplug/widgets/menu/main_menu.dart';
 import 'package:africanplug/widgets/video/thumbnail_display.dart';
 import 'package:africanplug/widgets/video/video_info_chip.dart';
 import 'package:africanplug/widgets/video/video_tile.dart';
+import 'package:flick_video_player/flick_video_player.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:video_player/video_player.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 
 class VideosScreen extends StatefulWidget {
   const VideosScreen({Key? key}) : super(key: key);
@@ -29,6 +37,7 @@ class VideosScreen extends StatefulWidget {
 class _VideosScreenState extends State<VideosScreen>
     with TickerProviderStateMixin {
   late VideoPlayerController _controller;
+  late VideoPlayerController main_controller;
   bool playArea = false;
   bool isPlaying = false;
   bool disposed = false;
@@ -46,8 +55,7 @@ class _VideosScreenState extends State<VideosScreen>
   late Animation<double> _scaleAnimation;
   late Animation<double> _menuScaleAnimation;
   late Animation<Offset> _slideAnimation;
-
-  var latest_videos = [];
+  late List<Video>? latestVideos;
   late VoidCallback listener;
   int currentDurationInSecond = 0;
 
@@ -66,11 +74,64 @@ class _VideosScreenState extends State<VideosScreen>
     };
   }
 
+  int currentPlaying = 0;
   late VideoProgressIndicator progressIndicator;
+  late FlickManager flickManager;
+  late CustomDataManager dataManager;
+  late List<String> videoUrls;
+  double _playHeight = 250;
+  late double _controllerHeight;
+  late double _controllerWidth;
+  late double _controllerAspectRatio;
 
   @override
   void initState() {
-    super.initState();
+    UserController ctrl = UserController();
+    ctrl.fetchLatestVideos(currentUser().id).then((latest_videos) {
+      if (latest_videos == null) {
+      } else {
+        setState(() {
+          latestVideos = latest_videos;
+          videoUrls = latestVideos!.map<String>((item) => item.url).toList();
+        });
+
+        main_controller = VideoPlayerController.network(videoUrls[0])
+          ..initialize().then((_) {
+            setState(() {});
+
+            // _controller.play();
+          });
+        main_controller.addListener(checkVideo);
+        flickManager = FlickManager(
+            videoPlayerController: main_controller,
+            onVideoEnd: () {
+              // skipToNextVideo([Duration? duration]) {
+              if (currentPlaying != videoUrls.length - 1) {
+                main_controller =
+                    VideoPlayerController.network(videoUrls[currentPlaying + 1])
+                      ..initialize().then((_) {
+                        setState(() {});
+
+                        // _controller.play();
+                      });
+                main_controller.addListener(checkVideo);
+                // flickManager.handleChangeVideo(main_controller,
+                //     videoChangeDuration: Duration(seconds: 4));
+                // flickManager.handleChangeVideo(main_controller,
+                //   videoChangeDuration: duration);
+
+                // currentPlaying++;
+
+                currentPlaying++;
+                dataManager.skipToNextVideo(Duration(seconds: 3));
+              }
+              // }
+            });
+
+        dataManager = CustomDataManager(
+            flickManager: flickManager, videos: latestVideos!);
+      }
+    });
     _controller = VideoPlayerController.network(
         'https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4')
       ..initialize().then((_) {
@@ -85,16 +146,29 @@ class _VideosScreenState extends State<VideosScreen>
     _slideAnimation = Tween<Offset>(begin: Offset(-1, 0), end: Offset(0, 0))
         .animate(_aController);
     // updateVideos();
+    super.initState();
   }
 
   @override
   void dispose() {
+    flickManager.dispose();
     _controller.setVolume(0);
     _controller.pause();
     _controller.dispose();
     disposed = true;
     _aController.dispose();
     super.dispose();
+  }
+
+  skipToVideo(String url) {
+    setState(() {
+      main_controller = VideoPlayerController.network(url)
+        ..initialize().then((_) {
+          // _controller.play();
+        });
+      main_controller.addListener(checkVideo);
+    });
+    flickManager.handleChangeVideo(main_controller);
   }
 
   @override
@@ -212,10 +286,8 @@ class _VideosScreenState extends State<VideosScreen>
                                         padding: const EdgeInsets.symmetric(
                                             horizontal: 8.0),
                                         child: Container(
-                                            height: videoSelected
-                                                ? size.height / 2.23
-                                                : size.height -
-                                                    (size.height / 5.5),
+                                            height: size.height -
+                                                (size.height / 5.5),
                                             decoration: BoxDecoration(
                                                 borderRadius:
                                                     BorderRadius.circular(
@@ -233,160 +305,252 @@ class _VideosScreenState extends State<VideosScreen>
                                                           child:
                                                               CircularProgressIndicator());
                                                     } else {
-                                                      return SingleChildScrollView(
-                                                        child: Column(
-                                                            children: [
-                                                              Container(
-                                                                height: videoSelected
-                                                                    ? size.height -
-                                                                        450
-                                                                    : size.height -
-                                                                        120,
-                                                                child: ListView
-                                                                    .builder(
-                                                                        itemCount: snapshot
-                                                                            .data
-                                                                            .length,
-                                                                        scrollDirection:
-                                                                            Axis
-                                                                                .vertical,
-                                                                        itemBuilder:
-                                                                            (BuildContext context,
-                                                                                int index) {
-                                                                          return Padding(
-                                                                            padding:
-                                                                                const EdgeInsets.symmetric(vertical: 3.0),
-                                                                            child:
-                                                                                ClipRRect(
-                                                                              borderRadius: BorderRadius.circular(8.0),
-                                                                              child: GestureDetector(
-                                                                                  onTap: () {
-                                                                                    videoSelected = true;
-                                                                                    onVideoTap(1, snapshot.data[index].url, snapshot.data[index].id);
+                                                      return VisibilityDetector(
+                                                        key: ObjectKey(
+                                                            flickManager),
+                                                        onVisibilityChanged:
+                                                            (visibility) {
+                                                          if (visibility
+                                                                      .visibleFraction ==
+                                                                  0 &&
+                                                              this.mounted) {
+                                                            flickManager
+                                                                .flickControlManager
+                                                                ?.autoPause();
+                                                          } else if (visibility
+                                                                  .visibleFraction ==
+                                                              1) {
+                                                            flickManager
+                                                                .flickControlManager
+                                                                ?.autoResume();
+                                                          }
+                                                        },
+                                                        child:
+                                                            SingleChildScrollView(
+                                                          child: Column(
+                                                              children: [
+                                                                // _playHeight >
+                                                                //         250
+                                                                //     ? Container(
+                                                                //         height:
+                                                                //             250,
+                                                                //         width: size.width /
+                                                                //             3.5,
+                                                                //         color: Colors
+                                                                //             .red,
+                                                                //         child:
+                                                                //             FittedBox(
+                                                                //           fit: BoxFit
+                                                                //               .cover,
+                                                                //           child:
+                                                                //               SizedBox(
+                                                                //             height:
+                                                                //                 250,
+                                                                //             child:
+                                                                //                 FlickVideoPlayer(
+                                                                //               flickManager: flickManager,
+                                                                //               preferredDeviceOrientationFullscreen: [
+                                                                //                 DeviceOrientation.portraitUp,
+                                                                //                 DeviceOrientation.landscapeLeft,
+                                                                //                 DeviceOrientation.landscapeRight,
+                                                                //               ],
+                                                                //               flickVideoWithControls: CustomFlickVideoWithControls(
+                                                                //                 controls: CustomOrientationControls(dataManager: dataManager),
+                                                                //               ),
+                                                                //               flickVideoWithControlsFullscreen: CustomFlickVideoWithControls(
+                                                                //                 videoFit: BoxFit.fitWidth,
+                                                                //                 controls: CustomOrientationControls(dataManager: dataManager),
+                                                                //               ),
+                                                                //             ),
+                                                                //           ),
+                                                                //         ),
+                                                                //       )
+                                                                //     :
+                                                                Container(
+                                                                  height:
+                                                                      _playHeight,
+                                                                  child:
+                                                                      FlickVideoPlayer(
+                                                                    flickManager:
+                                                                        flickManager,
+                                                                    preferredDeviceOrientationFullscreen: [
+                                                                      DeviceOrientation
+                                                                          .portraitUp,
+                                                                      DeviceOrientation
+                                                                          .landscapeLeft,
+                                                                      DeviceOrientation
+                                                                          .landscapeRight,
+                                                                    ],
+                                                                    flickVideoWithControls:
+                                                                        CustomFlickVideoWithControls(
+                                                                      controls: CustomOrientationControls(
+                                                                          dataManager:
+                                                                              dataManager),
+                                                                    ),
+                                                                    flickVideoWithControlsFullscreen:
+                                                                        CustomFullFlickVideoWithControls(
+                                                                      videoFit:
+                                                                          BoxFit
+                                                                              .fitWidth,
+                                                                      controls: CustomOrientationControls(
+                                                                          dataManager:
+                                                                              dataManager),
+                                                                    ),
+                                                                  ),
+                                                                ),
 
-                                                                                    videoTitle = snapshot.data[index].title;
-                                                                                    setState(() {});
-                                                                                  },
-                                                                                  child: Container(
-                                                                                    width: !isCollapsed ? size.width * 1 : size.width * 0.98,
-                                                                                    child: Material(
-                                                                                      elevation: 8.0,
-                                                                                      color: Colors.grey.shade900,
-                                                                                      child: Container(
-                                                                                        height: size.height / 6.3,
-                                                                                        padding: EdgeInsets.only(left: 5, right: 5),
-                                                                                        // width: size.width,
-                                                                                        child: Stack(
-                                                                                          children: [
-                                                                                            ColorFiltered(
-                                                                                              colorFilter: ColorFilter.mode(
-                                                                                                Colors.black26,
-                                                                                                BlendMode.darken,
+                                                                Container(
+                                                                  height: size
+                                                                          .height -
+                                                                      _playHeight,
+                                                                  // videoSelected
+                                                                  //     ? size.height -
+                                                                  //         450
+                                                                  //     : size.height -
+                                                                  //         120,
+                                                                  child: ListView
+                                                                      .builder(
+                                                                          itemCount: snapshot
+                                                                              .data
+                                                                              .length,
+                                                                          scrollDirection: Axis
+                                                                              .vertical,
+                                                                          itemBuilder:
+                                                                              (BuildContext context, int index) {
+                                                                            return Padding(
+                                                                              padding: const EdgeInsets.symmetric(vertical: 3.0),
+                                                                              child: ClipRRect(
+                                                                                borderRadius: BorderRadius.circular(8.0),
+                                                                                child: GestureDetector(
+                                                                                    onTap: () {
+                                                                                      dataManager.skipToVideo(index);
+                                                                                      // videoSelected = true;
+                                                                                      // onVideoTap(1, snapshot.data[index].url, snapshot.data[index].id);
+
+                                                                                      // videoTitle = snapshot.data[index].title;
+                                                                                      setState(() {});
+                                                                                    },
+                                                                                    child: Container(
+                                                                                      width: !isCollapsed ? size.width * 1 : size.width * 0.98,
+                                                                                      child: Material(
+                                                                                        elevation: 8.0,
+                                                                                        color: Colors.grey.shade900,
+                                                                                        child: Container(
+                                                                                          height: size.height / 6.3,
+                                                                                          padding: EdgeInsets.only(left: 5, right: 5),
+                                                                                          // width: size.width,
+                                                                                          child: Stack(
+                                                                                            children: [
+                                                                                              ColorFiltered(
+                                                                                                colorFilter: ColorFilter.mode(
+                                                                                                  Colors.black26,
+                                                                                                  BlendMode.darken,
+                                                                                                ),
+                                                                                                child: Row(
+                                                                                                  children: [
+                                                                                                    Container(
+                                                                                                      width: size.width * 0.45,
+                                                                                                      height: size.height * 0.147,
+                                                                                                      child: Container(
+                                                                                                        decoration: BoxDecoration(
+                                                                                                          borderRadius: BorderRadius.circular(numCurveRadius),
+                                                                                                          image: DecorationImage(image: NetworkImage(snapshot.data[index].thumbnail_url == null ? "https://redmoonrecord.co.uk/tech/wp-content/uploads/2019/11/YouTube-thumbnail-size-guide-best-practices-top-examples.png" : snapshot.data[index].thumbnail_url), fit: BoxFit.fill),
+                                                                                                        ),
+                                                                                                        alignment: Alignment.center,
+                                                                                                      ),
+                                                                                                    ),
+                                                                                                    SizedBox(
+                                                                                                      // width: 180,
+                                                                                                      height: 200,
+                                                                                                    )
+                                                                                                  ],
+                                                                                                ),
                                                                                               ),
-                                                                                              child: Row(
+                                                                                              Row(
+                                                                                                mainAxisSize: MainAxisSize.max,
+                                                                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                                                                 children: [
                                                                                                   Container(
                                                                                                     width: size.width * 0.45,
                                                                                                     height: size.height * 0.147,
-                                                                                                    child: Container(
-                                                                                                      decoration: BoxDecoration(
-                                                                                                        borderRadius: BorderRadius.circular(numCurveRadius),
-                                                                                                        image: DecorationImage(image: NetworkImage(snapshot.data[index].thumbnail_url == null ? "https://redmoonrecord.co.uk/tech/wp-content/uploads/2019/11/YouTube-thumbnail-size-guide-best-practices-top-examples.png" : snapshot.data[index].thumbnail_url), fit: BoxFit.fill),
+                                                                                                    child: Align(
+                                                                                                      alignment: Alignment.bottomCenter,
+                                                                                                      child: Container(
+                                                                                                        height: size.width * 0.07,
+                                                                                                        child: Stack(
+                                                                                                          children: [
+                                                                                                            // Align(
+                                                                                                            //   alignment: Alignment.bottomLeft,
+                                                                                                            //   child: ThumbNailIconButton(
+                                                                                                            //     icon_data: Icons.watch_later,
+                                                                                                            //     press: () {},
+                                                                                                            //   ),
+                                                                                                            // ),
+                                                                                                            // Align(
+                                                                                                            //   alignment: Alignment.bottomRight,
+                                                                                                            //   child: ThumbNailIconButton(
+                                                                                                            //     icon_data: Icons.favorite,
+                                                                                                            //     press: () {},
+                                                                                                            //   ),
+                                                                                                            // )
+                                                                                                          ],
+                                                                                                        ),
                                                                                                       ),
-                                                                                                      alignment: Alignment.center,
                                                                                                     ),
                                                                                                   ),
-                                                                                                  SizedBox(
-                                                                                                    // width: 180,
-                                                                                                    height: 200,
-                                                                                                  )
+                                                                                                  Container(
+                                                                                                    // height: size.height * 0.19,
+                                                                                                    width: !isCollapsed ? size.width / 4 : size.width / 2.2,
+                                                                                                    // color: Colors.black26,
+                                                                                                    // padding: EdgeInsets.symmetric(horizontal: size.width * 0.02),
+                                                                                                    child: Column(
+                                                                                                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                                                                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                                                                                      children: [
+                                                                                                        Text(
+                                                                                                          snapshot.data[index].title,
+                                                                                                          style: TextStyle(color: kWhite, fontSize: 18, fontWeight: FontWeight.w300),
+                                                                                                          textAlign: TextAlign.left,
+                                                                                                        ),
+                                                                                                        // SizedBox(
+                                                                                                        //   height: size.height * 0.01,
+                                                                                                        // ),
+                                                                                                        ImageChip(image_url: (snapshot.data[index].uploader_dpurl == '' || snapshot.data[index].uploader_dpurl == null) ? 'https://www.pngitem.com/pimgs/m/421-4212617_person-placeholder-image-transparent-hd-png-download.png' : snapshot.data[index].uploader_dpurl, text: snapshot.data[index].uploaded_by),
+                                                                                                        Row(
+                                                                                                          mainAxisSize: MainAxisSize.max,
+                                                                                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                                                                          children: [
+                                                                                                            VideoInfoChip(
+                                                                                                              icon_data: Icons.remove_red_eye,
+                                                                                                              text: snapshot.data[index].views,
+                                                                                                            ),
+                                                                                                            VideoInfoChip(
+                                                                                                              icon_data: Icons.access_time,
+                                                                                                              text: snapshot.data[index].upload_lapse,
+                                                                                                            ),
+                                                                                                          ],
+                                                                                                        )
+                                                                                                      ],
+                                                                                                    ),
+                                                                                                  ),
                                                                                                 ],
-                                                                                              ),
-                                                                                            ),
-                                                                                            Row(
-                                                                                              mainAxisSize: MainAxisSize.max,
-                                                                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                                                              children: [
-                                                                                                Container(
-                                                                                                  width: size.width * 0.45,
-                                                                                                  height: size.height * 0.147,
-                                                                                                  child: Align(
-                                                                                                    alignment: Alignment.bottomCenter,
-                                                                                                    child: Container(
-                                                                                                      height: size.width * 0.07,
-                                                                                                      child: Stack(
-                                                                                                        children: [
-                                                                                                          // Align(
-                                                                                                          //   alignment: Alignment.bottomLeft,
-                                                                                                          //   child: ThumbNailIconButton(
-                                                                                                          //     icon_data: Icons.watch_later,
-                                                                                                          //     press: () {},
-                                                                                                          //   ),
-                                                                                                          // ),
-                                                                                                          // Align(
-                                                                                                          //   alignment: Alignment.bottomRight,
-                                                                                                          //   child: ThumbNailIconButton(
-                                                                                                          //     icon_data: Icons.favorite,
-                                                                                                          //     press: () {},
-                                                                                                          //   ),
-                                                                                                          // )
-                                                                                                        ],
-                                                                                                      ),
-                                                                                                    ),
-                                                                                                  ),
-                                                                                                ),
-                                                                                                Container(
-                                                                                                  // height: size.height * 0.19,
-                                                                                                  width: !isCollapsed ? size.width / 4 : size.width / 2.2,
-                                                                                                  // color: Colors.black26,
-                                                                                                  // padding: EdgeInsets.symmetric(horizontal: size.width * 0.02),
-                                                                                                  child: Column(
-                                                                                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                                                                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                                                                                    children: [
-                                                                                                      Text(
-                                                                                                        snapshot.data[index].title,
-                                                                                                        style: TextStyle(color: kWhite, fontSize: 18, fontWeight: FontWeight.w300),
-                                                                                                        textAlign: TextAlign.left,
-                                                                                                      ),
-                                                                                                      // SizedBox(
-                                                                                                      //   height: size.height * 0.01,
-                                                                                                      // ),
-                                                                                                      ImageChip(image_url: (snapshot.data[index].uploader_dpurl == '' || snapshot.data[index].uploader_dpurl == null) ? 'https://www.pngitem.com/pimgs/m/421-4212617_person-placeholder-image-transparent-hd-png-download.png' : snapshot.data[index].uploader_dpurl, text: snapshot.data[index].uploaded_by),
-                                                                                                      Row(
-                                                                                                        mainAxisSize: MainAxisSize.max,
-                                                                                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                                                                        children: [
-                                                                                                          VideoInfoChip(
-                                                                                                            icon_data: Icons.remove_red_eye,
-                                                                                                            text: snapshot.data[index].views,
-                                                                                                          ),
-                                                                                                          VideoInfoChip(
-                                                                                                            icon_data: Icons.access_time,
-                                                                                                            text: snapshot.data[index].upload_lapse,
-                                                                                                          ),
-                                                                                                        ],
-                                                                                                      )
-                                                                                                    ],
-                                                                                                  ),
-                                                                                                ),
-                                                                                              ],
-                                                                                            )
-                                                                                          ],
+                                                                                              )
+                                                                                            ],
+                                                                                          ),
                                                                                         ),
                                                                                       ),
-                                                                                    ),
-                                                                                  )),
-                                                                            ),
-                                                                          );
-                                                                        }),
-                                                              ),
-                                                              // videoSelected
-                                                              //     ? SizedBox(
-                                                              //         height:
-                                                              //             200)
-                                                              //     : SizedBox(),
-                                                            ]),
+                                                                                    )),
+                                                                              ),
+                                                                            );
+                                                                          }),
+                                                                ),
+                                                                // videoSelected
+                                                                //     ? SizedBox(
+                                                                //         height:
+                                                                //             200)
+                                                                //     : SizedBox(),
+                                                              ]),
+                                                        ),
                                                       );
                                                     }
                                                   }),
@@ -595,115 +759,10 @@ class _VideosScreenState extends State<VideosScreen>
   }
 
   Future<List<Video>> fetchLatestVideos() async {
-    List<Video> _latestVideos = [];
-
-    QueryResult result = await GraphQLClient(
-      cache: GraphQLCache(),
-      link: HttpLink("https://plug27.herokuapp.com/graphq"),
-    ).query(QueryOptions(document: gql("""
-query{
-  listVideo(sortField:"created_at",order:"desc",limit:50){
-    id,
-    title,
-    url,
-    description,
-    name,
-    durationMillisec,
-    createdAt,
-    deletedAt,
-    thumbnailUrl,
-    thumbnailName,
-    uploader{
-      id,
-      dpUrl,
-      channelName,
-      firstName,
-      lastName,
-      email,
-      emailVerifiedAt,
-      userType{
-        id,
-        name
-      }
-    },
-    views{
-      viewer{
-        firstName
-      }
-    },
-    comments{
-      commenter{
-        lastName
-      }
-    }
-  }
-}
-""")));
-    try {
-      if (result.hasException) {
-        print(result);
-        try {
-          OperationException? registerexception = result.exception;
-          List<GraphQLError>? errors = registerexception?.graphqlErrors;
-          String main_error = errors![0].message;
-          print(main_error);
-          return [];
-        } catch (error) {
-          return [];
-        }
-      } else {
-        var videos = result.data?['listVideo'];
-
-        videos.forEach((video) {
-          if (video['deletedAt'] == null || video['deletedAt'] == "") {
-            DateTime dateTimeCreatedAt = DateTime.parse(video['createdAt']);
-            DateTime dateTimeNow = DateTime.now();
-            final days_lapse = dateTimeNow.difference(dateTimeCreatedAt).inDays;
-            String lapse = "Today";
-            if (days_lapse < 1) {
-              String lapse = "Today";
-            } else if (days_lapse == 1) {
-              lapse = "yesterday";
-            } else {
-              lapse = days_lapse.toString() + " days ago";
-            }
-            String views = video['views'].length.toString() + " views";
-
-            _latestVideos.add(Video(
-              id: int.parse(video['id']),
-              title: video['title'].length > 20
-                  ? video['title']
-                      .replaceRange(20, video['title'].length, '...')
-                  : video['title'],
-              url: video['url'],
-              description: video['description'],
-              duration_millisec: video['durationMillisec'],
-              name: video['name'],
-              thumbnail_url: video['thumbnailUrl'],
-              thumbnail_name: video['thumbnailName'],
-              views: views.length > 12
-                  ? views.replaceRange(9, views.length, '...')
-                  : views,
-              upload_lapse: lapse.length > 12
-                  ? lapse.replaceRange(9, lapse.length, '...')
-                  : lapse,
-              uploaded_by: video['uploader']['firstName'].length > 20
-                  ? video['uploader']['firstName'].replaceRange(
-                      20, video['uploader']['firstName'].length, '...')
-                  : video['uploader']['firstName'],
-              uploader_dpurl: video['uploader']['dpUrl'],
-            ));
-          }
-        });
-        return _latestVideos;
-        // return _allTags
-        //     .where(
-        //         (tag) => tag.name.toLowerCase().contains(query.toLowerCase()))
-        //     .toList();
-      }
-    } catch (e) {
-      print(e);
+    if (latestVideos == null) {
       return [];
+    } else {
+      return latestVideos!;
     }
   }
 
@@ -1103,6 +1162,40 @@ query{
           MaterialPageRoute(builder: (BuildContext context) => LoginScreen()),
           ModalRoute.withName('/'));
     });
+  }
+
+  void checkVideo() {
+    // print('______________________________________________');
+    // print('CHECKING ' +
+    //     main_controller.value.position.toString() +
+    //     '/' +
+    //     main_controller.value.duration.toString());
+    // print('______________________________________________');
+    if (main_controller.value.position ==
+        Duration(seconds: 0, minutes: 0, hours: 0)) {
+      Size size = MediaQuery.of(context).size;
+      Size video_size = main_controller.value.size;
+      double aspect_ratio = video_size.aspectRatio;
+      setState(() {
+        // _playHeight = size.width / aspect_ratio;
+        // _controllerHeight = video_size.height;
+        // _controllerWidth = video_size.width;
+        // _controllerAspectRatio = video_size.aspectRatio;
+        // if (_playHeight > (size.height / 2)) {
+        //   flickManager.flickControlManager!.toggleFullscreen();
+        // }
+      });
+      // print('______________________________________________');
+      // print('video Started');
+      // print('______________________________________________');
+    }
+
+    if (main_controller.value.position == main_controller.value.duration ||
+        main_controller.value.position > main_controller.value.duration) {
+      // print('______________________________________________');
+      // print('video Ended');
+      // print('______________________________________________');
+    }
   }
 }
 

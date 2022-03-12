@@ -26,6 +26,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:video_player/video_player.dart';
 
 class UserProfileScreen extends StatefulWidget {
@@ -403,57 +404,91 @@ class _UserProfileScreenState extends State<UserProfileScreen>
                                                   ),
                                                   Row(
                                                     children: <Widget>[
-                                                      Row(
-                                                        children: <Widget>[
-                                                          Image.asset(
-                                                            "assets/travel/fb.png",
-                                                            height: 3 *
-                                                                heightMultiplier,
-                                                            width: 3 *
-                                                                widthMultiplier,
-                                                          ),
-                                                          SizedBox(
-                                                            width: 2 *
-                                                                widthMultiplier,
-                                                          ),
-                                                          Text(
-                                                            "Protorix",
-                                                            style: TextStyle(
-                                                              color: Colors
-                                                                  .white60,
-                                                              fontSize: 1.5 *
-                                                                  textMultiplier,
+                                                      InkWell(
+                                                        onTap: _FBUrl == null ||
+                                                                _FBUrl == ""
+                                                            ? () {}
+                                                            : () =>
+                                                                launch(_FBUrl!),
+                                                        child: Row(
+                                                          children: <Widget>[
+                                                            Image.asset(
+                                                              "assets/travel/fb.png",
+                                                              height: 3 *
+                                                                  heightMultiplier,
+                                                              width: 3 *
+                                                                  widthMultiplier,
                                                             ),
-                                                          ),
-                                                        ],
+                                                            SizedBox(
+                                                              width: 2 *
+                                                                  widthMultiplier,
+                                                            ),
+                                                            Text(
+                                                              channel == null ||
+                                                                      channel!.fb_name ==
+                                                                          ""
+                                                                  ? _FBName ==
+                                                                              "" ||
+                                                                          _FBName ==
+                                                                              null
+                                                                      ? "FB name"
+                                                                      : _FBName!
+                                                                  : channel!
+                                                                      .fb_name!,
+                                                              style: TextStyle(
+                                                                color: Colors
+                                                                    .white60,
+                                                                fontSize: 1.5 *
+                                                                    textMultiplier,
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
                                                       ),
                                                       SizedBox(
                                                         width:
                                                             7 * widthMultiplier,
                                                       ),
-                                                      Row(
-                                                        children: <Widget>[
-                                                          Image.asset(
-                                                            "assets/travel/insta.png",
-                                                            height: 3 *
-                                                                heightMultiplier,
-                                                            width: 3 *
-                                                                widthMultiplier,
-                                                          ),
-                                                          SizedBox(
-                                                            width: 2 *
-                                                                widthMultiplier,
-                                                          ),
-                                                          Text(
-                                                            "Protorix",
-                                                            style: TextStyle(
-                                                              color: Colors
-                                                                  .white60,
-                                                              fontSize: 1.5 *
-                                                                  textMultiplier,
+                                                      InkWell(
+                                                        onTap: _IGUrl == null ||
+                                                                _IGUrl == ""
+                                                            ? () {}
+                                                            : () =>
+                                                                launch(_IGUrl!),
+                                                        child: Row(
+                                                          children: <Widget>[
+                                                            Image.asset(
+                                                              "assets/travel/insta.png",
+                                                              height: 3 *
+                                                                  heightMultiplier,
+                                                              width: 3 *
+                                                                  widthMultiplier,
                                                             ),
-                                                          ),
-                                                        ],
+                                                            SizedBox(
+                                                              width: 2 *
+                                                                  widthMultiplier,
+                                                            ),
+                                                            Text(
+                                                              channel == null ||
+                                                                      channel!.instagram_name ==
+                                                                          ""
+                                                                  ? _IGName ==
+                                                                              "" ||
+                                                                          _IGName ==
+                                                                              null
+                                                                      ? "IG name"
+                                                                      : _IGName!
+                                                                  : channel!
+                                                                      .instagram_name!,
+                                                              style: TextStyle(
+                                                                color: Colors
+                                                                    .white60,
+                                                                fontSize: 1.5 *
+                                                                    textMultiplier,
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
                                                       )
                                                     ],
                                                   )
@@ -471,7 +506,7 @@ class _UserProfileScreenState extends State<UserProfileScreen>
                                               Column(
                                                 children: <Widget>[
                                                   Text(
-                                                    "10.2K",
+                                                    "0",
                                                     style: TextStyle(
                                                         color: Colors.white,
                                                         fontSize:

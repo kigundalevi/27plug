@@ -11,6 +11,7 @@ import 'package:africanplug/models/video.dart';
 import 'package:africanplug/op/mutations.dart';
 import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:africanplug/config/graphql_config.dart';
 import 'package:http/http.dart' as http;
@@ -202,6 +203,200 @@ class UserController {
       print(e);
       return null;
     }
+  }
+
+  Future<List<Video>?> fetchLatestVideos(int userId) async {
+    try {
+      Loc location = await currentLocation();
+      var user = appBox.get("user");
+      Dio dio = Dio(
+        BaseOptions(
+          contentType: 'multipart/form-data',
+          headers: {
+            "Accept": "*/*",
+            "Authorization": "Bearer " + user['token']
+          },
+        ),
+      );
+
+      var req = new http.MultipartRequest("POST", Uri.parse(BACKEND_URL));
+      Map<String, String> headers = {
+        "Accept": "*/*",
+        "Authorization": "Bearer " + user['token']
+      };
+
+      req.headers.addAll(headers);
+      String live = location.live ? 'true' : 'false';
+      req.fields['query'] = """
+query{
+  listVideo(sortField:"created_at",order:"desc",limit:50){
+    id,
+    title,
+    url,
+    description,
+    name,
+    durationMillisec,
+    createdAt,
+    deletedAt,
+    thumbnailUrl,
+    thumbnailName,
+    uploader{
+      id,
+      dpUrl,
+      channelName,
+      firstName,
+      lastName,
+      email,
+      emailVerifiedAt,
+      userType{
+        id,
+        name
+      }
+    },
+    views{
+      viewer{
+        firstName
+      }
+    },
+    comments{
+      commenter{
+        lastName
+      }
+    }
+  }
+}
+""";
+      http.Response response = await http.Response.fromStream(await req.send());
+      var resp = jsonDecode(response.body);
+
+      List<Video> _latestVideos = [];
+
+      if (response.statusCode == 200) {
+        var videos = resp["data"]['listVideo'];
+
+        videos.forEach((video) {
+          if (video['deletedAt'] == null || video['deletedAt'] == "") {
+            print(video['title']);
+            DateTime dateTimeCreatedAt = DateTime.parse(video['createdAt']);
+            DateTime dateTimeNow = DateTime.now();
+            final days_lapse = dateTimeNow.difference(dateTimeCreatedAt).inDays;
+            String lapse = "Today";
+            if (days_lapse < 1) {
+              String lapse = "Today";
+            } else if (days_lapse == 1) {
+              lapse = "yesterday";
+            } else {
+              lapse = days_lapse.toString() + " days ago";
+            }
+            String views = video['views'].length.toString() + " views";
+
+            _latestVideos.add(Video(
+              id: int.parse(video['id']),
+              title: video['title'].length > 20
+                  ? video['title']
+                      .replaceRange(20, video['title'].length, '...')
+                  : video['title'],
+              url: video['url'],
+              description: video['description'],
+              duration_millisec: video['durationMillisec'],
+              name: video['name'],
+              thumbnail_url: video['thumbnailUrl'],
+              thumbnail_name: video['thumbnailName'],
+              views: views.length > 12
+                  ? views.replaceRange(9, views.length, '...')
+                  : views,
+              upload_lapse: lapse.length > 12
+                  ? lapse.replaceRange(9, lapse.length, '...')
+                  : lapse,
+              uploaded_by: video['uploader']['firstName'].length > 20
+                  ? video['uploader']['firstName'].replaceRange(
+                      20, video['uploader']['firstName'].length, '...')
+                  : video['uploader']['firstName'],
+              uploader_dpurl: video['uploader']['dpUrl'],
+            ));
+          }
+        });
+
+        return _latestVideos;
+      } else {
+        print(response.body);
+        try {
+          var msg = jsonDecode(response.body)["msg"];
+          if (msg == "Token has expired") {
+            appBox.delete('user');
+            appBox.delete('cached_location');
+            GraphQLConfiguration.removeToken();
+            // Navigator.pop(context);
+            // Navigator.pushNamed(context, '/landing');
+            // Navigator.pushAndRemoveUntil(
+            //     context,
+            //     MaterialPageRoute(
+            //       builder: (context) => LandingScreen(),
+            //     ),
+            //     (route) => false);
+          }
+        } catch (e) {}
+        // print(response.);
+        print(response.statusCode);
+        return null;
+      }
+    } catch (e) {
+      print(e);
+      return null;
+    }
+  }
+
+  Future<bool> addVideoView(int video_id) async {
+    User current_user = currentUser();
+    int user_id = current_user.id;
+    Loc loc = await currentLocation();
+    String lat = loc.lat;
+    String lng = loc.lng;
+    String ip = loc.ip;
+    String locationName = loc.name;
+    bool locationLive = loc.live;
+
+//   String query = """
+// mutation{
+//   addVideoView(videoId:$video_id,userId:$user_id,lat:"$lat",lng:"$lng",ip:"$ip",locationName:"$locationName",locationLive:$locationLive){
+//     ok
+//   }
+// }
+// """;
+
+    String query = """
+mutation{
+  addVideoView(videoId:$video_id,userId:$user_id,ip:"$ip",lat:"$lat",lng:"$lng",locationName:"$locationName",locationLive:$locationLive){
+    ok
+  }
+}
+""";
+
+    // print(query);
+
+    GraphQLConfiguration graphQLConfig = new GraphQLConfiguration();
+    // GraphQLClient _client = graphQLConfig.clientToQuery();
+    QueryResult result = await GraphQLClient(
+      cache: GraphQLCache(),
+      link: HttpLink("https://plug27.herokuapp.com/graphq"),
+    ).mutate(MutationOptions(document: gql(query)));
+
+    if (result.hasException) {
+      print(result);
+      try {
+        OperationException? registerexception = result.exception;
+        List<GraphQLError>? errors = registerexception?.graphqlErrors;
+        String main_error = errors![0].message;
+        print(main_error);
+      } catch (error) {
+        print('Invalid parameters');
+      }
+      return false;
+    } else {
+      return true;
+    }
+    // print("VIEW RESULT");
+    // print(result);
   }
 
   Future<String?> userUpdateDisplayPicture(String dpUrl, String ip, String lat,

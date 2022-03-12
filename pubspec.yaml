@@ -61,7 +61,9 @@ dependencies:
     # aws_s3: ^0.1.1+hotfix.5
     simple_s3: ^0.3.2
     percent_indicator: ^4.0.0
-    expansion_tile_card: ^2.0.0
+    flick_video_player: ^0.4.0-dev.4
+    visibility_detector: ^0.2.2
+    url_launcher: ^6.0.20
     # flutter_uploader: ^1.2.1
     # aws_s3: ^0.1.1+hotfix.5
     # d
