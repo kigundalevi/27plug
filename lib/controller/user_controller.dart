@@ -273,7 +273,6 @@ query{
 
         videos.forEach((video) {
           if (video['deletedAt'] == null || video['deletedAt'] == "") {
-            print(video['title']);
             DateTime dateTimeCreatedAt = DateTime.parse(video['createdAt']);
             DateTime dateTimeNow = DateTime.now();
             final days_lapse = dateTimeNow.difference(dateTimeCreatedAt).inDays;
@@ -420,7 +419,6 @@ query{
 
         videos.forEach((video) {
           if (video['deletedAt'] == null || video['deletedAt'] == "") {
-            print(video['title']);
             DateTime dateTimeCreatedAt = DateTime.parse(video['createdAt']);
             DateTime dateTimeNow = DateTime.now();
             final days_lapse = dateTimeNow.difference(dateTimeCreatedAt).inDays;
@@ -567,7 +565,6 @@ query{
 
         videos.forEach((video) {
           if (video['deletedAt'] == null || video['deletedAt'] == "") {
-            print(video['title']);
             DateTime dateTimeCreatedAt = DateTime.parse(video['createdAt']);
             DateTime dateTimeNow = DateTime.now();
             final days_lapse = dateTimeNow.difference(dateTimeCreatedAt).inDays;
