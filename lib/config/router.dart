@@ -1,5 +1,6 @@
 import 'package:africanplug/config/route_names.dart';
 import 'package:africanplug/landing.dart';
+import 'package:africanplug/main.dart';
 import 'package:africanplug/screens/login/login_signup.dart';
 import 'package:africanplug/screens/profile/user_profile.dart';
 import 'package:africanplug/screens/upload/upload.dart';
@@ -15,7 +16,9 @@ class CustomRouter {
         return MaterialPageRoute(builder: (_) => LoginSignupScreen());
       // homeRoute: (BuildContext context) => VideosScreen(),
       case homeRoute:
-        return MaterialPageRoute(builder: (_) => VideosScreen());
+        return appBox.get("user") == null
+            ? MaterialPageRoute(builder: (_) => LandingScreen())
+            : MaterialPageRoute(builder: (_) => VideosScreen());
       case uploadRoute:
         return MaterialPageRoute(builder: (_) => UploadVideoPage());
       case profileRoute:

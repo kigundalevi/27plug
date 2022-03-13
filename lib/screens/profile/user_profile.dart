@@ -16,10 +16,11 @@ import 'package:africanplug/widgets/button/main_upload_button.dart';
 import 'package:africanplug/widgets/button/thumbnail_icon_button.dart';
 import 'package:africanplug/widgets/chip/image_chip.dart';
 import 'package:africanplug/widgets/input/text_input_field.dart';
+import 'package:africanplug/widgets/loader/custom_loader.dart';
 import 'package:africanplug/widgets/menu/main_menu.dart';
 import 'package:africanplug/widgets/video/thumbnail_display.dart';
 import 'package:africanplug/widgets/video/video_info_chip.dart';
-import 'package:africanplug/widgets/video/video_tile.dart';
+import 'package:africanplug/widgets/video/video_tile_old.dart';
 import 'package:another_flushbar/flushbar.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -147,13 +148,6 @@ class _UserProfileScreenState extends State<UserProfileScreen>
   @override
   void initState() {
     isOwner = logged_in_user.id == widget.user_id ? true : false;
-    _controller = VideoPlayerController.network(
-        'https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4')
-      ..initialize().then((_) {
-        setState(() {});
-        // _controller.play();
-      });
-    // setUser(user_id);
 
     _aController = AnimationController(duration: duration, vsync: this);
     _scaleAnimation = Tween<double>(begin: 1, end: 0.85).animate(_aController);
@@ -167,11 +161,6 @@ class _UserProfileScreenState extends State<UserProfileScreen>
 
   @override
   void dispose() {
-    _controller.setVolume(0);
-    _controller.pause();
-    _controller.dispose();
-    disposed = true;
-    _aController.dispose();
     super.dispose();
   }
 
@@ -214,46 +203,52 @@ class _UserProfileScreenState extends State<UserProfileScreen>
     ctrl.fetchChannelDetails(user_id).then((res) {
       if (res == null) {
       } else {
-        setState(() {
-          channel = res;
-        });
+        if (mounted) {
+          setState(() {
+            channel = res;
+          });
+        }
         if (user_id != channel!.id) {
         } else {
-          setState(() {
-            // print("____________RES______________");
-            // print(res.first_name);
-            dp_url = res.dp_url;
-            _channelName = res.channel_name;
-            _displayText = res.channel_name == "" || res.channel_name == null
-                ? res.first_name + " " + res.last_name
-                : res.channel_name;
-            _registerLastName = res.last_name;
-            _registerFirstName = res.first_name;
+          if (mounted) {
+            setState(() {
+              // print("____________RES______________");
+              // print(res.first_name);
+              dp_url = res.dp_url;
+              _channelName = res.channel_name;
+              _displayText = res.channel_name == "" || res.channel_name == null
+                  ? res.first_name + " " + res.last_name
+                  : res.channel_name;
+              _registerLastName = res.last_name;
+              _registerFirstName = res.first_name;
 
-            if (res.phone_no != null || res.phone_no == '') {
-              phoneStr = res.phone_no.substring(res.phone_no.length - 9);
-            }
-            _registerPhoneNo = phoneStr;
+              if (res.phone_no != null || res.phone_no == '') {
+                phoneStr = res.phone_no.substring(res.phone_no.length - 9);
+              }
+              _registerPhoneNo = phoneStr;
 
-            _profileImageSection = Container(
-              height: 11 * heightMultiplier,
-              width: 22 * widthMultiplier,
-              decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  image: DecorationImage(
-                      fit: BoxFit.cover,
-                      image: NetworkImage(
-                        dp_url,
-                      ))),
-            );
-          });
+              _profileImageSection = Container(
+                height: 11 * heightMultiplier,
+                width: 22 * widthMultiplier,
+                decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    image: DecorationImage(
+                        fit: BoxFit.cover,
+                        image: NetworkImage(
+                          dp_url,
+                        ))),
+              );
+            });
+          }
         }
       }
     });
     ctrl.fetchChannelVideos(user_id).then((channel_videos) {
-      setState(() {
-        _channelVideos = channel_videos;
-      });
+      if (mounted) {
+        setState(() {
+          _channelVideos = channel_videos;
+        });
+      }
     });
 
     final key = GlobalKey();
@@ -288,11 +283,7 @@ class _UserProfileScreenState extends State<UserProfileScreen>
                 elevation: 8.0,
                 color: kScaffoldColor,
                 child: channel == null
-                    ? Center(
-                        child: Container(
-                            height: size.width / 7,
-                            width: size.width / 7,
-                            child: const CircularProgressIndicator()))
+                    ? customLoader(size: size, text: "Fetching details...")
                     : Padding(
                         padding: isCollapsed
                             ? const EdgeInsets.only(top: 0.0, bottom: 0.0)
@@ -660,123 +651,7 @@ class _UserProfileScreenState extends State<UserProfileScreen>
                                                       : tab == 'watch later'
                                                           ? SizedBox()
                                                           : tab == 'favourites'
-                                                              ? Column(
-                                                                  children: [
-                                                                    // Padding(
-                                                                    //   padding: EdgeInsets.only(
-                                                                    //       left: 20.0,
-                                                                    //       top: 3 * heightMultiplier),
-                                                                    //   child: Text(
-                                                                    //     "$tab",
-                                                                    //     style: TextStyle(
-                                                                    //         color: Colors.black,
-                                                                    //         fontWeight: FontWeight.bold,
-                                                                    //         fontSize:
-                                                                    //             2.2 * textMultiplier),
-                                                                    //   ),
-                                                                    // ),
-                                                                    // SizedBox(
-                                                                    //   height: 3 * heightMultiplier,
-                                                                    // ),
-                                                                    Container(
-                                                                      height: 37 *
-                                                                          heightMultiplier,
-                                                                      child:
-                                                                          ListView(
-                                                                        scrollDirection:
-                                                                            Axis.horizontal,
-                                                                        children: <
-                                                                            Widget>[
-                                                                          _myAlbumCard(
-                                                                              "assets/travel/travelfive.png",
-                                                                              "assets/travel/traveltwo.png",
-                                                                              "assets/travel/travelsix.png",
-                                                                              "assets/travel/travelthree.png",
-                                                                              "+178",
-                                                                              "Best Trip"),
-                                                                          _myAlbumCard(
-                                                                              "assets/travel/travelsix.png",
-                                                                              "assets/travel/travelthree.png",
-                                                                              "assets/travel/travelfour.png",
-                                                                              "assets/travel/travelfive.png",
-                                                                              "+18",
-                                                                              "Hill Lake Tourism"),
-                                                                          _myAlbumCard(
-                                                                              "assets/travel/travelfive.png",
-                                                                              "assets/travel/travelsix.png",
-                                                                              "assets/travel/traveltwo.png",
-                                                                              "assets/travel/travelone.png",
-                                                                              "+1288",
-                                                                              "The Grand Canyon"),
-                                                                          SizedBox(
-                                                                            width:
-                                                                                10 * widthMultiplier,
-                                                                          ),
-                                                                        ],
-                                                                      ),
-                                                                    ),
-                                                                    SizedBox(
-                                                                      height: 3 *
-                                                                          heightMultiplier,
-                                                                    ),
-                                                                    Padding(
-                                                                      padding: EdgeInsets.only(
-                                                                          left:
-                                                                              30.0,
-                                                                          right:
-                                                                              30.0),
-                                                                      child:
-                                                                          Row(
-                                                                        children: <
-                                                                            Widget>[
-                                                                          Text(
-                                                                            "Favourite places",
-                                                                            style: TextStyle(
-                                                                                color: Colors.black,
-                                                                                fontWeight: FontWeight.bold,
-                                                                                fontSize: 2.2 * textMultiplier),
-                                                                          ),
-                                                                          Spacer(),
-                                                                          Text(
-                                                                            "View All",
-                                                                            style:
-                                                                                TextStyle(color: Colors.grey, fontSize: 1.7 * textMultiplier),
-                                                                          ),
-                                                                        ],
-                                                                      ),
-                                                                    ),
-                                                                    SizedBox(
-                                                                      height: 3 *
-                                                                          heightMultiplier,
-                                                                    ),
-                                                                    Container(
-                                                                      height: 20 *
-                                                                          heightMultiplier,
-                                                                      child:
-                                                                          ListView(
-                                                                        scrollDirection:
-                                                                            Axis.horizontal,
-                                                                        children: <
-                                                                            Widget>[
-                                                                          _favoriteCard(
-                                                                              "assets/travel/travelfive.png"),
-                                                                          _favoriteCard(
-                                                                              "assets/travel/travelthree.png"),
-                                                                          _favoriteCard(
-                                                                              "assets/travel/travelfive.png"),
-                                                                          SizedBox(
-                                                                            width:
-                                                                                10 * widthMultiplier,
-                                                                          )
-                                                                        ],
-                                                                      ),
-                                                                    ),
-                                                                    SizedBox(
-                                                                      height: 3 *
-                                                                          heightMultiplier,
-                                                                    )
-                                                                  ],
-                                                                )
+                                                              ? SizedBox()
                                                               : SizedBox(
                                                                   child: Text(
                                                                       'Tab not found'),
@@ -797,6 +672,104 @@ class _UserProfileScreenState extends State<UserProfileScreen>
             ),
           ),
         ]));
+  }
+
+  Column favouritesTab() {
+    return Column(
+      children: [
+        // Padding(
+        //   padding: EdgeInsets.only(
+        //       left: 20.0,
+        //       top: 3 * heightMultiplier),
+        //   child: Text(
+        //     "$tab",
+        //     style: TextStyle(
+        //         color: Colors.black,
+        //         fontWeight: FontWeight.bold,
+        //         fontSize:
+        //             2.2 * textMultiplier),
+        //   ),
+        // ),
+        // SizedBox(
+        //   height: 3 * heightMultiplier,
+        // ),
+        Container(
+          height: 37 * heightMultiplier,
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            children: <Widget>[
+              _myAlbumCard(
+                  "assets/travel/travelfive.png",
+                  "assets/travel/traveltwo.png",
+                  "assets/travel/travelsix.png",
+                  "assets/travel/travelthree.png",
+                  "+178",
+                  "Best Trip"),
+              _myAlbumCard(
+                  "assets/travel/travelsix.png",
+                  "assets/travel/travelthree.png",
+                  "assets/travel/travelfour.png",
+                  "assets/travel/travelfive.png",
+                  "+18",
+                  "Hill Lake Tourism"),
+              _myAlbumCard(
+                  "assets/travel/travelfive.png",
+                  "assets/travel/travelsix.png",
+                  "assets/travel/traveltwo.png",
+                  "assets/travel/travelone.png",
+                  "+1288",
+                  "The Grand Canyon"),
+              SizedBox(
+                width: 10 * widthMultiplier,
+              ),
+            ],
+          ),
+        ),
+        SizedBox(
+          height: 3 * heightMultiplier,
+        ),
+        Padding(
+          padding: EdgeInsets.only(left: 30.0, right: 30.0),
+          child: Row(
+            children: <Widget>[
+              Text(
+                "Favourite places",
+                style: TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 2.2 * textMultiplier),
+              ),
+              Spacer(),
+              Text(
+                "View All",
+                style: TextStyle(
+                    color: Colors.grey, fontSize: 1.7 * textMultiplier),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(
+          height: 3 * heightMultiplier,
+        ),
+        Container(
+          height: 20 * heightMultiplier,
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            children: <Widget>[
+              _favoriteCard("assets/travel/travelfive.png"),
+              _favoriteCard("assets/travel/travelthree.png"),
+              _favoriteCard("assets/travel/travelfive.png"),
+              SizedBox(
+                width: 10 * widthMultiplier,
+              )
+            ],
+          ),
+        ),
+        SizedBox(
+          height: 3 * heightMultiplier,
+        )
+      ],
+    );
   }
 
   Container channelVideosTab(Size size) {
@@ -1750,6 +1723,10 @@ query{
                 ? video['uploader']['firstName'].replaceRange(
                     20, video['uploader']['firstName'].length, '...')
                 : video['uploader']['firstName'],
+            uploader_channel_name: video['uploader']['channelName'].length > 20
+                ? video['uploader']['channelName'].replaceRange(
+                    20, video['uploader']['channelName'].length, '...')
+                : video['uploader']['channelName'],
             uploader_dpurl: video['uploader']['dpUrl'],
           ));
         });

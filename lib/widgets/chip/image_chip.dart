@@ -29,6 +29,7 @@ class ImageChip extends StatelessWidget {
               child: Image.network(
                 image_url,
                 height: size.height * 0.03,
+                width: size.height * 0.03,
               ),
             ),
           ),

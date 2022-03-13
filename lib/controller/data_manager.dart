@@ -6,9 +6,11 @@ import 'package:flick_video_player/flick_video_player.dart';
 import 'package:video_player/video_player.dart';
 
 class CustomDataManager {
-  CustomDataManager({required this.flickManager, required this.videos});
-
-  int currentPlaying = 0;
+  CustomDataManager(
+      {required this.flickManager,
+      required this.videos,
+      required this.currentPlaying});
+  int currentPlaying;
   final FlickManager flickManager;
   final List<Video> videos;
 
@@ -38,6 +40,12 @@ class CustomDataManager {
           videoChangeDuration: duration);
       currentPlaying++;
     }
+  }
+
+  play() {
+    // saveView(videos[currentPlaying].id);
+    flickManager.handleChangeVideo(
+        VideoPlayerController.network(videos[currentPlaying].url));
   }
 
   skipToVideo(int index) {

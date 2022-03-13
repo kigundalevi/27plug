@@ -45,6 +45,8 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     User user = currentUser();
+    // print("_____-------CURRENT USER++______");
+    // print(appBox.get("user"));
     // SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark.copyWith(
     //         statusBarColor: kPrimaryLightColor,
     //         /* set Status bar color in Android devices. */

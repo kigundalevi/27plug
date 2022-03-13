@@ -1,3 +1,4 @@
+import 'package:africanplug/controller/custom_auto_hide_controls.dart';
 import 'package:flick_video_player/flick_video_player.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -20,14 +21,14 @@ class CustomOrientationControls extends StatelessWidget {
     return Stack(
       children: <Widget>[
         Positioned.fill(
-          child: FlickAutoHideChild(
+          child: CustomFlickAutoHideChild(
             child: Container(color: Colors.black38),
           ),
         ),
         Positioned(
             top: 0,
             left: 0,
-            child: FlickAutoHideChild(
+            child: CustomFlickAutoHideChild(
                 child: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Text(dataManager!.currentVideo().title)))),
@@ -42,7 +43,7 @@ class CustomOrientationControls extends StatelessWidget {
                           color: Colors.red,
                         ),
                       )
-                    : FlickAutoHideChild(
+                    : CustomFlickAutoHideChild(
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
@@ -88,7 +89,7 @@ class CustomOrientationControls extends StatelessWidget {
           ),
         ),
         Positioned.fill(
-          child: FlickAutoHideChild(
+          child: CustomFlickAutoHideChild(
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: Column(

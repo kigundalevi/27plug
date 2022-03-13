@@ -10,7 +10,7 @@ import 'package:africanplug/widgets/input/text_field_container.dart';
 import 'package:africanplug/widgets/menu/main_menu.dart';
 import 'package:africanplug/widgets/video/thumbnail_display.dart';
 import 'package:africanplug/widgets/video/video_info_chip.dart';
-import 'package:africanplug/widgets/video/video_tile.dart';
+import 'package:africanplug/widgets/video/video_tile_old.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';

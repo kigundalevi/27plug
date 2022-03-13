@@ -41,7 +41,14 @@ Widget MainMenu(
                                     heroTag: "btn2",
                                     elevation: 5.0,
                                     backgroundColor: kWhite,
-                                    onPressed: () {},
+                                    onPressed: () {
+                                      // Navigator.pop(context);
+                                      Navigator.pushNamed(context, "/profile",
+                                          arguments: [
+                                            currentUser().id,
+                                            'profile'
+                                          ]);
+                                    },
                                     child: Padding(
                                       padding: const EdgeInsets.all(3.0),
                                       child: new Container(
@@ -77,7 +84,10 @@ Widget MainMenu(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    user.first_name + " " + user.last_name,
+                                    user.channel_name == null ||
+                                            user.channel_name == ""
+                                        ? user.first_name + " " + user.last_name
+                                        : user.channel_name,
                                     style: TextStyle(
                                         fontSize: 18,
                                         fontWeight: FontWeight.bold),

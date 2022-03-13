@@ -12,6 +12,7 @@ class Video {
   final String views;
   final String upload_lapse;
   final String uploaded_by;
+  final String uploader_channel_name;
   final String uploader_dpurl;
   // final String upload_ip;
   // final String upload_lat;
@@ -32,6 +33,7 @@ class Video {
     required this.views,
     required this.upload_lapse,
     required this.uploaded_by,
+    required this.uploader_channel_name,
     required this.uploader_dpurl,
     // required this.upload_ip,
     // required this.upload_lat,

@@ -4,7 +4,7 @@ import 'package:africanplug/widgets/video/thumbnail_display.dart';
 import 'package:africanplug/widgets/video/video_info_chip.dart';
 import 'package:flutter/material.dart';
 
-class VideoTile extends StatelessWidget {
+class VideoTileOld extends StatelessWidget {
   final String thumbnail_url;
   final String title;
   final int channel_id;
@@ -12,7 +12,7 @@ class VideoTile extends StatelessWidget {
   final String channel_image_url;
   final String view_count;
   final String lapse;
-  const VideoTile({
+  const VideoTileOld({
     Key? key,
     required this.thumbnail_url,
     required this.title,

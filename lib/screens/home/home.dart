@@ -6,7 +6,7 @@ import 'package:africanplug/widgets/button/thumbnail_icon_button.dart';
 import 'package:africanplug/widgets/menu/main_menu.dart';
 import 'package:africanplug/widgets/video/thumbnail_display.dart';
 import 'package:africanplug/widgets/video/video_info_chip.dart';
-import 'package:africanplug/widgets/video/video_tile.dart';
+import 'package:africanplug/widgets/video/video_tile_old.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
@@ -184,7 +184,7 @@ class _AppHomeState extends State<AppHome> with TickerProviderStateMixin {
                       onTap: () {
                         onVideoTap(index, "assets/videos/ruto.mp4");
                       },
-                      child: VideoTile(
+                      child: VideoTileOld(
                         thumbnail_url: "assets/images/ruto.jpg",
                         title: "The government's scorecard",
                         channel_name: "Visanga Kenya",

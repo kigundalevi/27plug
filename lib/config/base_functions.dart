@@ -100,7 +100,14 @@ Future<Loc> currentLocation() async {
     // App to enable the location services.
     // return Future.error('Location services are disabled.');
     print('Location services are disabled.');
-    return _locFromIp();
+    Map loc = await _locFromIp();
+
+    return Loc(
+        lat: loc['lng'],
+        lng: loc['lat'],
+        ip: loc['ip'],
+        name: loc['name'],
+        live: true);
   }
 
   permission = await Geolocator.checkPermission();
@@ -114,7 +121,14 @@ Future<Loc> currentLocation() async {
       // your App should show an explanatory UI now.
       // return Future.error('Location permissions are denied');
       print('Location permissions are denied.');
-      return _locFromIp();
+      Map loc = await _locFromIp();
+
+      return Loc(
+          lat: loc['lng'],
+          lng: loc['lat'],
+          ip: loc['ip'],
+          name: loc['name'],
+          live: true);
     }
   }
 
@@ -124,22 +138,29 @@ Future<Loc> currentLocation() async {
     //     'Location permissions are permanently denied, we cannot request permissions.');
     print(
         'Location permissions are permanently denied, we cannot request permissions.');
-    return _locFromIp();
+    Map loc = await _locFromIp();
+
+    return Loc(
+        lat: loc['lng'],
+        lng: loc['lat'],
+        ip: loc['ip'],
+        name: loc['name'],
+        live: true);
   }
 
   // When we reach here, permissions are granted and we can
   // continue accessing the position of the device.
   Position pos = await Geolocator.getCurrentPosition();
-  Loc ipLoc = await _locFromIp();
+  Map ipLoc = await _locFromIp();
   return Loc(
       lat: pos.latitude.toString(),
       lng: pos.longitude.toString(),
-      ip: ipLoc.ip,
-      name: ipLoc.name,
+      ip: ipLoc['ip'],
+      name: ipLoc['name'],
       live: true);
 }
 
-Future<Loc> _locFromIp() async {
+Future<Map> _locFromIp() async {
   Loc location;
   var cached_location = appBox.get("cached_location");
 
@@ -154,8 +175,18 @@ Future<Loc> _locFromIp() async {
           name: json.decode(res.body)['regionName'] +
               ',' +
               json.decode(res.body)['country']);
-      appBox.put('cached_location', location);
-      return location;
+
+      Map<String, String> loc = {
+        "lat": json.decode(res.body)['lat'].toString(),
+        "tng": json.decode(res.body)['lon'].toString(),
+        "ip": json.decode(res.body)['query'],
+        "name": json.decode(res.body)['regionName'] +
+            ',' +
+            json.decode(res.body)['country']
+      };
+
+      appBox.put('cached_location', loc);
+      return loc;
     } else {
       return cached_location;
     }
@@ -164,7 +195,13 @@ Future<Loc> _locFromIp() async {
     // print("Error getting Loc from IP");
 
     location = Loc(lat: "0", lng: "0", ip: "0.0.0.0", name: "unknown");
-    return location;
+    Map<String, String> loc = {
+      "lat": "0",
+      "tng": "0",
+      "ip": "0.0.0.0",
+      "name": "unknown"
+    };
+    return loc;
     //handleError
   }
 }
