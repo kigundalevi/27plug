@@ -90,6 +90,7 @@ class _VideosScreenState extends State<VideosScreen>
   TextEditingController searchController = new TextEditingController();
   List<Video> _searchResults = [];
   String searchText = "";
+  bool _searching = false;
   @override
   void initState() {
     UserController ctrl = UserController();
@@ -159,8 +160,9 @@ class _VideosScreenState extends State<VideosScreen>
     return Scaffold(
         resizeToAvoidBottomInset: false,
         backgroundColor: kBackgroundColor,
-        floatingActionButton:
-            current_page != "/upload" ? MainUploadButton() : SizedBox(),
+        floatingActionButton: current_page == "/upload" || isCollapsed
+            ? MainUploadButton()
+            : SizedBox(),
         body: Stack(children: [
           MainMenu(context, current_page, _slideAnimation, _menuScaleAnimation,
               size),
@@ -219,6 +221,10 @@ class _VideosScreenState extends State<VideosScreen>
                                             currentUser().id,
                                             'profile'
                                           ]);
+                                    }, () {
+                                      setState(() {
+                                        _searching = !_searching;
+                                      });
                                     }),
                                   ],
                                 ),
@@ -262,12 +268,16 @@ class _VideosScreenState extends State<VideosScreen>
                                                       return SingleChildScrollView(
                                                         child: Column(
                                                             children: [
-                                                              searchTab(
-                                                                  context),
+                                                              _searching
+                                                                  ? searchTab(
+                                                                      context)
+                                                                  : SizedBox(),
                                                               Container(
-                                                                height:
-                                                                    size.height -
-                                                                        200,
+                                                                height: _searching
+                                                                    ? size.height -
+                                                                        200
+                                                                    : size.height -
+                                                                        140,
                                                                 child: searchText !=
                                                                         ""
                                                                     ? new ListView
@@ -277,55 +287,12 @@ class _VideosScreenState extends State<VideosScreen>
                                                                         itemBuilder:
                                                                             (context,
                                                                                 i) {
-                                                                          if (_searchResults.length ==
-                                                                              0) {
-                                                                            return Container(
-                                                                              width: size.width,
-                                                                              child: TextButton(
-                                                                                  style: ButtonStyle(
-                                                                                      elevation: MaterialStateProperty.all(3.0),
-                                                                                      backgroundColor: MaterialStateProperty.all(kActiveColor),
-                                                                                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(RoundedRectangleBorder(
-                                                                                        borderRadius: BorderRadius.circular(numCurveRadius),
-                                                                                        // side: BorderSide(color: Colors.red)
-                                                                                      ))),
-                                                                                  onPressed: () {
-                                                                                    // Navigator.pop(context);
-                                                                                    Navigator.pushNamed(context, "/loginRegister");
-                                                                                  },
-                                                                                  child: Text("Register/Login for wider search", style: TextStyle(color: kPrimaryColor, fontWeight: FontWeight.bold))),
-                                                                            );
-                                                                          } else if (i ==
-                                                                              _searchResults.length - 1) {
-                                                                            return Column(
-                                                                              children: [
-                                                                                VideoListTile(video: _searchResults[i], playList: _searchResults, playingIndex: i, isCollapsed: isCollapsed, size: size),
-                                                                                Container(
-                                                                                  width: size.width,
-                                                                                  child: TextButton(
-                                                                                      style: ButtonStyle(
-                                                                                          elevation: MaterialStateProperty.all(3.0),
-                                                                                          backgroundColor: MaterialStateProperty.all(kActiveColor),
-                                                                                          shape: MaterialStateProperty.all<RoundedRectangleBorder>(RoundedRectangleBorder(
-                                                                                            borderRadius: BorderRadius.circular(numCurveRadius),
-                                                                                            // side: BorderSide(color: Colors.red)
-                                                                                          ))),
-                                                                                      onPressed: () {
-                                                                                        // Navigator.pop(context);
-                                                                                        Navigator.pushNamed(context, "/loginRegister");
-                                                                                      },
-                                                                                      child: Text("Register/Login for more", style: TextStyle(color: kPrimaryColor, fontWeight: FontWeight.bold))),
-                                                                                ),
-                                                                              ],
-                                                                            );
-                                                                          } else {
-                                                                            return new VideoListTile(
-                                                                                video: _searchResults[i],
-                                                                                playList: _searchResults,
-                                                                                playingIndex: i,
-                                                                                isCollapsed: isCollapsed,
-                                                                                size: size);
-                                                                          }
+                                                                          return new VideoListTile(
+                                                                              video: _searchResults[i],
+                                                                              playList: _searchResults,
+                                                                              playingIndex: i,
+                                                                              isCollapsed: isCollapsed,
+                                                                              size: size);
                                                                         },
                                                                       )
                                                                     : ListView.builder(
@@ -727,6 +694,7 @@ class _VideosScreenState extends State<VideosScreen>
             searchController.clear();
             onSearchTextChanged('');
             setState(() {
+              _searching = false;
               searchText = "";
             });
           },
