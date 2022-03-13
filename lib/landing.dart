@@ -76,6 +76,10 @@ class _LandingScreenState extends State<LandingScreen>
   late List<Video>? trendingVideos;
   late List<Video>? topVideos;
 
+  TextEditingController searchController = new TextEditingController();
+  List<Video> _searchResults = [];
+  String searchText = "";
+
   @override
   void initState() {
     super.initState();
@@ -127,6 +131,7 @@ class _LandingScreenState extends State<LandingScreen>
     final height = MediaQuery.of(context).size.height;
 
     return Scaffold(
+        resizeToAvoidBottomInset: false,
         backgroundColor: kBackgroundColor,
         // floatingActionButton:
         //     current_page != "/upload" ? MainUploadButton() : SizedBox(),
@@ -160,6 +165,7 @@ class _LandingScreenState extends State<LandingScreen>
                       child: Stack(
                     children: [
                       Scaffold(
+                        resizeToAvoidBottomInset: false,
                         backgroundColor: kScaffoldColor,
                         body: Column(
                           children: [
@@ -243,21 +249,76 @@ class _LandingScreenState extends State<LandingScreen>
                                                       return SingleChildScrollView(
                                                         child: Column(
                                                             children: [
+                                                              searchTab(
+                                                                  context),
                                                               Container(
                                                                 height:
                                                                     size.height -
-                                                                        150,
-                                                                child: ListView
-                                                                    .builder(
-                                                                        itemCount: snapshot
-                                                                            .data
-                                                                            .length,
-                                                                        scrollDirection:
-                                                                            Axis
-                                                                                .vertical,
+                                                                        200,
+                                                                child: searchText !=
+                                                                        ""
+                                                                    ? new ListView
+                                                                        .builder(
+                                                                        itemCount:
+                                                                            _searchResults.length,
                                                                         itemBuilder:
-                                                                            (BuildContext context,
-                                                                                int index) {
+                                                                            (context,
+                                                                                i) {
+                                                                          if (_searchResults.length ==
+                                                                              0) {
+                                                                            return Container(
+                                                                              width: size.width,
+                                                                              child: TextButton(
+                                                                                  style: ButtonStyle(
+                                                                                      elevation: MaterialStateProperty.all(3.0),
+                                                                                      backgroundColor: MaterialStateProperty.all(kActiveColor),
+                                                                                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(RoundedRectangleBorder(
+                                                                                        borderRadius: BorderRadius.circular(numCurveRadius),
+                                                                                        // side: BorderSide(color: Colors.red)
+                                                                                      ))),
+                                                                                  onPressed: () {
+                                                                                    // Navigator.pop(context);
+                                                                                    Navigator.pushNamed(context, "/loginRegister");
+                                                                                  },
+                                                                                  child: Text("Register/Login for wider search", style: TextStyle(color: kPrimaryColor, fontWeight: FontWeight.bold))),
+                                                                            );
+                                                                          } else if (i ==
+                                                                              _searchResults.length - 1) {
+                                                                            return Column(
+                                                                              children: [
+                                                                                VideoListTile(video: _searchResults[i], playList: _searchResults, playingIndex: i, isCollapsed: isCollapsed, size: size),
+                                                                                Container(
+                                                                                  width: size.width,
+                                                                                  child: TextButton(
+                                                                                      style: ButtonStyle(
+                                                                                          elevation: MaterialStateProperty.all(3.0),
+                                                                                          backgroundColor: MaterialStateProperty.all(kActiveColor),
+                                                                                          shape: MaterialStateProperty.all<RoundedRectangleBorder>(RoundedRectangleBorder(
+                                                                                            borderRadius: BorderRadius.circular(numCurveRadius),
+                                                                                            // side: BorderSide(color: Colors.red)
+                                                                                          ))),
+                                                                                      onPressed: () {
+                                                                                        // Navigator.pop(context);
+                                                                                        Navigator.pushNamed(context, "/loginRegister");
+                                                                                      },
+                                                                                      child: Text("Register/Login for more", style: TextStyle(color: kPrimaryColor, fontWeight: FontWeight.bold))),
+                                                                                ),
+                                                                              ],
+                                                                            );
+                                                                          } else {
+                                                                            return new VideoListTile(
+                                                                                video: _searchResults[i],
+                                                                                playList: _searchResults,
+                                                                                playingIndex: i,
+                                                                                isCollapsed: isCollapsed,
+                                                                                size: size);
+                                                                          }
+                                                                        },
+                                                                      )
+                                                                    : ListView.builder(
+                                                                        itemCount: snapshot.data.length,
+                                                                        scrollDirection: Axis.vertical,
+                                                                        itemBuilder: (BuildContext context, int index) {
                                                                           return Padding(
                                                                             padding:
                                                                                 const EdgeInsets.symmetric(vertical: 3.0),
@@ -552,6 +613,44 @@ class _LandingScreenState extends State<LandingScreen>
             ),
           ),
         ]));
+  }
+
+  Container searchTab(BuildContext context) {
+    return new Container(
+      color: Theme.of(context).primaryColor.withOpacity(0.4),
+      child: new ListTile(
+        dense: true,
+        contentPadding: EdgeInsets.symmetric(horizontal: 4.0, vertical: 0.0),
+        visualDensity: VisualDensity(horizontal: 0, vertical: 0),
+        leading: new Icon(Icons.search, color: kActiveColor.withOpacity(0.8)),
+        title: new TextField(
+          style: TextStyle(color: kActiveColor),
+          cursorColor: kActiveColor,
+          controller: searchController,
+          decoration: new InputDecoration(
+              hintText: 'Search',
+              hintStyle: TextStyle(color: kActiveColor.withOpacity(0.6)),
+              border: InputBorder.none),
+          onChanged: (value) {
+            onSearchTextChanged(value);
+            setState(() {
+              searchText = value;
+            });
+            print(searchText);
+          },
+        ),
+        trailing: new IconButton(
+          icon: new Icon(Icons.cancel, color: kActiveColor.withOpacity(0.7)),
+          onPressed: () {
+            searchController.clear();
+            onSearchTextChanged('');
+            setState(() {
+              searchText = "";
+            });
+          },
+        ),
+      ),
+    );
   }
 
   Future<List<Video>> fetchLatestVideos() async {
@@ -897,6 +996,27 @@ class _LandingScreenState extends State<LandingScreen>
           MaterialPageRoute(builder: (BuildContext context) => LoginScreen()),
           ModalRoute.withName('/'));
     });
+  }
+
+  onSearchTextChanged(String text) async {
+    _searchResults.clear();
+
+    List<Video> videos_list = latestPage
+        ? latestVideos!
+        : trendingPage
+            ? trendingVideos!
+            : topVideos!;
+    if (text.isEmpty) {
+      //setState(() {});
+      return videos_list;
+    }
+
+    videos_list.forEach((video) {
+      if (video.title.contains(text) || video.name.contains(text))
+        _searchResults.add(video);
+    });
+
+    //setState(() {});
   }
 }
 

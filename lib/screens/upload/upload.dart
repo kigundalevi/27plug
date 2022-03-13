@@ -812,7 +812,7 @@ class _UploadVideoPageState extends State<UploadVideoPage>
                                                             fontSize: 13.0),
                                                       ),
                                                       footer: new Text(
-                                                        "Uploading..",
+                                                        "Processing..",
                                                         style: new TextStyle(
                                                             color: kBlack,
                                                             fontWeight:
