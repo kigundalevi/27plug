@@ -43,7 +43,7 @@ class CustomDataManager {
   }
 
   play() {
-    // saveView(videos[currentPlaying].id);
+    saveView(videos[currentPlaying].id);
     flickManager.handleChangeVideo(
         VideoPlayerController.network(videos[currentPlaying].url));
   }
