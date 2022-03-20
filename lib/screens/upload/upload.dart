@@ -21,6 +21,7 @@ import 'package:africanplug/widgets/button/thumbnail_icon_button.dart';
 import 'package:africanplug/widgets/input/image_input.dart';
 import 'package:africanplug/widgets/input/text_field_container.dart';
 import 'package:africanplug/widgets/input/text_input_field.dart';
+import 'package:africanplug/widgets/loader/custom_loader.dart';
 import 'package:africanplug/widgets/menu/main_menu.dart';
 import 'package:africanplug/widgets/video/thumbnail_display.dart';
 import 'package:africanplug/widgets/video/video_info_chip.dart';
@@ -118,7 +119,7 @@ class _UploadVideoPageState extends State<UploadVideoPage>
   late String uploadedThumbnailUrl;
   late String uploadedThumbnailName;
 
-  String s3UploadStatus = "listening";
+  String s3UploadStatus = "Select video first";
 
   //PLAYAREA
   bool playArea = false;
@@ -148,6 +149,8 @@ class _UploadVideoPageState extends State<UploadVideoPage>
   late GenThumbnailImage _futureImage;
 
   late String _tempDir;
+
+  bool _generatingThumbnail = false;
 
   @override
   void initState() {
@@ -805,258 +808,179 @@ class _UploadVideoPageState extends State<UploadVideoPage>
                                             //     })
                                           ),
                                           SizedBox(height: size.height * 0.03),
-                                          isLoading
-                                              ? StreamBuilder<dynamic>(
-                                                  stream:
-                                                      _awsS3.getUploadStatus,
-                                                  builder: (context, snapshot) {
-                                                    return new CircularPercentIndicator(
-                                                      radius: 30.0,
-                                                      lineWidth: 8.0,
-                                                      animation: false,
-                                                      percent: snapshot.data !=
-                                                              null
-                                                          ? (snapshot.data /
-                                                                      100) >
-                                                                  1
-                                                              ? 1
-                                                              : (snapshot.data /
-                                                                  100)
-                                                          : 0.0,
-                                                      center: new Text(
-                                                        snapshot.data != null
-                                                            ? "${snapshot.data}%"
-                                                            : "0.0%",
-                                                        style: new TextStyle(
-                                                            // fontWeight:
-                                                            //     FontWeight.bold,
-                                                            fontSize: 13.0),
-                                                      ),
-                                                      footer: new Text(
-                                                        "Processing..",
-                                                        style: new TextStyle(
-                                                            color: kBlack,
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                            fontSize: 17.0),
-                                                      ),
-                                                      circularStrokeCap:
-                                                          CircularStrokeCap
-                                                              .round,
-                                                      progressColor:
-                                                          kActiveColor,
-                                                    );
-                                                  })
-                                              : videoDuration > 300000
-                                                  ? TextButton.icon(
-                                                      style:
-                                                          TextButton.styleFrom(
-                                                        elevation: 8.0,
-                                                        padding: EdgeInsets
-                                                            .symmetric(
-                                                                horizontal:
-                                                                    14.0,
-                                                                vertical: 8.0),
-                                                        textStyle: TextStyle(
-                                                            color:
-                                                                kPrimaryColor),
-                                                        backgroundColor:
-                                                            Colors.red.shade300,
-                                                        shape:
-                                                            RoundedRectangleBorder(
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(
-                                                                      24.0),
-                                                        ),
-                                                      ),
-                                                      icon: Icon(
-                                                        FlutterIcons
-                                                            .chat_processing_mco,
-                                                        color: kPrimaryColor,
-                                                      ),
-                                                      label: Text(
-                                                        'Contact support for long videos',
-                                                        style: TextStyle(
+                                          _generatingThumbnail
+                                              ? customLoader(
+                                                  size: size,
+                                                  text:
+                                                      "Generating thumbnail..")
+                                              : isLoading
+                                                  ? StreamBuilder<dynamic>(
+                                                      stream: _awsS3
+                                                          .getUploadStatus,
+                                                      builder:
+                                                          (context, snapshot) {
+                                                        return new CircularPercentIndicator(
+                                                          radius: 30.0,
+                                                          lineWidth: 8.0,
+                                                          animation: false,
+                                                          percent: snapshot
+                                                                      .data !=
+                                                                  null
+                                                              ? (snapshot.data /
+                                                                          100) >
+                                                                      1
+                                                                  ? 1
+                                                                  : (snapshot
+                                                                          .data /
+                                                                      100)
+                                                              : 0.0,
+                                                          center: new Text(
+                                                            snapshot.data !=
+                                                                    null
+                                                                ? "${snapshot.data}%"
+                                                                : "0.0%",
+                                                            style: new TextStyle(
+                                                                // fontWeight:
+                                                                //     FontWeight.bold,
+                                                                fontSize: 13.0),
+                                                          ),
+                                                          footer: new Text(
+                                                            "Processing..",
+                                                            style: new TextStyle(
+                                                                color: kBlack,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
+                                                                fontSize: 17.0),
+                                                          ),
+                                                          circularStrokeCap:
+                                                              CircularStrokeCap
+                                                                  .round,
+                                                          progressColor:
+                                                              kActiveColor,
+                                                        );
+                                                      })
+                                                  : videoDuration > 300000
+                                                      ? TextButton.icon(
+                                                          style: TextButton
+                                                              .styleFrom(
+                                                            elevation: 8.0,
+                                                            padding: EdgeInsets
+                                                                .symmetric(
+                                                                    horizontal:
+                                                                        14.0,
+                                                                    vertical:
+                                                                        8.0),
+                                                            textStyle: TextStyle(
+                                                                color:
+                                                                    kPrimaryColor),
+                                                            backgroundColor:
+                                                                Colors.red
+                                                                    .shade300,
+                                                            shape:
+                                                                RoundedRectangleBorder(
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          24.0),
+                                                            ),
+                                                          ),
+                                                          icon: Icon(
+                                                            FlutterIcons
+                                                                .chat_processing_mco,
                                                             color:
                                                                 kPrimaryColor,
-                                                            fontSize: 17,
-                                                            fontWeight:
-                                                                FontWeight
-                                                                    .bold),
-                                                      ),
-                                                      onPressed: () async {})
-                                                  : (!_loading
-                                                      ? uploadedVideoUrl == ""
-                                                          ? Text(s3UploadStatus)
-                                                          : TextButton.icon(
-                                                              style: TextButton
-                                                                  .styleFrom(
-                                                                elevation: 8.0,
-                                                                padding: EdgeInsets
-                                                                    .symmetric(
+                                                          ),
+                                                          label: Text(
+                                                            'Contact support for long videos',
+                                                            style: TextStyle(
+                                                                color:
+                                                                    kPrimaryColor,
+                                                                fontSize: 17,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold),
+                                                          ),
+                                                          onPressed:
+                                                              () async {})
+                                                      : (!_loading
+                                                          ? uploadedVideoUrl ==
+                                                                  ""
+                                                              ? Text(
+                                                                  s3UploadStatus)
+                                                              : TextButton.icon(
+                                                                  style: TextButton
+                                                                      .styleFrom(
+                                                                    elevation:
+                                                                        8.0,
+                                                                    padding: EdgeInsets.symmetric(
                                                                         horizontal:
                                                                             14.0,
                                                                         vertical:
                                                                             8.0),
-                                                                textStyle: TextStyle(
-                                                                    color: Colors
-                                                                        .blue),
-                                                                backgroundColor:
-                                                                    kActiveColor,
-                                                                shape:
-                                                                    RoundedRectangleBorder(
-                                                                  borderRadius:
-                                                                      BorderRadius
-                                                                          .circular(
-                                                                              24.0),
-                                                                ),
-                                                              ),
-                                                              icon: Icon(
-                                                                FlutterIcons
-                                                                    .plug_faw5s,
-                                                                color: kWhite,
-                                                              ),
-                                                              label: Text(
-                                                                'Upload',
-                                                                style: TextStyle(
-                                                                    color:
-                                                                        kBlack,
-                                                                    fontSize:
-                                                                        17,
-                                                                    fontWeight:
-                                                                        FontWeight
-                                                                            .bold),
-                                                              ),
-                                                              onPressed:
-                                                                  () async {
-                                                                if (uploadedVideoUrl ==
-                                                                    "") {
-                                                                  setState(() {
-                                                                    _selectedVideoError =
-                                                                        true;
-                                                                  });
-                                                                  return;
-                                                                }
-                                                                if (selectedVideo ==
-                                                                    null) {
-                                                                  setState(() {
-                                                                    _selectedVideoError =
-                                                                        true;
-                                                                  });
-                                                                  return;
-                                                                }
-                                                                if (_selectedThumbnail ==
-                                                                        null ||
-                                                                    uploadedThumbnailUrl ==
-                                                                        "") {
-                                                                  // setState(() {
-                                                                  //   _selectedThumbnailError =
-                                                                  //       true;
-                                                                  // });
-                                                                  // return;
-
-                                                                }
-                                                                bool isOnline =
-                                                                    await checkOnline();
-                                                                if (!isOnline) {
-                                                                  Flushbar(
-                                                                    icon: Icon(
-                                                                      Icons
-                                                                          .info_outline,
-                                                                      color: Colors
-                                                                          .white,
-                                                                    ),
+                                                                    textStyle: TextStyle(
+                                                                        color: Colors
+                                                                            .blue),
                                                                     backgroundColor:
-                                                                        Colors
-                                                                            .redAccent,
-                                                                    title:
-                                                                        "Error",
-                                                                    message:
-                                                                        "No Internet",
-                                                                    duration: Duration(
-                                                                        seconds:
-                                                                            3),
-                                                                  )..show(
-                                                                      context);
-                                                                } else {
-                                                                  /// POST FUNCTIONALITY
-                                                                  if (_uploadFormKey
-                                                                      .currentState!
-                                                                      .validate()) {
-                                                                    setState(
-                                                                        () {
-                                                                      _loading =
-                                                                          true;
-                                                                    });
-                                                                    Loc location =
-                                                                        await currentLocation();
-                                                                    UserController
-                                                                        ctrl =
-                                                                        new UserController();
-                                                                    print(
-                                                                        "uploading");
-                                                                    String? upload_response = await ctrl.userUploadVideo(
-                                                                        _selectedTags,
-                                                                        uploadedVideoUrl,
-                                                                        uploadedVideoName,
-                                                                        uploadedThumbnailUrl,
-                                                                        uploadedThumbnailName,
-                                                                        _title!,
-                                                                        _description!,
-                                                                        videoDuration,
-                                                                        location
-                                                                            .ip,
-                                                                        location
-                                                                            .lat,
-                                                                        location
-                                                                            .lng,
-                                                                        location
-                                                                            .name,
-                                                                        location
-                                                                            .live);
+                                                                        kActiveColor,
+                                                                    shape:
+                                                                        RoundedRectangleBorder(
+                                                                      borderRadius:
+                                                                          BorderRadius.circular(
+                                                                              24.0),
+                                                                    ),
+                                                                  ),
+                                                                  icon: Icon(
+                                                                    FlutterIcons
+                                                                        .plug_faw5s,
+                                                                    color:
+                                                                        kWhite,
+                                                                  ),
+                                                                  label: Text(
+                                                                    'Upload',
+                                                                    style: TextStyle(
+                                                                        color:
+                                                                            kBlack,
+                                                                        fontSize:
+                                                                            17,
+                                                                        fontWeight:
+                                                                            FontWeight.bold),
+                                                                  ),
+                                                                  onPressed:
+                                                                      () async {
+                                                                    if (uploadedVideoUrl ==
+                                                                        "") {
+                                                                      setState(
+                                                                          () {
+                                                                        _selectedVideoError =
+                                                                            true;
+                                                                      });
+                                                                      return;
+                                                                    }
+                                                                    if (selectedVideo ==
+                                                                        null) {
+                                                                      setState(
+                                                                          () {
+                                                                        _selectedVideoError =
+                                                                            true;
+                                                                      });
+                                                                      return;
+                                                                    }
+                                                                    if (_selectedThumbnail ==
+                                                                            null ||
+                                                                        uploadedThumbnailUrl ==
+                                                                            "") {
+                                                                      // setState(() {
+                                                                      //   _selectedThumbnailError =
+                                                                      //       true;
+                                                                      // });
+                                                                      // return;
 
-                                                                    if (upload_response
-                                                                            .toString() ==
-                                                                        'success') {
-                                                                      setState(
-                                                                          () {
-                                                                        _loading =
-                                                                            false;
-                                                                      });
-                                                                      Flushbar(
-                                                                        isDismissible:
-                                                                            false,
-                                                                        icon:
-                                                                            Icon(
-                                                                          Icons
-                                                                              .check_circle_rounded,
-                                                                          color:
-                                                                              kPrimaryColor,
-                                                                        ),
-                                                                        backgroundColor:
-                                                                            kPrimaryLightColor,
-                                                                        title:
-                                                                            "Success",
-                                                                        message:
-                                                                            "Video uploaded successfully",
-                                                                        duration:
-                                                                            Duration(seconds: 3),
-                                                                      )..show(
-                                                                          context);
-                                                                      Navigator.pushAndRemoveUntil(
-                                                                          context,
-                                                                          MaterialPageRoute(
-                                                                            builder: (context) =>
-                                                                                VideosScreen(),
-                                                                          ),
-                                                                          (route) => false);
-                                                                    } else {
-                                                                      setState(
-                                                                          () {
-                                                                        _loading =
-                                                                            false;
-                                                                      });
+                                                                    }
+                                                                    bool
+                                                                        isOnline =
+                                                                        await checkOnline();
+                                                                    if (!isOnline) {
                                                                       Flushbar(
                                                                         icon:
                                                                             Icon(
@@ -1070,35 +994,121 @@ class _UploadVideoPageState extends State<UploadVideoPage>
                                                                         title:
                                                                             "Error",
                                                                         message:
-                                                                            upload_response.toString(),
+                                                                            "No Internet",
                                                                         duration:
                                                                             Duration(seconds: 3),
                                                                       )..show(
                                                                           context);
+                                                                    } else {
+                                                                      /// POST FUNCTIONALITY
+                                                                      if (_uploadFormKey
+                                                                          .currentState!
+                                                                          .validate()) {
+                                                                        setState(
+                                                                            () {
+                                                                          _loading =
+                                                                              true;
+                                                                        });
+                                                                        Loc location =
+                                                                            await currentLocation();
+                                                                        UserController
+                                                                            ctrl =
+                                                                            new UserController();
+                                                                        print(
+                                                                            "uploading");
+                                                                        String? upload_response = await ctrl.userUploadVideo(
+                                                                            _selectedTags,
+                                                                            uploadedVideoUrl,
+                                                                            uploadedVideoName,
+                                                                            uploadedThumbnailUrl,
+                                                                            uploadedThumbnailName,
+                                                                            _title!,
+                                                                            _description!,
+                                                                            videoDuration,
+                                                                            location.ip,
+                                                                            location.lat,
+                                                                            location.lng,
+                                                                            location.name,
+                                                                            location.live);
+
+                                                                        if (upload_response.toString() ==
+                                                                            'success') {
+                                                                          setState(
+                                                                              () {
+                                                                            _loading =
+                                                                                false;
+                                                                          });
+                                                                          Flushbar(
+                                                                            isDismissible:
+                                                                                false,
+                                                                            icon:
+                                                                                Icon(
+                                                                              Icons.check_circle_rounded,
+                                                                              color: kPrimaryColor,
+                                                                            ),
+                                                                            backgroundColor:
+                                                                                kPrimaryLightColor,
+                                                                            title:
+                                                                                "Success",
+                                                                            message:
+                                                                                "Video uploaded successfully",
+                                                                            duration:
+                                                                                Duration(seconds: 3),
+                                                                          )..show(
+                                                                              context);
+                                                                          Navigator.pushAndRemoveUntil(
+                                                                              context,
+                                                                              MaterialPageRoute(
+                                                                                builder: (context) => VideosScreen(),
+                                                                              ),
+                                                                              (route) => false);
+                                                                        } else {
+                                                                          setState(
+                                                                              () {
+                                                                            _loading =
+                                                                                false;
+                                                                          });
+                                                                          Flushbar(
+                                                                            icon:
+                                                                                Icon(
+                                                                              Icons.info_outline,
+                                                                              color: Colors.white,
+                                                                            ),
+                                                                            backgroundColor:
+                                                                                Colors.redAccent,
+                                                                            title:
+                                                                                "Error",
+                                                                            message:
+                                                                                upload_response.toString(),
+                                                                            duration:
+                                                                                Duration(seconds: 3),
+                                                                          )..show(
+                                                                              context);
+                                                                        }
+                                                                      }
                                                                     }
-                                                                  }
-                                                                }
-                                                              })
-                                                      : Center(
-                                                          child: Column(
-                                                            children: [
-                                                              CircularProgressIndicator(
-                                                                color:
-                                                                    kActiveColor,
+                                                                  })
+                                                          : Center(
+                                                              child: Column(
+                                                                children: [
+                                                                  CircularProgressIndicator(
+                                                                    color:
+                                                                        kActiveColor,
+                                                                  ),
+                                                                  SizedBox(
+                                                                    height:
+                                                                        10.0,
+                                                                  ),
+                                                                  Text(
+                                                                      "  Uploading..",
+                                                                      style: TextStyle(
+                                                                          color:
+                                                                              kBlack,
+                                                                          fontSize:
+                                                                              17))
+                                                                ],
                                                               ),
-                                                              SizedBox(
-                                                                height: 10.0,
-                                                              ),
-                                                              Text(
-                                                                  "  Uploading..",
-                                                                  style: TextStyle(
-                                                                      color:
-                                                                          kBlack,
-                                                                      fontSize:
-                                                                          17))
-                                                            ],
-                                                          ),
-                                                        )),
+                                                            )),
                                           SizedBox(height: size.height * 0.05)
                                         ],
                                       ),
@@ -1626,15 +1636,18 @@ class _UploadVideoPageState extends State<UploadVideoPage>
 
             var appDocDir = await getApplicationDocumentsDirectory();
             final folderPath = appDocDir.path;
-            print('STARTING TO GENERATE THUMB');
+            setState(() {
+              _generatingThumbnail = true;
+            });
             String thumbnail = await Thumbnails.getThumbnail(
                 thumbnailFolder: folderPath,
                 videoFile: _file.path,
                 imageType: ThumbFormat
                     .PNG, //this image will store in created folderpath
                 quality: 30);
-            print('________THUMB________');
-            print(thumbnail);
+            setState(() {
+              _generatingThumbnail = false;
+            });
             _uploadThumbnailToS3(File(thumbnail));
             // _image.image
             //     .resolve(ImageConfiguration())

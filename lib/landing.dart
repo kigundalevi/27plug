@@ -1026,8 +1026,12 @@ class _LandingScreenState extends State<LandingScreen>
       return videos_list;
     }
 
+    String _searchText = text.toLowerCase();
+
     videos_list.forEach((video) {
-      if (video.title.contains(text) || video.name.contains(text))
+      if (video.title.toLowerCase().contains(_searchText) ||
+          video.name.toLowerCase().contains((_searchText)) ||
+          video.description.toLowerCase().contains((_searchText)))
         _searchResults.add(video);
     });
 
