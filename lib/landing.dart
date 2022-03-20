@@ -1031,7 +1031,8 @@ class _LandingScreenState extends State<LandingScreen>
     videos_list.forEach((video) {
       if (video.title.toLowerCase().contains(_searchText) ||
           video.name.toLowerCase().contains((_searchText)) ||
-          video.description.toLowerCase().contains((_searchText)))
+          video.description.toLowerCase().contains((_searchText)) ||
+          video.uploader_channel_name.toLowerCase().contains((_searchText)))
         _searchResults.add(video);
     });
 
