@@ -36,6 +36,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.8.2"
+  aws_s3:
+    dependency: "direct main"
+    description:
+      name: aws_s3
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.1.1+hotfix.5"
   boolean_selector:
     dependency: transitive
     description:
@@ -577,7 +584,7 @@ packages:
     source: hosted
     version: "0.6.0"
   path:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: path
       url: "https://pub.dartlang.org"
@@ -777,6 +784,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.4.3"
+  thumbnails:
+    dependency: "direct main"
+    description:
+      name: thumbnails
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.1"
   typed_data:
     dependency: transitive
     description:
@@ -889,6 +903,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.0.6"
+  video_thumbnail:
+    dependency: "direct main"
+    description:
+      name: video_thumbnail
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.4.6"
   visibility_detector:
     dependency: "direct main"
     description:

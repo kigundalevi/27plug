@@ -93,31 +93,35 @@ class _VideosScreenState extends State<VideosScreen>
   bool _searching = false;
   @override
   void initState() {
-    UserController ctrl = UserController();
-    ctrl.fetchLatestVideos(currentUser().id).then((latest_videos) {
-      if (latest_videos == null) {
-      } else {
-        setState(() {
-          latestVideos = latest_videos;
+    WidgetsBinding.instance!.addPostFrameCallback((_) {
+      print("WidgetsBinding");
+      UserController ctrl = UserController();
+      ctrl.fetchLatestVideos(currentUser().id).then((latest_videos) {
+        if (latest_videos == null) {
+        } else {
+          setState(() {
+            latestVideos = latest_videos;
+          });
+        }
+        ctrl.fetchTopVideos(currentUser().id).then((top_videos) {
+          if (top_videos == null) {
+          } else {
+            setState(() {
+              topVideos = top_videos;
+            });
+          }
+          ctrl.fetchTrendingVideos(currentUser().id).then((trending_videos) {
+            if (trending_videos == null) {
+            } else {
+              setState(() {
+                trendingVideos = trending_videos;
+              });
+            }
+          });
         });
-      }
+      });
     });
-    ctrl.fetchTopVideos(currentUser().id).then((top_videos) {
-      if (top_videos == null) {
-      } else {
-        setState(() {
-          topVideos = top_videos;
-        });
-      }
-    });
-    ctrl.fetchTrendingVideos(currentUser().id).then((trending_videos) {
-      if (trending_videos == null) {
-      } else {
-        setState(() {
-          trendingVideos = trending_videos;
-        });
-      }
-    });
+
     _aController = AnimationController(duration: duration, vsync: this);
     _scaleAnimation = Tween<double>(begin: 1, end: 0.85).animate(_aController);
     _menuScaleAnimation =

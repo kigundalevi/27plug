@@ -165,7 +165,7 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
             ),
           ),
           // Trick to add the shadow for the submit button
-          buildBottomHalfContainer(true),
+          buildBottomHalfContainer(true, context),
           //Main Contianer for Login and Signup
           AnimatedPositioned(
             duration: Duration(milliseconds: 700),
@@ -1327,11 +1327,12 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
     );
   }
 
-  Widget buildBottomHalfContainer(bool showShadow) {
+  Widget buildBottomHalfContainer(bool showShadow, BuildContext context) {
+    double height = MediaQuery.of(context).size.height;
     return AnimatedPositioned(
       duration: Duration(milliseconds: 700),
       curve: Curves.bounceInOut,
-      top: isSignupScreen ? 565 : 430,
+      top: isSignupScreen ? height / 1.34 : height / 1.76,
       right: 0,
       left: 0,
       child: Center(

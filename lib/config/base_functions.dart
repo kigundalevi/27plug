@@ -91,23 +91,16 @@ Future<bool> checkOnline() async {
 Future<Loc> currentLocation() async {
   bool serviceEnabled;
   LocationPermission permission;
-
+  Loc ip_loc = await _locFromIp();
+  print(ip_loc.name);
   // Test if location services are enabled.
   serviceEnabled = await Geolocator.isLocationServiceEnabled();
   if (!serviceEnabled) {
     // Location services are not enabled don't continue
     // accessing the position and request users of the
     // App to enable the location services.
-    // return Future.error('Location services are disabled.');
     print('Location services are disabled.');
-    Map loc = await _locFromIp();
-
-    return Loc(
-        lat: loc['lng'],
-        lng: loc['lat'],
-        ip: loc['ip'],
-        name: loc['name'],
-        live: true);
+    return ip_loc;
   }
 
   permission = await Geolocator.checkPermission();
@@ -119,92 +112,99 @@ Future<Loc> currentLocation() async {
       // Android's shouldShowRequestPermissionRationale
       // returned true. According to Android guidelines
       // your App should show an explanatory UI now.
-      // return Future.error('Location permissions are denied');
-      print('Location permissions are denied.');
-      Map loc = await _locFromIp();
-
-      return Loc(
-          lat: loc['lng'],
-          lng: loc['lat'],
-          ip: loc['ip'],
-          name: loc['name'],
-          live: true);
+      print('Location permissions are denied');
+      return ip_loc;
     }
   }
 
   if (permission == LocationPermission.deniedForever) {
     // Permissions are denied forever, handle appropriately.
-    // return Future.error(
-    //     'Location permissions are permanently denied, we cannot request permissions.');
     print(
         'Location permissions are permanently denied, we cannot request permissions.');
-    Map loc = await _locFromIp();
-
-    return Loc(
-        lat: loc['lng'],
-        lng: loc['lat'],
-        ip: loc['ip'],
-        name: loc['name'],
-        live: true);
+    return ip_loc;
   }
 
   // When we reach here, permissions are granted and we can
   // continue accessing the position of the device.
   Position pos = await Geolocator.getCurrentPosition();
-  Map ipLoc = await _locFromIp();
   return Loc(
       lat: pos.latitude.toString(),
       lng: pos.longitude.toString(),
-      ip: ipLoc['ip'],
-      name: ipLoc['name'],
+      ip: ip_loc.ip,
+      name: ip_loc.name,
       live: true);
 }
 
-Future<Map> _locFromIp() async {
+Future<Loc> _locFromIp() async {
   Loc location;
-  var cached_location = appBox.get("cached_location");
 
   try {
-    if (cached_location == null) {
-      http.Response res = await http.get(Uri.parse('http://ip-api.com/json'));
-
-      location = Loc(
-          lat: json.decode(res.body)['lat'].toString(),
-          lng: json.decode(res.body)['lon'].toString(),
-          ip: json.decode(res.body)['query'],
-          name: json.decode(res.body)['regionName'] +
-              ',' +
-              json.decode(res.body)['country']);
-
-      Map<String, String> loc = {
-        "lat": json.decode(res.body)['lat'].toString(),
-        "tng": json.decode(res.body)['lon'].toString(),
-        "ip": json.decode(res.body)['query'],
-        "name": json.decode(res.body)['regionName'] +
+    http.Response res = await http.get(Uri.parse('http://ip-api.com/json'));
+    location = Loc(
+        lat: json.decode(res.body)['lat'].toString(),
+        lng: json.decode(res.body)['lon'].toString(),
+        ip: json.decode(res.body)['query'],
+        name: json.decode(res.body)['regionName'] +
             ',' +
-            json.decode(res.body)['country']
-      };
+            json.decode(res.body)['country']);
 
-      appBox.put('cached_location', loc);
-      return loc;
-    } else {
-      return cached_location;
-    }
+    return location;
   } catch (err) {
-    // print(err);
-    // print("Error getting Loc from IP");
+    print(err);
+    print("Error getting Loc from IP");
 
     location = Loc(lat: "0", lng: "0", ip: "0.0.0.0", name: "unknown");
-    Map<String, String> loc = {
-      "lat": "0",
-      "tng": "0",
-      "ip": "0.0.0.0",
-      "name": "unknown"
-    };
-    return loc;
+    return location;
     //handleError
   }
 }
+
+// Future<Map> _locFromIp() async {
+//   Loc location;
+//   var cached_location = appBox.get("cached_location");
+//   // print(cached_location);
+
+//   try {
+//     if (cached_location == null) {
+//       http.Response res = await http.get(Uri.parse('http://ip-api.com/json'));
+
+//       location = Loc(
+//           lat: json.decode(res.body)['lat'].toString(),
+//           lng: json.decode(res.body)['lon'].toString(),
+//           ip: json.decode(res.body)['query'],
+//           name: json.decode(res.body)['regionName'] +
+//               ',' +
+//               json.decode(res.body)['country']);
+
+//       Map<String, String> loc = {
+//         "lat": json.decode(res.body)['lat'].toString(),
+//         "lng": json.decode(res.body)['lon'].toString(),
+//         "ip": json.decode(res.body)['query'],
+//         "name": json.decode(res.body)['regionName'] +
+//             ',' +
+//             json.decode(res.body)['country']
+//       };
+
+//       appBox.put('cached_location', loc);
+//       return loc;
+//     } else {
+//       return cached_location;
+//     }
+//   } catch (err) {
+//     // print(err);
+//     // print("Error getting Loc from IP");
+
+//     location = Loc(lat: "0", lng: "0", ip: "0.0.0.0", name: "unknown");
+//     Map<String, String> loc = {
+//       "lat": "0.0",
+//       "lng": "0.0",
+//       "ip": "0.0.0.0",
+//       "name": "unknown"
+//     };
+//     return loc;
+//     //handleError
+//   }
+// }
 
 Future<Map<String, dynamic>> deviceInfo() async {
   final DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();

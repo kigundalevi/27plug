@@ -5,7 +5,6 @@ class Loc {
   final String name;
   final bool live;
 
-  /// Creates Language
   Loc(
       {required this.lat,
       required this.lng,

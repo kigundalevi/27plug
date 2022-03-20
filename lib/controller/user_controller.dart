@@ -32,12 +32,15 @@ class UserController {
     return '';
   }
 
-  Future<User?> fetchChannelDetails(int userId) async {
+  Future<User> fetchChannelDetails(int userId) async {
     try {
       Loc location = await currentLocation();
+      print(location);
+
       var user = appBox.get("user");
 
       var req = new http.MultipartRequest("POST", Uri.parse(BACKEND_URL));
+
       Map<String, String> headers = {
         "Accept": "*/*",
         "Authorization": "Bearer " + user['token']
@@ -89,11 +92,23 @@ class UserController {
         print(response.body);
         // print(response.);
         print(response.statusCode);
-        return null;
+        return User(
+          id: 1,
+          first_name: "27Plug",
+          last_name: "Guest",
+          channel_name: "",
+          email: "guest@27plug.app",
+        );
       }
     } catch (e) {
       print(e);
-      return null;
+      return User(
+        id: 1,
+        first_name: "27Plug",
+        last_name: "Guest",
+        channel_name: "",
+        email: "guest@27plug.app",
+      );
     }
   }
 
@@ -265,6 +280,8 @@ query{
 """;
       http.Response response = await http.Response.fromStream(await req.send());
       var resp = jsonDecode(response.body);
+      // print('---------BACKEND RESPONSE---------');
+      // print(resp);
 
       List<Video> _latestVideos = [];
 
@@ -411,7 +428,8 @@ query{
 """;
       http.Response response = await http.Response.fromStream(await req.send());
       var resp = jsonDecode(response.body);
-
+      print('---BE RESPONSE---');
+      print(resp);
       List<Video> _topVideos = [];
 
       if (response.statusCode == 200) {
@@ -926,15 +944,6 @@ mutation{
       print("Uploading video");
       var user = appBox.get("user");
       print(user['token']);
-      Dio dio = Dio(
-        BaseOptions(
-          contentType: 'multipart/form-data',
-          headers: {
-            "Accept": "*/*",
-            "Authorization": "Bearer " + user['token']
-          },
-        ),
-      );
       // dio.options.headers['content-Type'] = 'application/json';
       // dio.options.headers["authorization"] =
       //     "token ${GraphQLConfiguration.sessionToken}";

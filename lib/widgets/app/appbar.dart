@@ -92,14 +92,35 @@ Container appBar(Size size, left_pressed, center_pressed, right_pressed,
                       ),
                     ],
                   )
-            : IconButton(
-                icon: Icon(
-                  FlutterIcons.guest_zoc,
-                  color: Colors.white70,
-                  size: 23,
-                ),
-                onPressed: right_pressed,
-              )
+            : search_pressed == null
+                ? IconButton(
+                    icon: Icon(
+                      FlutterIcons.guest_zoc,
+                      color: Colors.white70,
+                      size: 23,
+                    ),
+                    onPressed: right_pressed,
+                  )
+                : Row(
+                    children: [
+                      IconButton(
+                        icon: RotatedBox(
+                            quarterTurns: 1,
+                            child: Icon(FlutterIcons.search_oct)),
+                        onPressed: search_pressed,
+                      ),
+                      IconButton(
+                        icon: CircleAvatar(
+                          backgroundImage: NetworkImage(
+                            user.dp_url,
+                          ),
+                          backgroundColor: Colors.black26,
+                          foregroundColor: Colors.black26,
+                        ),
+                        onPressed: right_pressed,
+                      ),
+                    ],
+                  )
       ],
     ),
   );

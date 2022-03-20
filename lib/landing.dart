@@ -22,6 +22,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:video_player/video_player.dart';
+import 'package:video_thumbnail/video_thumbnail.dart';
 
 class LandingScreen extends StatefulWidget {
   const LandingScreen({Key? key}) : super(key: key);
@@ -79,35 +80,40 @@ class _LandingScreenState extends State<LandingScreen>
   TextEditingController searchController = new TextEditingController();
   List<Video> _searchResults = [];
   String searchText = "";
+  bool _searching = false;
 
   @override
   void initState() {
+    WidgetsBinding.instance!.addPostFrameCallback((_) {
+      print("WidgetsBinding");
+      UserController ctrl = UserController();
+      ctrl.fetchLatestVideos(currentUser().id).then((latest_videos) {
+        if (latest_videos == null) {
+        } else {
+          setState(() {
+            latestVideos = latest_videos.take(7).toList();
+          });
+        }
+        ctrl.fetchTopVideos(currentUser().id).then((top_videos) {
+          if (top_videos == null) {
+          } else {
+            setState(() {
+              topVideos = top_videos.take(7).toList();
+            });
+          }
+          ctrl.fetchTrendingVideos(currentUser().id).then((trending_videos) {
+            if (trending_videos == null) {
+            } else {
+              setState(() {
+                trendingVideos = trending_videos.take(7).toList();
+              });
+            }
+          });
+        });
+      });
+    });
+
     super.initState();
-    UserController ctrl = UserController();
-    ctrl.fetchLatestVideos(currentUser().id).then((latest_videos) {
-      if (latest_videos == null) {
-      } else {
-        setState(() {
-          latestVideos = latest_videos.take(7).toList();
-        });
-      }
-    });
-    ctrl.fetchTopVideos(currentUser().id).then((top_videos) {
-      if (top_videos == null) {
-      } else {
-        setState(() {
-          topVideos = top_videos.take(7).toList();
-        });
-      }
-    });
-    ctrl.fetchTrendingVideos(currentUser().id).then((trending_videos) {
-      if (trending_videos == null) {
-      } else {
-        setState(() {
-          trendingVideos = trending_videos.take(7).toList();
-        });
-      }
-    });
 
     _aController = AnimationController(duration: duration, vsync: this);
     _scaleAnimation = Tween<double>(begin: 1, end: 0.85).animate(_aController);
@@ -187,9 +193,13 @@ class _LandingScreenState extends State<LandingScreen>
                                       Navigator.pop(context);
                                       Navigator.pushNamed(context, "/landing");
                                     }, () {
-                                      Navigator.pop(context);
+                                      // Navigator.pop(context);
                                       Navigator.pushNamed(
                                           context, "/loginRegister");
+                                    }, () {
+                                      setState(() {
+                                        _searching = !_searching;
+                                      });
                                     }),
                                   ],
                                 ),
@@ -249,12 +259,16 @@ class _LandingScreenState extends State<LandingScreen>
                                                       return SingleChildScrollView(
                                                         child: Column(
                                                             children: [
-                                                              searchTab(
-                                                                  context),
+                                                              _searching
+                                                                  ? searchTab(
+                                                                      context)
+                                                                  : SizedBox(),
                                                               Container(
-                                                                height:
-                                                                    size.height -
-                                                                        200,
+                                                                height: _searching
+                                                                    ? size.height -
+                                                                        200
+                                                                    : size.height -
+                                                                        140,
                                                                 child: searchText !=
                                                                         ""
                                                                     ? new ListView
@@ -645,6 +659,7 @@ class _LandingScreenState extends State<LandingScreen>
             searchController.clear();
             onSearchTextChanged('');
             setState(() {
+              _searching = false;
               searchText = "";
             });
           },

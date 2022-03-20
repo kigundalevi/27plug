@@ -57,6 +57,7 @@ class LoginController {
     String token = res['token'];
 
     if (token != null) {
+      appBox.delete('user');
       GraphQLConfiguration.setToken(token);
       res['user']['token'] = token;
 

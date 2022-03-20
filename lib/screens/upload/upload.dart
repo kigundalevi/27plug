@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
 import 'dart:ui';
 import 'package:africanplug/config/base_functions.dart';
 import 'package:africanplug/config/config.dart';
@@ -22,16 +24,22 @@ import 'package:africanplug/widgets/input/text_input_field.dart';
 import 'package:africanplug/widgets/menu/main_menu.dart';
 import 'package:africanplug/widgets/video/thumbnail_display.dart';
 import 'package:africanplug/widgets/video/video_info_chip.dart';
-import 'package:africanplug/widgets/video/video_tile_old.dart';
+import 'package:africanplug/widgets/video/video_list_tile.dart';
 import 'package:another_flushbar/flushbar.dart';
+import 'package:aws_s3/aws_s3.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:flutter_tagging/flutter_tagging.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
+import 'package:thumbnails/thumbnails.dart';
 import 'package:video_player/video_player.dart';
 import 'package:simple_s3/simple_s3.dart';
+import 'package:path/path.dart' as Path;
+import 'package:video_thumbnail/video_thumbnail.dart';
+import 'package:path_provider/path_provider.dart';
 
 class UploadVideoPage extends StatefulWidget {
   const UploadVideoPage({Key? key}) : super(key: key);
@@ -103,12 +111,14 @@ class _UploadVideoPageState extends State<UploadVideoPage>
   bool isLoading = false;
   bool uploaded = false;
 
+  late AwsS3 _awsS3;
+
   late String uploadedVideoUrl;
   late String uploadedVideoName;
   late String uploadedThumbnailUrl;
   late String uploadedThumbnailName;
 
-  String s3UploadStatus = "Select video and fill details";
+  String s3UploadStatus = "listening";
 
   //PLAYAREA
   bool playArea = false;
@@ -127,6 +137,17 @@ class _UploadVideoPageState extends State<UploadVideoPage>
   late String videoTitle;
 
   late VideoProgressIndicator progressIndicator;
+
+  final _editNode = FocusNode();
+  late ImageFormat _format = ImageFormat.JPEG;
+  late int _quality = 50;
+  late int _sizeH = 0;
+  late int _sizeW = 0;
+  late int _timeMs = 0;
+
+  late GenThumbnailImage _futureImage;
+
+  late String _tempDir;
 
   @override
   void initState() {
@@ -555,7 +576,7 @@ class _UploadVideoPageState extends State<UploadVideoPage>
                                                     placeholder:
                                                         _selectedThumbnail ==
                                                                 null
-                                                            ? "Select thumbnail"
+                                                            ? "Select thumbnail (optional)"
                                                             : _selectedThumbnail!
                                                                 .name,
                                                     icondata: FlutterIcons
@@ -786,8 +807,8 @@ class _UploadVideoPageState extends State<UploadVideoPage>
                                           SizedBox(height: size.height * 0.03),
                                           isLoading
                                               ? StreamBuilder<dynamic>(
-                                                  stream: _simpleS3
-                                                      .getUploadPercentage,
+                                                  stream:
+                                                      _awsS3.getUploadStatus,
                                                   builder: (context, snapshot) {
                                                     return new CircularPercentIndicator(
                                                       radius: 30.0,
@@ -929,11 +950,12 @@ class _UploadVideoPageState extends State<UploadVideoPage>
                                                                         null ||
                                                                     uploadedThumbnailUrl ==
                                                                         "") {
-                                                                  setState(() {
-                                                                    _selectedThumbnailError =
-                                                                        true;
-                                                                  });
-                                                                  return;
+                                                                  // setState(() {
+                                                                  //   _selectedThumbnailError =
+                                                                  //       true;
+                                                                  // });
+                                                                  // return;
+
                                                                 }
                                                                 bool isOnline =
                                                                     await checkOnline();
@@ -1558,7 +1580,7 @@ class _UploadVideoPageState extends State<UploadVideoPage>
         deleteIconColor: kPrimaryColor);
   }
 
-  Future<String?> _uploadVideoToS3(File file) async {
+  Future<String?> _uploadVideoToS3(PlatformFile file) async {
     String? result;
 
     if (result == null) {
@@ -1568,22 +1590,84 @@ class _UploadVideoPageState extends State<UploadVideoPage>
         setState(() {
           uploadingNewVideo = true;
         });
-        result = await _simpleS3.uploadFile(
-          file,
-          kS3BucketName,
-          kS3PoolID,
-          AWSRegions.euWest3,
-          debugLog: true,
-          s3FolderPath: "uploads/videos",
-          accessControl: S3AccessControl.publicRead,
-          useTimeStamp: true,
-        );
+        File _file = File(file.path!);
+        final _extension = Path.extension(_file.path);
+        String fileName = Path.basenameWithoutExtension(_file.path) +
+            "_" +
+            DateTime.now().millisecondsSinceEpoch.toString() +
+            _extension;
 
+        // result = await _simpleS3.uploadFile(
+        //   File(file.path!),
+        //   kS3BucketName,
+        //   kS3PoolID,
+        //   AWSRegions.euWest3,
+        //   debugLog: true,
+        //   s3FolderPath: "uploads/videos",
+        //   accessControl: S3AccessControl.publicRead,
+        //   useTimeStamp: true,
+        // );
+
+        AwsS3 awsS3 = AwsS3(
+            awsFolderPath: "uploads/videos",
+            file: _file,
+            fileNameWithExt: fileName,
+            poolId: kS3PoolID,
+            region: Regions.EU_WEST_3,
+            bucketName: kS3BucketName);
         setState(() {
-          uploaded = true;
-          uploadedVideoUrl = result!;
-          isLoading = false;
+          _awsS3 = awsS3;
         });
+
+        try {
+          try {
+            result = await awsS3.uploadFile;
+            print(result);
+
+            var appDocDir = await getApplicationDocumentsDirectory();
+            final folderPath = appDocDir.path;
+            print('STARTING TO GENERATE THUMB');
+            String thumbnail = await Thumbnails.getThumbnail(
+                thumbnailFolder: folderPath,
+                videoFile: _file.path,
+                imageType: ThumbFormat
+                    .PNG, //this image will store in created folderpath
+                quality: 30);
+            print('________THUMB________');
+            print(thumbnail);
+            _uploadThumbnailToS3(File(thumbnail));
+            // _image.image
+            //     .resolve(ImageConfiguration())
+            //     .addListener(ImageStreamListener((ImageInfo info, bool _) {
+            //   completer.complete(ThumbnailResult(
+            //     image: _image,
+            //     dataSize: _imageDataSize,
+            //     height: info.image.height,
+            //     width: info.image.width,
+            //   ));
+            // }));
+
+            setState(() {
+              uploaded = true;
+              uploadedVideoUrl = result!;
+              isLoading = false;
+            });
+          } on PlatformException {
+            debugPrint("Result :'$result'.");
+            s3UploadStatus = "Result :'$result'.";
+            setState(() {
+              uploadingNewVideo = false;
+              isLoading = false;
+            });
+          }
+        } on PlatformException catch (e) {
+          debugPrint("Failed :'${e.message}'.");
+          s3UploadStatus = "Failed :'${e.message}'.";
+          setState(() {
+            uploadingNewVideo = false;
+            isLoading = false;
+          });
+        }
       } catch (e) {
         print(e);
 
@@ -1815,7 +1899,7 @@ class _UploadVideoPageState extends State<UploadVideoPage>
             uploadingNewVideo = true;
             isLoading = true;
           });
-          _uploadVideoToS3(File(file.path!));
+          _uploadVideoToS3(file);
 
 //
 
@@ -1957,4 +2041,149 @@ class TagSearchService {
   //   }
   //   return filteredTagList;
   // }
+}
+
+class ThumbnailRequest {
+  final String video;
+  final String? thumbnailPath;
+  final ImageFormat imageFormat;
+  final int maxHeight;
+  final int maxWidth;
+  final int timeMs;
+  final int quality;
+
+  const ThumbnailRequest(
+      {required this.video,
+      this.thumbnailPath = null,
+      required this.imageFormat,
+      required this.maxHeight,
+      required this.maxWidth,
+      required this.timeMs,
+      required this.quality});
+}
+
+class ThumbnailResult {
+  final Image image;
+  final int dataSize;
+  final int height;
+  final int width;
+  const ThumbnailResult(
+      {required this.image,
+      required this.dataSize,
+      required this.height,
+      required this.width});
+}
+
+Future<ThumbnailResult> genThumbnail(ThumbnailRequest r) async {
+  //WidgetsFlutterBinding.ensureInitialized();
+  Uint8List? bytes;
+  final Completer<ThumbnailResult> completer = Completer();
+  if (r.thumbnailPath != null) {
+    final thumbnailPath = await VideoThumbnail.thumbnailFile(
+        video: r.video,
+        thumbnailPath: r.thumbnailPath,
+        imageFormat: r.imageFormat,
+        maxHeight: r.maxHeight,
+        maxWidth: r.maxWidth,
+        timeMs: r.timeMs,
+        quality: r.quality);
+
+    print("thumbnail file is located: $thumbnailPath");
+
+    final file = File(thumbnailPath!);
+    bytes = file.readAsBytesSync();
+  } else {
+    bytes = await VideoThumbnail.thumbnailData(
+        video: r.video,
+        imageFormat: r.imageFormat,
+        maxHeight: r.maxHeight,
+        maxWidth: r.maxWidth,
+        timeMs: r.timeMs,
+        quality: r.quality);
+  }
+
+  int _imageDataSize = bytes!.length;
+  print("image size: $_imageDataSize");
+
+  final _image = Image.memory(bytes);
+  _image.image
+      .resolve(ImageConfiguration())
+      .addListener(ImageStreamListener((ImageInfo info, bool _) {
+    completer.complete(ThumbnailResult(
+      image: _image,
+      dataSize: _imageDataSize,
+      height: info.image.height,
+      width: info.image.width,
+    ));
+  }));
+  return completer.future;
+}
+
+class GenThumbnailImage extends StatefulWidget {
+  final ThumbnailRequest thumbnailRequest;
+
+  const GenThumbnailImage({required Key key, required this.thumbnailRequest})
+      : super(key: key);
+
+  @override
+  _GenThumbnailImageState createState() => _GenThumbnailImageState();
+}
+
+class _GenThumbnailImageState extends State<GenThumbnailImage> {
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<ThumbnailResult>(
+      future: genThumbnail(widget.thumbnailRequest),
+      builder: (BuildContext context, AsyncSnapshot snapshot) {
+        if (snapshot.hasData) {
+          final _image = snapshot.data.image;
+          final _width = snapshot.data.width;
+          final _height = snapshot.data.height;
+          final _dataSize = snapshot.data.dataSize;
+          return Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              Center(
+                child: Text(
+                    "Image ${widget.thumbnailRequest.thumbnailPath == null ? 'data size' : 'file size'}: $_dataSize, width:$_width, height:$_height"),
+              ),
+              Container(
+                color: Colors.grey,
+                height: 1.0,
+              ),
+              _image,
+            ],
+          );
+        } else if (snapshot.hasError) {
+          return Container(
+            padding: EdgeInsets.all(8.0),
+            color: Colors.red,
+            child: Text(
+              "Error:\n${snapshot.error.toString()}",
+            ),
+          );
+        } else {
+          return Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                Text(
+                    "Generating the thumbnail for: ${widget.thumbnailRequest.video}..."),
+                SizedBox(
+                  height: 10.0,
+                ),
+                CircularProgressIndicator(),
+              ]);
+        }
+      },
+    );
+  }
+}
+
+class ImageInFile extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container();
+  }
 }

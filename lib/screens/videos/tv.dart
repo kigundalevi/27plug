@@ -162,6 +162,7 @@ class _TvScreenState extends State<TvScreen> with TickerProviderStateMixin {
     final key = GlobalKey();
     String? current_page = ModalRoute.of(context)?.settings.name;
     final height = MediaQuery.of(context).size.height;
+    User user = currentUser();
 
     return Scaffold(
         backgroundColor: kBackgroundColor,
@@ -217,14 +218,22 @@ class _TvScreenState extends State<TvScreen> with TickerProviderStateMixin {
                                     }, () {
                                       Navigator.pop(context);
                                       Navigator.pushNamed(context, "/home");
-                                    }, () {
-                                      // Navigator.pop(context);
-                                      Navigator.pushNamed(context, "/profile",
-                                          arguments: [
-                                            currentUser().id,
-                                            'profile'
-                                          ]);
-                                    })
+                                    },
+                                        user.id == 1
+                                            ? () {
+                                                // Navigator.pop(context);
+                                                Navigator.pushNamed(
+                                                    context, "/loginRegister");
+                                              }
+                                            : () {
+                                                // Navigator.pop(context);
+                                                Navigator.pushNamed(
+                                                    context, "/profile",
+                                                    arguments: [
+                                                      currentUser().id,
+                                                      'profile'
+                                                    ]);
+                                              })
                                   ],
                                 ),
                                 DefaultTextStyle(
