@@ -20,7 +20,7 @@ Container appBar(Size size, left_pressed, center_pressed, right_pressed,
         IconButton(
           icon: Icon(
             Icons.menu,
-            color: kWhite,
+            color: kPrimaryColor,
           ),
           onPressed: left_pressed,
         ),
@@ -111,9 +111,7 @@ Container appBar(Size size, left_pressed, center_pressed, right_pressed,
                       ),
                       IconButton(
                         icon: CircleAvatar(
-                          backgroundImage: NetworkImage(
-                            user.dp_url,
-                          ),
+                          backgroundImage: AssetImage("assets/images/user.png"),
                           backgroundColor: Colors.black26,
                           foregroundColor: Colors.black26,
                         ),

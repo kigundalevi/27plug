@@ -73,11 +73,6 @@ class _VideosScreenState extends State<VideosScreen>
   bool _overlayed = false;
 
   late String videoTitle;
-  _VideoPlayPauseState() {
-    listener = () {
-      setState(() {});
-    };
-  }
 
   late VideoProgressIndicator progressIndicator;
   late FlickManager flickManager;
@@ -94,6 +89,12 @@ class _VideosScreenState extends State<VideosScreen>
   @override
   void initState() {
     WidgetsBinding.instance!.addPostFrameCallback((_) {
+      _VideoPlayPauseState() {
+        listener = () {
+          setState(() {});
+        };
+      }
+
       print("WidgetsBinding");
       UserController ctrl = UserController();
       ctrl.fetchLatestVideos(currentUser().id).then((latest_videos) {
@@ -332,8 +333,8 @@ class _VideosScreenState extends State<VideosScreen>
                                       ),
                                       Container(
                                         height: !isCollapsed
-                                            ? size.height / 17
-                                            : size.height / 13,
+                                            ? size.height / 22
+                                            : size.height / 17,
                                         width: size.width,
                                         child: Column(
                                           mainAxisSize: MainAxisSize.max,

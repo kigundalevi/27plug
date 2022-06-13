@@ -1089,60 +1089,61 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                               ]),
                         ),
                       )
-                    : Column(
-                        children: [
-                          SizedBox(height: 22.0),
-                          Container(
-                            // margin: EdgeInsets.only(right: 20, left: 20, top: 15),
-                            color: kScaffoldColor,
-                            child: Row(
-                              mainAxisSize: MainAxisSize.max,
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                // buildTextButton(MaterialCommunityIcons.facebook,
-                                //     "Facebook", Palette.facebookColor),
-                                Row(
-                                  children: [
-                                    Checkbox(
-                                      value: isRememberMe,
-                                      activeColor: kPrimaryColor,
-                                      onChanged: (value) {
-                                        setState(() {
-                                          isRememberMe = !isRememberMe;
-                                        });
-                                      },
-                                    ),
-                                    Text("Remember me",
-                                        style:
-                                            TextStyle(color: kLightTextColor))
-                                  ],
-                                ),
-                                InkWell(
-                                  onTap: () {},
-                                  child: Row(
-                                    children: [
-                                      Text("Forgot password ?",
-                                          style:
-                                              TextStyle(color: kLightTextColor))
-                                    ],
-                                  ),
-                                ),
-                                // Column(
-                                //   children: [
-                                //     Text("Forgot password ?",
-                                //         style:
-                                //             TextStyle(color: Palette.textColor2)),
-                                //     Text("Reset",
-                                //         style: TextStyle(color: kActiveColor)),
-                                //   ],
-                                // )
-                                // buildTextButton(MaterialCommunityIcons.google_plus,
-                                //     "Google", Palette.googleColor),
-                              ],
-                            ),
-                          ),
-                        ],
-                      )
+                    : SizedBox()
+                // : Column(
+                //     children: [
+                //       SizedBox(height: 22.0),
+                //       Container(
+                //         // margin: EdgeInsets.only(right: 20, left: 20, top: 15),
+                //         color: kScaffoldColor,
+                //         child: Row(
+                //           mainAxisSize: MainAxisSize.max,
+                //           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                //           children: [
+                //             // buildTextButton(MaterialCommunityIcons.facebook,
+                //             //     "Facebook", Palette.facebookColor),
+                //             Row(
+                //               children: [
+                //                 Checkbox(
+                //                   value: isRememberMe,
+                //                   activeColor: kPrimaryColor,
+                //                   onChanged: (value) {
+                //                     setState(() {
+                //                       isRememberMe = !isRememberMe;
+                //                     });
+                //                   },
+                //                 ),
+                //                 Text("Remember me",
+                //                     style:
+                //                         TextStyle(color: kLightTextColor))
+                //               ],
+                //             ),
+                //             InkWell(
+                //               onTap: () {},
+                //               child: Row(
+                //                 children: [
+                //                   Text("Forgot password ?",
+                //                       style:
+                //                           TextStyle(color: kLightTextColor))
+                //                 ],
+                //               ),
+                //             ),
+                //             // Column(
+                //             //   children: [
+                //             //     Text("Forgot password ?",
+                //             //         style:
+                //             //             TextStyle(color: Palette.textColor2)),
+                //             //     Text("Reset",
+                //             //         style: TextStyle(color: kActiveColor)),
+                //             //   ],
+                //             // )
+                //             // buildTextButton(MaterialCommunityIcons.google_plus,
+                //             //     "Google", Palette.googleColor),
+                //           ],
+                //         ),
+                //       ),
+                //     ],
+                //   )
               ],
             ),
           )

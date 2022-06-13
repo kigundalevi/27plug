@@ -38,36 +38,50 @@ Future<String> uploadFileToS3(File file, String folder) async {
 
 User currentUser() {
   var user = appBox.get("user");
+
   if (user == null) {
+    print("NO LOGGED IN USER FOUND!");
     return User(
       id: 1,
       first_name: "27Plug",
       last_name: "Guest",
       channel_name: "",
       email: "guest@27plug.app",
+      liked_videos: [],
+      later_videos: [],
+      favourited_videos: [],
+      subscribed_channels: [],
+      subscribers: [],
     );
   } else {
     var user = appBox.get("user");
     String dp_url = txtDefaultDpUrl;
     if (user["dp_url"] != null && user["dp_url"] != "") {
       dp_url = user["dp_url"];
-      print(dp_url);
+      // print(dp_url);
     }
+    // print(user['user_type']);
     return User(
-        id: user["id"],
-        first_name: user["first_name"],
-        last_name: user["last_name"],
-        channel_name: user["channel_name"],
-        phone_no: user["phoneNo"],
-        email: user["email"],
-        fb_name: user['fb_name'],
-        fb_url: user['fb_url'],
-        instagram_name: user['instagram_name'],
-        instagram_url: user['instagram_url'],
-        dp_url: dp_url,
-        logged_in: true,
-        user_type: user["user_type"]["name"],
-        user_type_id: user["user_type"]["id"]);
+      id: user["id"],
+      first_name: user["first_name"],
+      last_name: user["last_name"],
+      channel_name: user["channel_name"],
+      phone_no: user["phoneNo"],
+      email: user["email"],
+      fb_name: user['fb_name'],
+      fb_url: user['fb_url'],
+      instagram_name: user['instagram_name'],
+      instagram_url: user['instagram_url'],
+      dp_url: dp_url,
+      logged_in: true,
+      user_type: user["user_type"],
+      user_type_id: user["user_type_id"],
+      liked_videos: user["liked_videos"],
+      later_videos: user["later_videos"],
+      favourited_videos: user["favourited_videos"],
+      subscribed_channels: user["subscribed_channels"],
+      subscribers: user[" subscribers"],
+    );
   }
 }
 
@@ -92,47 +106,55 @@ Future<Loc> currentLocation() async {
   bool serviceEnabled;
   LocationPermission permission;
   Loc ip_loc = await _locFromIp();
-  print(ip_loc.name);
-  // Test if location services are enabled.
-  serviceEnabled = await Geolocator.isLocationServiceEnabled();
-  if (!serviceEnabled) {
-    // Location services are not enabled don't continue
-    // accessing the position and request users of the
-    // App to enable the location services.
-    print('Location services are disabled.');
-    return ip_loc;
-  }
-
-  permission = await Geolocator.checkPermission();
-  if (permission == LocationPermission.denied) {
-    permission = await Geolocator.requestPermission();
-    if (permission == LocationPermission.denied) {
-      // Permissions are denied, next time you could try
-      // requesting permissions again (this is also where
-      // Android's shouldShowRequestPermissionRationale
-      // returned true. According to Android guidelines
-      // your App should show an explanatory UI now.
-      print('Location permissions are denied');
+  // print(ip_loc.name);
+  try {
+    // Test if location services are enabled.
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      // Location services are not enabled don't continue
+      // accessing the position and request users of the
+      // App to enable the location services.
+      // print('Location services are disabled.');
       return ip_loc;
     }
-  }
 
-  if (permission == LocationPermission.deniedForever) {
-    // Permissions are denied forever, handle appropriately.
-    print(
-        'Location permissions are permanently denied, we cannot request permissions.');
+    permission = await Geolocator.checkPermission();
+
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+
+      if (permission == LocationPermission.denied) {
+        // Permissions are denied, next time you could try
+        // requesting permissions again (this is also where
+        // Android's shouldShowRequestPermissionRationale
+        // returned true. According to Android guidelines
+        // your App should show an explanatory UI now.
+        // print('Location permissions are denied');
+
+        return ip_loc;
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      // Permissions are denied forever, handle appropriately.
+      // print(
+      //     'Location permissions are permanently denied, we cannot request permissions.');
+      return ip_loc;
+    }
+
+    // When we reach here, permissions are granted and we can
+    // continue accessing the position of the device.
+    Position pos = await Geolocator.getCurrentPosition();
+    return Loc(
+        lat: pos.latitude.toString(),
+        lng: pos.longitude.toString(),
+        ip: ip_loc.ip,
+        name: ip_loc.name,
+        live: true);
+  } catch (e) {
+    print(e);
     return ip_loc;
   }
-
-  // When we reach here, permissions are granted and we can
-  // continue accessing the position of the device.
-  Position pos = await Geolocator.getCurrentPosition();
-  return Loc(
-      lat: pos.latitude.toString(),
-      lng: pos.longitude.toString(),
-      ip: ip_loc.ip,
-      name: ip_loc.name,
-      live: true);
 }
 
 Future<Loc> _locFromIp() async {
@@ -147,7 +169,7 @@ Future<Loc> _locFromIp() async {
         name: json.decode(res.body)['regionName'] +
             ',' +
             json.decode(res.body)['country']);
-
+    print("IP Lock ready");
     return location;
   } catch (err) {
     print(err);

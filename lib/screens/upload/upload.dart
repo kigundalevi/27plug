@@ -1640,8 +1640,7 @@ class _UploadVideoPageState extends State<UploadVideoPage>
               _generatingThumbnail = true;
             });
             String thumbnail = await Thumbnails.getThumbnail(
-                thumbnailFolder: folderPath,
-                videoFile: _file.path,
+                thumbnailFolder: folderPath, 
                 imageType: ThumbFormat
                     .PNG, //this image will store in created folderpath
                 quality: 30);
@@ -1662,7 +1661,7 @@ class _UploadVideoPageState extends State<UploadVideoPage>
 
             setState(() {
               uploaded = true;
-              uploadedVideoUrl = result!;
+              uploadedVideoUrl = VIDEOS_ROOT_URL + result!;
               isLoading = false;
             });
           } on PlatformException {
@@ -1682,6 +1681,7 @@ class _UploadVideoPageState extends State<UploadVideoPage>
           });
         }
       } catch (e) {
+        print('---VIDEO UPLOAD ERROR---');
         print(e);
 
         s3UploadStatus = "ERROR: " + e.toString();

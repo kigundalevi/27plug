@@ -1,18 +1,24 @@
 import 'dart:async';
 
+import 'package:africanplug/config/config.dart';
 import 'package:africanplug/controller/user_controller.dart';
 import 'package:africanplug/models/video.dart';
+import 'package:africanplug/screens/videos/tv.dart';
 import 'package:flick_video_player/flick_video_player.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
 class CustomDataManager {
   CustomDataManager(
-      {required this.flickManager,
+      {required this.context,
+      required this.flickManager,
       required this.videos,
       required this.currentPlaying});
   int currentPlaying;
   final FlickManager flickManager;
   final List<Video> videos;
+  BuildContext context;
 
   late Timer videoChangeTimer;
   Video currentVideo() {
@@ -21,7 +27,10 @@ class CustomDataManager {
 
   String getNextVideo() {
     currentPlaying++;
-    return videos[currentPlaying].url;
+    String videoUrl = videos[currentPlaying].url.substring(0, 4) == 'http'
+        ? videos[currentPlaying].url
+        : VIDEOS_ROOT_URL + videos[currentPlaying].url;
+    return videoUrl;
   }
 
   bool hasNextVideo() {
@@ -35,34 +44,81 @@ class CustomDataManager {
   skipToNextVideo([Duration? duration]) {
     if (hasNextVideo()) {
       saveView(videos[currentPlaying + 1].id);
-      flickManager.handleChangeVideo(
-          VideoPlayerController.network(videos[currentPlaying + 1].url),
-          videoChangeDuration: duration);
+
+      String videoUrl = videos[currentPlaying + 1].url.substring(0, 4) == 'http'
+          ? videos[currentPlaying + 1].url
+          : VIDEOS_ROOT_URL + videos[currentPlaying + 1].url;
+
+      // flickManager.handleChangeVideo(VideoPlayerController.network(videoUrl),
+      //     videoChangeDuration: duration);
       currentPlaying++;
+      Navigator.pop(context);
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) =>
+                TvScreen(videos: videos, activeIndex: currentPlaying)),
+      );
     }
   }
 
   play() {
     saveView(videos[currentPlaying].id);
-    flickManager.handleChangeVideo(
-        VideoPlayerController.network(videos[currentPlaying].url));
+
+    String videoUrl = videos[currentPlaying].url.substring(0, 4) == 'http'
+        ? videos[currentPlaying].url
+        : VIDEOS_ROOT_URL + videos[currentPlaying].url;
+
+    print("CURRENTLY PLAYING: " + videos[currentPlaying].url.substring(0, 4));
+
+    flickManager.handleChangeVideo(VideoPlayerController.network(videoUrl));
+    // Navigator.pop(context);
+    //       Navigator.push(
+    //   context,
+    //   MaterialPageRoute(
+    //       builder: (context) =>
+    //           TvScreen(videos: videos, activeIndex: currentPlaying)),
+    // );
+    currentPlaying = currentPlaying;
   }
 
   skipToVideo(int index) {
     if (index < videos.length) {
       saveView(videos[index].id);
-      flickManager
-          .handleChangeVideo(VideoPlayerController.network(videos[index].url));
+
+      String videoUrl = videos[index].url.substring(0, 4) == 'http'
+          ? videos[index].url
+          : VIDEOS_ROOT_URL + videos[index].url;
+
+      // flickManager.handleChangeVideo(VideoPlayerController.network(videoUrl));
       currentPlaying = index;
+      Navigator.pop(context);
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) =>
+                TvScreen(videos: videos, activeIndex: currentPlaying)),
+      );
     }
   }
 
   skipToPreviousVideo() {
     if (hasPreviousVideo()) {
-      currentPlaying--;
       saveView(videos[currentPlaying].id);
-      flickManager.handleChangeVideo(
-          VideoPlayerController.network(videos[currentPlaying].url));
+
+      String videoUrl = videos[currentPlaying].url.substring(0, 4) == 'http'
+          ? videos[currentPlaying].url
+          : VIDEOS_ROOT_URL + videos[currentPlaying].url;
+
+      // flickManager.handleChangeVideo(VideoPlayerController.network(videoUrl));
+      currentPlaying--;
+      Navigator.pop(context);
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) =>
+                TvScreen(videos: videos, activeIndex: currentPlaying)),
+      );
     }
   }
 

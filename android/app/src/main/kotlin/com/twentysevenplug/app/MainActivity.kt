@@ -1,4 +1,4 @@
-package com.example.africanplug
+package com.twentysevenplug.app
 
 import io.flutter.embedding.android.FlutterActivity
 

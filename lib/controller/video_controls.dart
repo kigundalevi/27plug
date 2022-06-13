@@ -22,7 +22,10 @@ class CustomOrientationControls extends StatelessWidget {
       children: <Widget>[
         Positioned.fill(
           child: CustomFlickAutoHideChild(
-            child: Container(color: Colors.black38),
+            child: Padding(
+              padding: const EdgeInsets.all(0.0),
+              child: Container(color: Colors.black38),
+            ),
           ),
         ),
         Positioned(

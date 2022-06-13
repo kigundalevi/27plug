@@ -164,7 +164,7 @@ Widget MainMenu(
                     //   ),
                     // ),
                     SizedBox(
-                      height: size.height / 2.2,
+                      height: size.height / 2.5,
                     ),
                     // MenuOption(context, size, Icons.help, "Contact Support",
                     //     "support", current_page),
@@ -184,6 +184,18 @@ Widget MainMenu(
                         color: Colors.black38,
                       ),
                     ),
+                    MenuButton(
+                        context,
+                        size,
+                        Icons.copyright,
+                        txtAppName +
+                            " v" +
+                            txtVersion +
+                            " " +
+                            DateTime.now().year.toString(),
+                        "App", () {
+                      // logout(context);
+                    })
                     // MenuButton(
                     //     context,
                     //     size,

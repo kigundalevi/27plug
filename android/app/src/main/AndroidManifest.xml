@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.africanplug">
+    package="com.twentysevenplug.app">
    <application
         android:label="27Plug"
         android:name="${applicationName}"

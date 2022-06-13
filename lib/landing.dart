@@ -73,9 +73,9 @@ class _LandingScreenState extends State<LandingScreen>
 
   late VideoProgressIndicator progressIndicator;
 
-  late List<Video>? latestVideos;
-  late List<Video>? trendingVideos;
-  late List<Video>? topVideos;
+  List<Video> latestVideos = [];
+  List<Video> trendingVideos = [];
+  List<Video> topVideos = [];
 
   TextEditingController searchController = new TextEditingController();
   List<Video> _searchResults = [];

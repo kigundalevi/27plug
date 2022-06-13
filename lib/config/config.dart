@@ -11,6 +11,9 @@ import 'package:flutter/cupertino.dart';
 const REGISTER_URL = "https://plug27.herokuapp.com/graphq";
 const BACKEND_URL = "https://plug27.herokuapp.com/graphql";
 const LOGIN_URL = "https://plug27.herokuapp.com/login";
+const REFRESH_TOKEN_URL = "https://plug27.herokuapp.com/refresh";
+const VIDEOS_ROOT_URL =
+    "https://27-plug-files.s3.eu-west-3.amazonaws.com/uploads/videos/";
 
 // https://brianmutugi.pythonanywhere.com/graphql
 // COLORS
@@ -25,7 +28,8 @@ const kBlack = Colors.black;
 const kWhite = Colors.white;
 const kRed = Colors.red;
 const kActiveColor = Color(0xFF03DAC5);
-const kScaffoldColor = Color(0xFF1b1e58);
+//const kScaffoldColor = Color(0xFF1b1e58);
+const kScaffoldColor = Color(0xFFFFFDFA);
 
 // TEXT
 const txtAppName = "27Plug";

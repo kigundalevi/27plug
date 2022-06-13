@@ -1,8 +1,8 @@
 import 'package:africanplug/config/config.dart';
 
-class User {
+class VideoComment {
   final int id;
-  final String first_name;
+  final String comment;
   final String last_name;
   final String channel_name;
   final String email;
@@ -22,10 +22,9 @@ class User {
   final List<int> subscribed_channels;
   final List<int> subscribers;
 
-  /// Creates Language
-  User(
+  VideoComment(
       {required this.id,
-      required this.first_name,
+      required this.comment,
       required this.last_name,
       required this.email,
       required this.liked_videos,

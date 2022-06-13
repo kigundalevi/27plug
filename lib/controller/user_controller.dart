@@ -35,7 +35,7 @@ class UserController {
   Future<User> fetchChannelDetails(int userId) async {
     try {
       Loc location = await currentLocation();
-      print(location);
+      // print(location);
 
       var user = appBox.get("user");
 
@@ -60,18 +60,41 @@ class UserController {
           location.name +
           '",locationLive:' +
           live +
-          '){id,firstName,lastName,channelName,phoneNo,email,fbName,fbUrl,instagramName,instagramUrl,dpUrl,userType{name,id}}}';
+          '){id,firstName,lastName,channelName,phoneNo,email,fbName,fbUrl,instagramName,instagramUrl,dpUrl, likes{videoId},favourites{videoId},watchLater{videoId},subscribers{subscriberId},subscribed{channelId},views{videoId}, userType{name,id}}}';
       http.Response response = await http.Response.fromStream(await req.send());
       var resp = jsonDecode(response.body);
 
       var res = resp["data"];
 
       if (response.statusCode == 200) {
+        print('RESPONSE');
+        print(resp);
         String dp_url = txtDefaultDpUrl;
         if (res['findUser']["dpUrl"] != null &&
             res['findUser']["dpUrl"] != "") {
           dp_url = res['findUser']["dpUrl"];
         }
+
+        List<int> liked_videos = [];
+        res['findUser']['likes'].forEach((l) {
+          liked_videos.add(l['videoId']);
+        });
+        List<int> later_videos = [];
+        res['findUser']['watchLater'].forEach((l) {
+          later_videos.add(l['videoId']);
+        });
+        List<int> favourited_videos = [];
+        res['findUser']['favourites'].forEach((l) {
+          favourited_videos.add(l['videoId']);
+        });
+        List<int> subscribed_channels = [];
+        res['findUser']['subscribed'].forEach((l) {
+          subscribed_channels.add(l['channelId']);
+        });
+        List<int> subscribers = [];
+        res['findUser']['subscribers'].forEach((l) {
+          subscribers.add(l['subscriberId']);
+        });
 
         return User(
           id: int.parse(res['findUser']['id']),
@@ -87,17 +110,47 @@ class UserController {
           dp_url: dp_url,
           user_type: res['findUser']['userType']['name'],
           user_type_id: int.parse(res['findUser']['userType']['id']),
+          liked_videos: liked_videos,
+          later_videos: later_videos,
+          favourited_videos: favourited_videos,
+          subscribed_channels: subscribed_channels,
+          subscribers: subscribers,
         );
+      } else if (response.statusCode == 401) {
+        //refresh token and call getUser again
+        bool refreshed = await refreshToken();
+        if (refreshed) {
+          return fetchChannelDetails(userId);
+        } else {
+          //TODO:Log out automatically or show error on snackbar
+          return User(
+            id: 1,
+            first_name: "27Plug",
+            last_name: "Guest",
+            channel_name: "",
+            email: "guest@27plug.app",
+            liked_videos: [],
+            later_videos: [],
+            favourited_videos: [],
+            subscribed_channels: [],
+            subscribers: [],
+          );
+        }
       } else {
         print(response.body);
         // print(response.);
-        print(response.statusCode);
+        // print(response.statusCode);
         return User(
           id: 1,
           first_name: "27Plug",
           last_name: "Guest",
           channel_name: "",
           email: "guest@27plug.app",
+          liked_videos: [],
+          later_videos: [],
+          favourited_videos: [],
+          subscribed_channels: [],
+          subscribers: [],
         );
       }
     } catch (e) {
@@ -108,7 +161,76 @@ class UserController {
         last_name: "Guest",
         channel_name: "",
         email: "guest@27plug.app",
+        liked_videos: [],
+        later_videos: [],
+        favourited_videos: [],
+        subscribed_channels: [],
+        subscribers: [],
       );
+    }
+  }
+
+  Future<List?> fetchVideoComments(int videoId) async {
+    try {
+      Loc location = await currentLocation();
+      var user = appBox.get("user");
+      Dio dio = Dio(
+        BaseOptions(
+          contentType: 'multipart/form-data',
+          headers: {
+            "Accept": "*/*",
+            "Authorization": "Bearer " + user['token']
+          },
+        ),
+      );
+
+      var req = new http.MultipartRequest("POST", Uri.parse(BACKEND_URL));
+      Map<String, String> headers = {
+        "Accept": "*/*",
+        "Authorization": "Bearer " + user['token']
+      };
+
+      req.headers.addAll(headers);
+      String live = location.live ? 'true' : 'false';
+      req.fields['query'] = 'query{listVideoComments(id:' +
+          videoId.toString() +
+          '){id,comment,commentedAt,deletedAt,commenter{id,dpUrl,firstName,lastName,channelName,email}}}';
+      http.Response response = await http.Response.fromStream(await req.send());
+      var resp = jsonDecode(response.body);
+      // print(resp);
+
+      List _videoComments = [];
+
+      if (response.statusCode == 200) {
+        var comments = resp["data"]['listVideoComments'];
+
+        comments.forEach((comment) {
+          if (comment['deletedAt'] == null || comment['deletedAt'] == "") {
+            // print(video['title']);
+            // print("Comment " + comment['comment'] + " ID " + comment['id']);
+            _videoComments.add(comment);
+          }
+        });
+
+        return _videoComments;
+      } else if (response.statusCode == 401) {
+        //refresh token and call getUser again
+        bool refreshed = await refreshToken();
+        if (refreshed) {
+          return fetchVideoComments(videoId);
+        } else {
+          //TODO:Log out automatically or show error on snackbar
+          return null;
+        }
+      } else {
+        print(response.body);
+        // print(response.);
+        print(response.statusCode);
+        return null;
+      }
+    } catch (e) {
+      print(e);
+      return null;
     }
   }
 
@@ -146,9 +268,10 @@ class UserController {
           location.name +
           '",locationLive:' +
           live +
-          '){id,name,url,thumbnailName,thumbnailUrl,title,description,durationMillisec,createdAt,deletedAt,uploader{firstName,dpUrl},views{id,viewer{id}},likes{id,liker{id}},comments{id,commenter{id}}}}';
+          '){id,name,url,thumbnailName,thumbnailUrl,title,description,durationMillisec,createdAt,deletedAt,uploader{firstName,dpUrl},views{id,viewer{id}},likes{id,liker{id}},watchLater{id,marker{id}},favourites{id,favouriter{id}},comments{id,comment,commentedAt,deletedAt,commenter{id,dpUrl,firstName,lastName,channelName,email}}}}';
       http.Response response = await http.Response.fromStream(await req.send());
       var resp = jsonDecode(response.body);
+      print(resp);
 
       List<Video> _channelVideos = [];
 
@@ -158,25 +281,38 @@ class UserController {
         videos.forEach((video) {
           if (video['deletedAt'] == null || video['deletedAt'] == "") {
             // print(video['title']);
-            DateTime dateTimeCreatedAt = DateTime.parse(video['createdAt']);
-            DateTime dateTimeNow = DateTime.now();
-            final days_lapse = dateTimeNow.difference(dateTimeCreatedAt).inDays;
-            String lapse = "Today";
-            if (days_lapse < 1) {
-              String lapse = "Today";
-            } else if (days_lapse == 1) {
-              lapse = "yesterday";
-            } else {
-              lapse = days_lapse.toString() + " days ago";
-            }
+
             String views = video['views'].length.toString() + " views";
+            String like_count = video['likes'].length > 0
+                ? video['likes'].length.toString()
+                : '0';
+            String comment_count = video['comments'].length > 0
+                ? video['comments'].length.toString()
+                : '0';
+
+            bool favourited = false;
+            video['favourites'].forEach((f) {
+              if (f['favouriter']['id'] == user['id']) {
+                favourited = true;
+              }
+            });
+
+            bool later = false;
+            video['watchLater'].forEach((l) {
+              if (l['marker']['id'] == user['id']) {
+                later = true;
+              }
+            });
+            bool liked = false;
+            video['likes'].forEach((l) {
+              if (l['liker']['id'] == user['id']) {
+                liked = true;
+              }
+            });
 
             _channelVideos.add(Video(
               id: int.parse(video['id']),
-              title: video['title'].length > 20
-                  ? video['title']
-                      .replaceRange(20, video['title'].length, '...')
-                  : video['title'],
+              title: video['title'],
               url: video['url'],
               description: video['description'],
               duration_millisec: video['durationMillisec'],
@@ -186,9 +322,17 @@ class UserController {
               views: views.length > 12
                   ? views.replaceRange(9, views.length, '...')
                   : views,
-              upload_lapse: lapse.length > 12
-                  ? lapse.replaceRange(9, lapse.length, '...')
-                  : lapse,
+              comments: video['comments'],
+              liked: liked,
+              favourite: favourited,
+              watch_later: later,
+              like_count: like_count,
+              comment_count: comment_count,
+              upload_lapse: lapse(video['createdAt']).length > 12
+                  ? lapse(video['createdAt'])
+                      .replaceRange(9, lapse(video['createdAt']).length, '...')
+                  : lapse(video['createdAt']),
+              uploader_id: video['uploader']['id'],
               uploaded_by: video['uploader']['firstName'].length > 20
                   ? video['uploader']['firstName'].replaceRange(
                       20, video['uploader']['firstName'].length, '...')
@@ -205,6 +349,15 @@ class UserController {
         });
 
         return _channelVideos;
+      } else if (response.statusCode == 401) {
+        //refresh token and call getUser again
+        bool refreshed = await refreshToken();
+        if (refreshed) {
+          return fetchChannelVideos(userId);
+        } else {
+          //TODO:Log out automatically or show error on snackbar
+          return null;
+        }
       } else {
         print(response.body);
         // print(response.);
@@ -270,9 +423,30 @@ query{
         firstName
       }
     },
+    likes{
+      likedAt,
+      liker{
+        id,
+        dpUrl,
+        firstName,
+        lastName,
+        channelName,
+        email
+      }
+    }
+    watchLater{id,marker{id}},favourites{id,favouriter{id}},
     comments{
+      id,
+      comment,
+      commentedAt,
+      deletedAt,
       commenter{
-        lastName
+        id,
+        dpUrl,
+        firstName,
+        lastName,
+        channelName,
+        email
       }
     }
   }
@@ -280,8 +454,8 @@ query{
 """;
       http.Response response = await http.Response.fromStream(await req.send());
       var resp = jsonDecode(response.body);
-      // print('---------BACKEND RESPONSE---------');
-      // print(resp);
+      print('---------BACKEND RESPONSE---------');
+      print(resp);
 
       List<Video> _latestVideos = [];
 
@@ -290,25 +464,43 @@ query{
 
         videos.forEach((video) {
           if (video['deletedAt'] == null || video['deletedAt'] == "") {
-            DateTime dateTimeCreatedAt = DateTime.parse(video['createdAt']);
-            DateTime dateTimeNow = DateTime.now();
-            final days_lapse = dateTimeNow.difference(dateTimeCreatedAt).inDays;
-            String lapse = "Today";
-            if (days_lapse < 1) {
-              String lapse = "Today";
-            } else if (days_lapse == 1) {
-              lapse = "yesterday";
-            } else {
-              lapse = days_lapse.toString() + " days ago";
-            }
             String views = video['views'].length.toString() + " views";
+            String like_count = video['likes'].length > 0
+                ? video['likes'].length.toString()
+                : '0';
+            String comment_count = video['comments'].length > 0
+                ? video['comments'].length.toString()
+                : '0';
+
+            bool favourited = false;
+            video['favourites'].forEach((f) {
+              if (f['favouriter'] != null) {
+                if (f['favouriter']['id'] == currentUser().id) {
+                  favourited = true;
+                }
+              }
+            });
+
+            bool later = false;
+            video['watchLater'].forEach((l) {
+              if (l['marker'] != null) {
+                if (l['marker']['id'] == currentUser().id) {
+                  later = true;
+                }
+              }
+            });
+            bool liked = false;
+            video['likes'].forEach((l) {
+              if (l['liker'] != null) {
+                if (l['liker']['id'] == currentUser().id) {
+                  liked = true;
+                }
+              }
+            });
 
             _latestVideos.add(Video(
               id: int.parse(video['id']),
-              title: video['title'].length > 20
-                  ? video['title']
-                      .replaceRange(20, video['title'].length, '...')
-                  : video['title'],
+              title: video['title'],
               url: video['url'],
               description: video['description'],
               duration_millisec: video['durationMillisec'],
@@ -318,13 +510,21 @@ query{
               views: views.length > 12
                   ? views.replaceRange(9, views.length, '...')
                   : views,
-              upload_lapse: lapse.length > 12
-                  ? lapse.replaceRange(9, lapse.length, '...')
-                  : lapse,
+              liked: liked,
+              comments: video['comments'],
+              like_count: like_count,
+              comment_count: comment_count,
+              favourite: favourited,
+              watch_later: later,
+              upload_lapse: lapse(video['createdAt']).length > 12
+                  ? lapse(video['createdAt'])
+                      .replaceRange(9, lapse(video['createdAt']).length, '...')
+                  : lapse(video['createdAt']),
               uploaded_by: video['uploader']['firstName'].length > 20
                   ? video['uploader']['firstName'].replaceRange(
                       20, video['uploader']['firstName'].length, '...')
                   : video['uploader']['firstName'],
+              uploader_id: video['uploader']['id'],
               uploader_channel_name: video['uploader']['channelName'] == null
                   ? null
                   : video['uploader']['channelName'].length > 20
@@ -337,6 +537,15 @@ query{
         });
 
         return _latestVideos;
+      } else if (response.statusCode == 401) {
+        //refresh token and call getUser again
+        bool refreshed = await refreshToken();
+        if (refreshed) {
+          return fetchLatestVideos(userId);
+        } else {
+          //TODO:Log out automatically or show error on snackbar
+          return null;
+        }
       } else {
         print(response.body);
         try {
@@ -418,9 +627,30 @@ query{
         firstName
       }
     },
+    likes{
+      likedAt,
+      liker{
+        id,
+        dpUrl,
+        firstName,
+        lastName,
+        channelName,
+        email
+      }
+    }
+    watchLater{id,marker{id}},favourites{id,favouriter{id}},
     comments{
+      id,
+      comment,
+      commentedAt,
+      deletedAt,
       commenter{
-        lastName
+        id,
+        dpUrl,
+        firstName,
+        lastName,
+        channelName,
+        email
       }
     }
   }
@@ -428,8 +658,8 @@ query{
 """;
       http.Response response = await http.Response.fromStream(await req.send());
       var resp = jsonDecode(response.body);
-      print('---BE RESPONSE---');
-      print(resp);
+      // print('---TOP VIDEOS BE RESPONSE---');
+      // print(resp);
       List<Video> _topVideos = [];
 
       if (response.statusCode == 200) {
@@ -437,25 +667,43 @@ query{
 
         videos.forEach((video) {
           if (video['deletedAt'] == null || video['deletedAt'] == "") {
-            DateTime dateTimeCreatedAt = DateTime.parse(video['createdAt']);
-            DateTime dateTimeNow = DateTime.now();
-            final days_lapse = dateTimeNow.difference(dateTimeCreatedAt).inDays;
-            String lapse = "Today";
-            if (days_lapse < 1) {
-              String lapse = "Today";
-            } else if (days_lapse == 1) {
-              lapse = "yesterday";
-            } else {
-              lapse = days_lapse.toString() + " days ago";
-            }
             String views = video['views'].length.toString() + " views";
+            String like_count = video['likes'].length > 0
+                ? video['likes'].length.toString()
+                : '0';
+            String comment_count = video['comments'].length > 0
+                ? video['comments'].length.toString()
+                : '0';
+
+            bool favourited = false;
+            video['favourites'].forEach((f) {
+              if (f['favouriter'] != null) {
+                if (f['favouriter']['id'] == currentUser().id) {
+                  favourited = true;
+                }
+              }
+            });
+
+            bool later = false;
+            video['watchLater'].forEach((l) {
+              if (l['marker'] != null) {
+                if (l['marker']['id'] == currentUser().id) {
+                  later = true;
+                }
+              }
+            });
+            bool liked = false;
+            video['likes'].forEach((l) {
+              if (l['liker'] != null) {
+                if (l['liker']['id'] == currentUser().id) {
+                  liked = true;
+                }
+              }
+            });
 
             _topVideos.add(Video(
               id: int.parse(video['id']),
-              title: video['title'].length > 20
-                  ? video['title']
-                      .replaceRange(20, video['title'].length, '...')
-                  : video['title'],
+              title: video['title'],
               url: video['url'],
               description: video['description'],
               duration_millisec: video['durationMillisec'],
@@ -465,9 +713,17 @@ query{
               views: views.length > 12
                   ? views.replaceRange(9, views.length, '...')
                   : views,
-              upload_lapse: lapse.length > 12
-                  ? lapse.replaceRange(9, lapse.length, '...')
-                  : lapse,
+              comments: video['comments'],
+              liked: liked,
+              favourite: favourited,
+              watch_later: later,
+              like_count: like_count,
+              comment_count: comment_count,
+              upload_lapse: lapse(video['createdAt']).length > 12
+                  ? lapse(video['createdAt'])
+                      .replaceRange(9, lapse(video['createdAt']).length, '...')
+                  : lapse(video['createdAt']),
+              uploader_id: video['uploader']['id'],
               uploaded_by: video['uploader']['firstName'].length > 20
                   ? video['uploader']['firstName'].replaceRange(
                       20, video['uploader']['firstName'].length, '...')
@@ -483,7 +739,19 @@ query{
           }
         });
 
+        print("TOP VIDEOS RESPONSE");
+        print(_topVideos);
+
         return _topVideos;
+      } else if (response.statusCode == 401) {
+        //refresh token and call getUser again
+        bool refreshed = await refreshToken();
+        if (refreshed) {
+          return fetchTopVideos(userId);
+        } else {
+          //TODO:Log out automatically or show error on snackbar
+          return null;
+        }
       } else {
         print(response.body);
         try {
@@ -565,9 +833,30 @@ query{
         firstName
       }
     },
+    likes{
+      likedAt,
+      liker{
+        id,
+        dpUrl,
+        firstName,
+        lastName,
+        channelName,
+        email
+      }
+    }
+    watchLater{id,marker{id}},favourites{id,favouriter{id}},
     comments{
+      id,
+      comment,
+      commentedAt,
+      deletedAt,
       commenter{
-        lastName
+        id,
+        dpUrl,
+        firstName,
+        lastName,
+        channelName,
+        email
       }
     }
   }
@@ -583,41 +872,67 @@ query{
 
         videos.forEach((video) {
           if (video['deletedAt'] == null || video['deletedAt'] == "") {
-            DateTime dateTimeCreatedAt = DateTime.parse(video['createdAt']);
-            DateTime dateTimeNow = DateTime.now();
-            final days_lapse = dateTimeNow.difference(dateTimeCreatedAt).inDays;
-            String lapse = "Today";
-            if (days_lapse < 1) {
-              String lapse = "Today";
-            } else if (days_lapse == 1) {
-              lapse = "yesterday";
-            } else {
-              lapse = days_lapse.toString() + " days ago";
-            }
             String views = video['views'].length.toString() + " views";
+            String like_count = video['likes'].length > 0
+                ? video['likes'].length.toString()
+                : '0';
+            String comment_count = video['comments'].length > 0
+                ? video['comments'].length.toString()
+                : '0';
+
+            bool favourited = false;
+            video['favourites'].forEach((f) {
+              if (f['favouriter'] != null) {
+                if (f['favouriter']['id'] == currentUser().id) {
+                  favourited = true;
+                }
+              }
+            });
+
+            bool later = false;
+            video['watchLater'].forEach((l) {
+              if (l['marker'] != null) {
+                if (l['marker']['id'] == currentUser().id) {
+                  later = true;
+                }
+              }
+            });
+            bool liked = false;
+            video['likes'].forEach((l) {
+              if (l['liker'] != null) {
+                if (l['liker']['id'] == currentUser().id) {
+                  liked = true;
+                }
+              }
+            });
 
             _trendingVideos.add(Video(
               id: int.parse(video['id']),
-              title: video['title'].length > 20
-                  ? video['title']
-                      .replaceRange(20, video['title'].length, '...')
-                  : video['title'],
+              title: video['title'],
               url: video['url'],
               description: video['description'],
               duration_millisec: video['durationMillisec'],
               name: video['name'],
               thumbnail_url: video['thumbnailUrl'],
               thumbnail_name: video['thumbnailName'],
+              liked: liked,
+              favourite: favourited,
+              watch_later: later,
               views: views.length > 12
                   ? views.replaceRange(9, views.length, '...')
                   : views,
-              upload_lapse: lapse.length > 12
-                  ? lapse.replaceRange(9, lapse.length, '...')
-                  : lapse,
+              comments: video['comments'],
+              like_count: like_count,
+              comment_count: comment_count,
+              upload_lapse: lapse(video['createdAt']).length > 12
+                  ? lapse(video['createdAt'])
+                      .replaceRange(9, lapse(video['createdAt']).length, '...')
+                  : lapse(video['createdAt']),
               uploaded_by: video['uploader']['firstName'].length > 20
                   ? video['uploader']['firstName'].replaceRange(
                       20, video['uploader']['firstName'].length, '...')
                   : video['uploader']['firstName'],
+              uploader_id: video['uploader']['id'],
               uploader_channel_name: video['uploader']['channelName'] == null
                   ? null
                   : video['uploader']['channelName'].length > 20
@@ -628,8 +943,16 @@ query{
             ));
           }
         });
-
         return _trendingVideos;
+      } else if (response.statusCode == 401) {
+        //refresh token and call getUser again
+        bool refreshed = await refreshToken();
+        if (refreshed) {
+          return fetchTrendingVideos(userId);
+        } else {
+          //TODO:Log out automatically or show error on snackbar
+          return null;
+        }
       } else {
         print(response.body);
         try {
@@ -655,6 +978,339 @@ query{
     } catch (e) {
       print(e);
       return null;
+    }
+  }
+
+  Future<bool> addSubscription(int channel_id) async {
+    User current_user = currentUser();
+    int user_id = current_user.id;
+
+    Loc loc = await currentLocation();
+    String lat = loc.lat;
+    String lng = loc.lng;
+    String ip = loc.ip;
+    String locationName = loc.name;
+    bool locationLive = loc.live;
+
+    Loc location = await currentLocation();
+    var user = appBox.get("user");
+    Dio dio = Dio(
+      BaseOptions(
+        contentType: 'multipart/form-data',
+        headers: {"Accept": "*/*", "Authorization": "Bearer " + user['token']},
+      ),
+    );
+
+    var req = new http.MultipartRequest("POST", Uri.parse(BACKEND_URL));
+    Map<String, String> headers = {
+      "Accept": "*/*",
+      "Authorization": "Bearer " + user['token']
+    };
+
+    req.headers.addAll(headers);
+    String live = location.live ? 'true' : 'false';
+    req.fields['query'] = """
+mutation{
+  addSubscription(channelId:$channel_id,userId:$user_id,ip:"$ip",lat:"$lat",lng:"$lng",locationName:"$locationName",locationLive:$locationLive){
+    ok
+  }
+}
+""";
+    DateTime start = DateTime.now();
+    print("SENT SUBS REQUEST");
+    http.Response response = await http.Response.fromStream(await req.send());
+    DateTime end = DateTime.now();
+    print("-----------SUBSCRIPTION RESULT AFTER " +
+        start.difference(end).inSeconds.toString() +
+        " SECONDS---------");
+    var resp = jsonDecode(response.body);
+    print(resp);
+
+    if (response.statusCode == 200) {
+      var userDetails = appBox.get("user");
+      List<int> subscribed_channels = userDetails['subscribed_channels'];
+      subscribed_channels.add(channel_id);
+      userDetails['subscribed_channels'] = subscribed_channels;
+      appBox.delete('user');
+      appBox.put('user', userDetails);
+      return true;
+    } else if (response.statusCode == 401) {
+      //refresh token and call getUser again
+      bool refreshed = await refreshToken();
+      if (refreshed) {
+        return addSubscription(channel_id);
+      } else {
+        //TODO:Log out automatically or show error on snackbar
+        return false;
+      }
+    } else {
+      print(response.body);
+      // print(response.);
+      print(response.statusCode);
+      return false;
+    }
+  }
+
+  Future<bool> addVideoFavourite(int video_id) async {
+    User current_user = currentUser();
+    int user_id = current_user.id;
+
+    Loc loc = await currentLocation();
+    String lat = loc.lat;
+    String lng = loc.lng;
+    String ip = loc.ip;
+    String locationName = loc.name;
+    bool locationLive = loc.live;
+
+    Loc location = await currentLocation();
+    var user = appBox.get("user");
+    Dio dio = Dio(
+      BaseOptions(
+        contentType: 'multipart/form-data',
+        headers: {"Accept": "*/*", "Authorization": "Bearer " + user['token']},
+      ),
+    );
+
+    var req = new http.MultipartRequest("POST", Uri.parse(BACKEND_URL));
+    Map<String, String> headers = {
+      "Accept": "*/*",
+      "Authorization": "Bearer " + user['token']
+    };
+
+    req.headers.addAll(headers);
+    String live = location.live ? 'true' : 'false';
+    req.fields['query'] = """
+mutation{
+  addVideoFavourite(videoId:$video_id,userId:$user_id,ip:"$ip",lat:"$lat",lng:"$lng",locationName:"$locationName",locationLive:$locationLive){
+    ok
+  }
+}
+""";
+    http.Response response = await http.Response.fromStream(await req.send());
+    print("-----------SUBSCRIPTION FAV---------");
+    var resp = jsonDecode(response.body);
+    print(resp);
+
+    if (response.statusCode == 200) {
+      var userDetails = appBox.get("user");
+      List<int> favourited_videos = userDetails['favourited_videos'];
+      favourited_videos.add(video_id);
+      userDetails['favourited_videos'] = favourited_videos;
+      appBox.delete('user');
+      appBox.put('user', userDetails);
+      return true;
+    } else if (response.statusCode == 401) {
+      //refresh token and call getUser again
+      bool refreshed = await refreshToken();
+      if (refreshed) {
+        return addVideoFavourite(video_id);
+      } else {
+        //TODO:Log out automatically or show error on snackbar
+        return false;
+      }
+    } else {
+      print(response.body);
+      // print(response.);
+      print(response.statusCode);
+      return false;
+    }
+  }
+
+  Future<bool> addVideoLater(int video_id) async {
+    User current_user = currentUser();
+    int user_id = current_user.id;
+
+    Loc loc = await currentLocation();
+    String lat = loc.lat;
+    String lng = loc.lng;
+    String ip = loc.ip;
+    String locationName = loc.name;
+    bool locationLive = loc.live;
+
+    Loc location = await currentLocation();
+    var user = appBox.get("user");
+    Dio dio = Dio(
+      BaseOptions(
+        contentType: 'multipart/form-data',
+        headers: {"Accept": "*/*", "Authorization": "Bearer " + user['token']},
+      ),
+    );
+
+    var req = new http.MultipartRequest("POST", Uri.parse(BACKEND_URL));
+    Map<String, String> headers = {
+      "Accept": "*/*",
+      "Authorization": "Bearer " + user['token']
+    };
+
+    req.headers.addAll(headers);
+    String live = location.live ? 'true' : 'false';
+    req.fields['query'] = """
+mutation{
+  addVideoLater(videoId:$video_id,userId:$user_id,ip:"$ip",lat:"$lat",lng:"$lng",locationName:"$locationName",locationLive:$locationLive){
+    ok
+  }
+}
+""";
+    http.Response response = await http.Response.fromStream(await req.send());
+    print("-----------VIDEO LATER RESULT---------");
+    var resp = jsonDecode(response.body);
+    print(resp);
+
+    if (response.statusCode == 200) {
+      var userDetails = appBox.get("user");
+      List<int> later_videos = userDetails['later_videos'];
+      later_videos.add(video_id);
+      userDetails['later_videos'] = later_videos;
+      appBox.delete('user');
+      appBox.put('user', userDetails);
+
+      return true;
+    } else if (response.statusCode == 401) {
+      //refresh token and call getUser again
+      bool refreshed = await refreshToken();
+      if (refreshed) {
+        return addVideoLater(video_id);
+      } else {
+        //TODO:Log out automatically or show error on snackbar
+        return false;
+      }
+    } else {
+      print(response.body);
+      // print(response.);
+      print(response.statusCode);
+      return false;
+    }
+  }
+
+  Future<bool> addVideoLike(int video_id) async {
+    User current_user = currentUser();
+    int user_id = current_user.id;
+
+    print("USER ID - " + user_id.toString());
+    Loc loc = await currentLocation();
+    String lat = loc.lat;
+    String lng = loc.lng;
+    String ip = loc.ip;
+    String locationName = loc.name;
+    bool locationLive = loc.live;
+
+    Loc location = await currentLocation();
+    var user = appBox.get("user");
+    Dio dio = Dio(
+      BaseOptions(
+        contentType: 'multipart/form-data',
+        headers: {"Accept": "*/*", "Authorization": "Bearer " + user['token']},
+      ),
+    );
+
+    var req = new http.MultipartRequest("POST", Uri.parse(BACKEND_URL));
+    Map<String, String> headers = {
+      "Accept": "*/*",
+      "Authorization": "Bearer " + user['token']
+    };
+
+    req.headers.addAll(headers);
+    String live = location.live ? 'true' : 'false';
+    req.fields['query'] = """
+mutation{
+  addVideoLike(videoId:$video_id,userId:$user_id,ip:"$ip",lat:"$lat",lng:"$lng",locationName:"$locationName",locationLive:$locationLive){
+    ok
+  }
+}
+""";
+    http.Response response = await http.Response.fromStream(await req.send());
+    print("-----------LIKED VIDEO RESULT---------");
+    var resp = jsonDecode(response.body);
+    print(resp);
+
+    if (response.statusCode == 200) {
+      var userDetails = appBox.get("user");
+      List<int> liked_videos = userDetails['liked_videos'];
+      liked_videos.add(video_id);
+      userDetails['liked_videos'] = liked_videos;
+      appBox.delete('user');
+      appBox.put('user', userDetails);
+      return true;
+    } else if (response.statusCode == 401) {
+      //refresh token and call getUser again
+      bool refreshed = await refreshToken();
+      if (refreshed) {
+        return addVideoLike(video_id);
+      } else {
+        //TODO:Log out automatically or show error on snackbar
+        return false;
+      }
+    } else {
+      print(response.body);
+      // print(response.);
+      print(response.statusCode);
+      return false;
+    }
+  }
+
+  Future<bool> addVideoComment(int video_id, String comment) async {
+    User current_user = currentUser();
+    int user_id = current_user.id;
+    Loc loc = await currentLocation();
+    String lat = loc.lat;
+    String lng = loc.lng;
+    String ip = loc.ip;
+    String locationName = loc.name;
+    bool locationLive = loc.live;
+
+//   String query = """
+// mutation{
+//   addVideoView(videoId:$video_id,userId:$user_id,lat:"$lat",lng:"$lng",ip:"$ip",locationName:"$locationName",locationLive:$locationLive){
+//     ok
+//   }
+// }
+// """;
+
+    Loc location = await currentLocation();
+    var user = appBox.get("user");
+    Dio dio = Dio(
+      BaseOptions(
+        contentType: 'multipart/form-data',
+        headers: {"Accept": "*/*", "Authorization": "Bearer " + user['token']},
+      ),
+    );
+
+    var req = new http.MultipartRequest("POST", Uri.parse(BACKEND_URL));
+    Map<String, String> headers = {
+      "Accept": "*/*",
+      "Authorization": "Bearer " + user['token']
+    };
+
+    req.headers.addAll(headers);
+    String live = location.live ? 'true' : 'false';
+    req.fields['query'] = """
+mutation{
+  addVideoComment(videoId:$video_id,userId:$user_id,comment:"$comment",ip:"$ip",lat:"$lat",lng:"$lng",locationName:"$locationName",locationLive:$locationLive){
+    ok
+  }
+}
+""";
+    http.Response response = await http.Response.fromStream(await req.send());
+    print("----------- VIDEO COMMENT RESULT---------");
+    var resp = jsonDecode(response.body);
+    print(resp);
+
+    if (response.statusCode == 200) {
+      return true;
+    } else if (response.statusCode == 401) {
+      //refresh token and call getUser again
+      bool refreshed = await refreshToken();
+      if (refreshed) {
+        return addVideoComment(video_id, comment);
+      } else {
+        //TODO:Log out automatically or show error on snackbar
+        return false;
+      }
+    } else {
+      print(response.body);
+      // print(response.);
+      print(response.statusCode);
+      return false;
     }
   }
 
@@ -711,6 +1367,174 @@ mutation{
     // print(result);
   }
 
+//   Future<bool> addVideoLater(int video_id) async {
+//     User current_user = currentUser();
+//     int user_id = current_user.id;
+//     Loc loc = await currentLocation();
+//     String lat = loc.lat;
+//     String lng = loc.lng;
+//     String ip = loc.ip;
+//     String locationName = loc.name;
+//     bool locationLive = loc.live;
+
+//     Loc location = await currentLocation();
+//     var user = appBox.get("user");
+//     Dio dio = Dio(
+//       BaseOptions(
+//         contentType: 'multipart/form-data',
+//         headers: {"Accept": "*/*", "Authorization": "Bearer " + user['token']},
+//       ),
+//     );
+
+//     var req = new http.MultipartRequest("POST", Uri.parse(BACKEND_URL));
+//     Map<String, String> headers = {
+//       "Accept": "*/*",
+//       "Authorization": "Bearer " + user['token']
+//     };
+
+//     req.headers.addAll(headers);
+//     String live = location.live ? 'true' : 'false';
+//     req.fields['query'] = """
+// mutation{
+//   addVideoLater(videoId:$video_id,userId:$user_id,ip:"$ip",lat:"$lat",lng:"$lng",locationName:"$locationName",locationLive:$locationLive){
+//     ok
+//   }
+// }
+// """;
+//     http.Response response = await http.Response.fromStream(await req.send());
+//     var resp = jsonDecode(response.body);
+
+//     if (response.statusCode == 200) {
+//       return true;
+//     } else if (response.statusCode == 401) {
+//       //refresh token and call getUser again
+//       bool refreshed = await refreshToken();
+//       if (refreshed) {
+//         return addVideoLater(video_id);
+//       } else {
+//         //TODO:Log out automatically or show error on snackbar
+//         return false;
+//       }
+//     } else {
+//       print(response.body);
+//       // print(response.);
+//       print(response.statusCode);
+//       return false;
+//     }
+//   }
+
+//   Future<bool> addVideoFavourite(int video_id) async {
+//     User current_user = currentUser();
+//     int user_id = current_user.id;
+//     Loc loc = await currentLocation();
+//     String lat = loc.lat;
+//     String lng = loc.lng;
+//     String ip = loc.ip;
+//     String locationName = loc.name;
+//     bool locationLive = loc.live;
+
+//     Loc location = await currentLocation();
+//     var user = appBox.get("user");
+//     Dio dio = Dio(
+//       BaseOptions(
+//         contentType: 'multipart/form-data',
+//         headers: {"Accept": "*/*", "Authorization": "Bearer " + user['token']},
+//       ),
+//     );
+
+//     var req = new http.MultipartRequest("POST", Uri.parse(BACKEND_URL));
+//     Map<String, String> headers = {
+//       "Accept": "*/*",
+//       "Authorization": "Bearer " + user['token']
+//     };
+
+//     req.headers.addAll(headers);
+//     String live = location.live ? 'true' : 'false';
+//     req.fields['query'] = """
+// mutation{
+//   addVideoFavourite(videoId:$video_id,userId:$user_id,ip:"$ip",lat:"$lat",lng:"$lng",locationName:"$locationName",locationLive:$locationLive){
+//     ok
+//   }
+// }
+// """;
+//     http.Response response = await http.Response.fromStream(await req.send());
+//     var resp = jsonDecode(response.body);
+
+//     if (response.statusCode == 200) {
+//       return true;
+//     } else if (response.statusCode == 401) {
+//       //refresh token and call getUser again
+//       bool refreshed = await refreshToken();
+//       if (refreshed) {
+//         return addVideoFavourite(video_id);
+//       } else {
+//         //TODO:Log out automatically or show error on snackbar
+//         return false;
+//       }
+//     } else {
+//       print(response.body);
+//       // print(response.);
+//       print(response.statusCode);
+//       return false;
+//     }
+//   }
+
+//   Future<bool> addSubscription(int channel_id) async {
+//     User current_user = currentUser();
+//     int user_id = current_user.id;
+//     Loc loc = await currentLocation();
+//     String lat = loc.lat;
+//     String lng = loc.lng;
+//     String ip = loc.ip;
+//     String locationName = loc.name;
+//     bool locationLive = loc.live;
+
+//     Loc location = await currentLocation();
+//     var user = appBox.get("user");
+//     Dio dio = Dio(
+//       BaseOptions(
+//         contentType: 'multipart/form-data',
+//         headers: {"Accept": "*/*", "Authorization": "Bearer " + user['token']},
+//       ),
+//     );
+
+//     var req = new http.MultipartRequest("POST", Uri.parse(BACKEND_URL));
+//     Map<String, String> headers = {
+//       "Accept": "*/*",
+//       "Authorization": "Bearer " + user['token']
+//     };
+
+//     req.headers.addAll(headers);
+//     String live = location.live ? 'true' : 'false';
+//     req.fields['query'] = """
+// mutation{
+//   addSubscription(channelId:$channel_id,userId:$user_id,ip:"$ip",lat:"$lat",lng:"$lng",locationName:"$locationName",locationLive:$locationLive){
+//     ok
+//   }
+// }
+// """;
+//     http.Response response = await http.Response.fromStream(await req.send());
+//     var resp = jsonDecode(response.body);
+
+//     if (response.statusCode == 200) {
+//       return true;
+//     } else if (response.statusCode == 401) {
+//       //refresh token and call getUser again
+//       bool refreshed = await refreshToken();
+//       if (refreshed) {
+//         return addSubscription(channel_id);
+//       } else {
+//         //TODO:Log out automatically or show error on snackbar
+//         return false;
+//       }
+//     } else {
+//       print(response.body);
+//       // print(response.);
+//       print(response.statusCode);
+//       return false;
+//     }
+//   }
+
   Future<String?> userUpdateDisplayPicture(String dpUrl, String ip, String lat,
       String lng, String location_name, bool location_live) async {
     try {
@@ -752,6 +1576,16 @@ mutation{
 
       if (response.statusCode == 200) {
         return 'success';
+      } else if (response.statusCode == 401) {
+        //refresh token and call getUser again
+        bool refreshed = await refreshToken();
+        if (refreshed) {
+          return userUpdateDisplayPicture(
+              dpUrl, ip, lat, lng, location_name, location_live);
+        } else {
+          //TODO:Log out automatically or show error on snackbar
+          return 'Could not update picture. Try again later';
+        }
       } else {
         print(response.body);
         // print(response.);
@@ -805,6 +1639,80 @@ mutation{
 
       if (response.statusCode == 200) {
         return true;
+      } else if (response.statusCode == 401) {
+        //refresh token and call getUser again
+        bool refreshed = await refreshToken();
+        if (refreshed) {
+          deleteVideo(videoId);
+        } else {
+          //TODO:Log out automatically or show error on snackbar
+          return null;
+        }
+      } else {
+        print(response.body);
+        // print(response.);
+        print(response.statusCode);
+        return null;
+      }
+    } catch (e) {
+      print(e);
+      return null;
+    }
+  }
+
+  Future<bool?> deleteComment(String commentId) async {
+    try {
+      print("STARTING TO DEL");
+      Loc location = await currentLocation();
+      print("GOT LOCATION");
+      var user = appBox.get("user");
+      Dio dio = Dio(
+        BaseOptions(
+          contentType: 'multipart/form-data',
+          headers: {
+            "Accept": "*/*",
+            "Authorization": "Bearer " + user['token']
+          },
+        ),
+      );
+
+      var req = new http.MultipartRequest("POST", Uri.parse(BACKEND_URL));
+      Map<String, String> headers = {
+        "Accept": "*/*",
+        "Authorization": "Bearer " + user['token']
+      };
+
+      req.headers.addAll(headers);
+      String live = location.live ? 'true' : 'false';
+      req.fields['query'] = 'mutation{deleteComment(commentId:' +
+          commentId.toString() +
+          ',ip:"' +
+          location.ip +
+          '",lat:"' +
+          location.lat +
+          '",lng:"' +
+          location.lng +
+          '",locationName:"' +
+          location.name +
+          '",locationLive:' +
+          live +
+          '){ok}}';
+      http.Response response = await http.Response.fromStream(await req.send());
+      print("-----------DELETED COMMENT RESULT---------");
+      var resp = jsonDecode(response.body);
+      print(resp);
+
+      if (response.statusCode == 200) {
+        return true;
+      } else if (response.statusCode == 401) {
+        //refresh token and call getUser again
+        bool refreshed = await refreshToken();
+        if (refreshed) {
+          deleteComment(commentId);
+        } else {
+          //TODO:Log out automatically or show error on snackbar
+          return null;
+        }
       } else {
         print(response.body);
         // print(response.);
@@ -883,6 +1791,25 @@ mutation{
 
       if (response.statusCode == 200) {
         return 'success';
+      } else if (response.statusCode == 401) {
+        //refresh token and call getUser again
+        bool refreshed = await refreshToken();
+        if (refreshed) {
+          updateUserDetails(
+              _channelName,
+              _fbName,
+              _fbUrl,
+              _instagramName,
+              _instagramUrl,
+              _firstName,
+              _lastName,
+              _password,
+              _phoneNo,
+              location);
+        } else {
+          //TODO:Log out automatically or show error on snackbar
+          return 'Could not update details. Try again later';
+        }
       } else {
         print(response.body);
         // print(response.);
@@ -1063,11 +1990,35 @@ mutation{
         });
 
         return 'success';
+      } else if (response.statusCode == 401) {
+        //refresh token and call getUser again
+        bool refreshed = await refreshToken();
+        if (refreshed) {
+          return userUploadVideo(
+              tags,
+              uploadedVideoUrl,
+              uploadedVideoName,
+              uploadedThumbnailUrl,
+              uploadedThumbnailName,
+              title,
+              description,
+              duration,
+              ip,
+              lat,
+              lng,
+              location_name,
+              location_live);
+        } else {
+          //TODO:Log out automatically or show error on snackbar
+          return 'Error: Session expired';
+        }
       } else {
+        print("----------UPLOAD ERROR----------");
         print(response.body);
         // print(response.);
         print(response.statusCode);
-        return 'Could not upload video. Try again later';
+        // return 'Could not upload video. Try again later';
+        return response.body;
       }
     } catch (e) {
       print(e.toString());
@@ -1153,5 +2104,68 @@ mutation{
       //         .toString();
       var response = await req.send();
     }
+  }
+
+  Future<bool> refreshToken() async {
+    try {
+      var user = appBox.get("user");
+
+      var req = http.MultipartRequest("POST", Uri.parse(REFRESH_TOKEN_URL));
+      Map<String, String> headers = {
+        "Accept": "*/*",
+        "Authorization": "Bearer " + user['token'],
+        "grant_type": "refresh_token",
+        "refresh_token": user['token']
+      };
+
+      // req.headers.addAll(headers);
+      // http.Response rresponse =
+      //     await http.Response.fromStream(await req.send());
+
+      http.Response rresponse = await http.post(
+        Uri.parse(REFRESH_TOKEN_URL),
+        body: json.encode({'email': user['email']}),
+        headers: headers,
+      );
+
+      var rresp = jsonDecode(rresponse.body);
+
+      // print('RESP');
+      // print(rresp);
+
+      String token = rresp['access_token'];
+      user['token'] = token;
+      GraphQLConfiguration.setToken(token);
+      // print("Refreshed Token, new token : " + token);
+      appBox.delete('user');
+
+      appBox.put('user', user);
+
+      return true;
+    } catch (e) {
+      print(e.toString());
+      return false;
+    }
+  }
+
+  String lapse(start) {
+    DateTime dateTimeCreatedAt = DateTime.parse(start);
+    DateTime dateTimeNow = DateTime.now();
+    final days_lapse = dateTimeNow.difference(dateTimeCreatedAt).inDays;
+    String lapse = "Today";
+    if (days_lapse < 1) {
+      String lapse = "Today";
+    } else if (days_lapse == 1) {
+      lapse = "yesterday";
+    } else if (days_lapse >= 365) {
+      lapse = (days_lapse / 365).ceil().toString() + " years";
+    } else if (days_lapse >= 30) {
+      lapse = (days_lapse / 30).ceil().toString() + " months";
+    } else if (days_lapse >= 7) {
+      lapse = (days_lapse / 7).ceil().toString() + " weeks ";
+    } else {
+      lapse = days_lapse.toString() + " days ";
+    }
+    return lapse;
   }
 }
